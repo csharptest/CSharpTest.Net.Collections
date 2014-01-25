@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>CSharpTest.Net.BPlusTree.Test</RootNamespace>
+    <AssemblyName>CSharpTest.Net.BPlusTreeTest</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <OutputPath>..\..\bin\</OutputPath>
+    <IntermediateOutputPath>$(OutputPath)obj\$(AssemblyName)\</IntermediateOutputPath>
+    <DocumentationFile Condition="'$(OutputType)' == 'Library'">$(OutputPath)$(AssemblyName).xml</DocumentationFile>
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <DefineConstants>NET20;TRACE</DefineConstants>
+    <ErrorReport>none</ErrorReport>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>1591</NoWarn>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Optimize>False</Optimize>
+    <DefineConstants>TRACE;NET20</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data">
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpTest.Net.Collections\CSharpTest.Net.Collections.csproj">
+      <Project>{fbd5edd1-445c-46d1-a0b2-4b68cb51eadb}</Project>
+      <Name>CSharpTest.Net.Collections</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Bases\Comparable.cs" />
+    <Compile Include="BasicMemoryTests.cs" />
+    <Compile Include="BasicTests.cs" />
+    <Compile Include="Crypto\Hash.cs" />
+    <Compile Include="Reflection\PropertyType.cs" />
+    <Compile Include="Reflection\PropertyValue.cs" />
+    <Compile Include="SampleCustomTypeTest.cs" />
+    <Compile Include="SampleTypes\DataValue.cs" />
+    <Compile Include="SampleTypes\DataValueSerializer.cs" />
+    <Compile Include="SampleTypes\KeyInfo.cs" />
+    <Compile Include="SampleTypes\KeyInfoComparer.cs" />
+    <Compile Include="SampleTypes\KeyInfoSerializer.cs" />
+    <Compile Include="Shared\Check.cs" />
+    <Compile Include="TestBackupAndRecovery.cs" />
+    <Compile Include="TestBPlusTreeOptions.cs" />
+    <Compile Include="TestCustomStorage.cs" />
+    <Compile Include="TestFileSerialized.cs" />
+    <Compile Include="SequenceTests.cs" />
+    <Compile Include="TestCollection.cs" />
+    <Compile Include="TestDictionary.cs" />
+    <Compile Include="TestInfo.cs" />
+    <Compile Include="BasicTestsVersion2.cs" />
+    <Compile Include="TestBulkInsert.cs" />
+    <Compile Include="TestMultiInstance.cs" />
+    <Compile Include="TestSimpleDictionary.cs" />
+    <Compile Include="TestTransactionLog.cs" />
+    <Compile Include="ThreadedBTreeTest.cs" />
+    <Compile Include="ThreadedMassInsertTest.cs" />
+    <Compile Include="Threading\IWorkQueue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Threading\WorkQueue.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <StartAction>Program</StartAction>
+    <StartProgram>$(ProjectDir)$(OutputPath)..\Tools\NUnit\nunit-console.exe</StartProgram>
+    <StartArguments>/nologo /noshadow /labels /wait $(AssemblyName).dll</StartArguments>
+    <StartWorkingDirectory>$(ProjectDir)$(OutputPath)</StartWorkingDirectory>
+  </PropertyGroup>
+  <Target Name="Test">
+    <Exec Command="$(StartProgram) /nologo /noshadow $(AssemblyName).dll" WorkingDirectory="$(StartWorkingDirectory)" />
+  </Target>
+</Project>

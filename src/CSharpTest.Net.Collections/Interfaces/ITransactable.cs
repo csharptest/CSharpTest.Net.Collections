@@ -1,0 +1,27 @@
+﻿#region Copyright 2011-2013 by Roger Knapp, Licensed under the Apache License, Version 2.0
+/* Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#endregion
+using System;
+
+namespace CSharpTest.Net.Interfaces
+{
+    /// <summary> Supplies a common interface to transaction based objects </summary>
+    public interface ITransactable : IDisposable
+    {
+        /// <summary> Completes the operation </summary>
+        void Commit();
+        /// <summary> Aborts the operation and reverts pending changes </summary>
+        void Rollback();
+    }
+}
