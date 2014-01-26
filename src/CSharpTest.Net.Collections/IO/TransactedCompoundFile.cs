@@ -946,7 +946,7 @@ namespace CSharpTest.Net.IO
 
                         if (block.Count == 16)
                         {
-                            long position = BlocksPerSection*BlockSize*block.Section;
+                            long position = (long)BlocksPerSection*BlockSize*block.Section;
                             position += BlockSize*block.Offset;
                             byte[] header = new byte[BlockHeaderSize];
                             if (BlockHeaderSize != fget(position, header, 0, header.Length))
