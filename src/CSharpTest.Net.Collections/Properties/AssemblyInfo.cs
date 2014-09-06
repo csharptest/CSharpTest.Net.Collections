@@ -15,7 +15,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("CSharpTest.Net.BPlusTree.dll")]
+[assembly: AssemblyTitle("CSharpTest.Net.Collections.dll")]
 [assembly: AssemblyDescription("Fully managed B+ Tree implementation for local data storage.")]
 [assembly: AssemblyProduct("http://CSharpTest.Net/Projects")]
 [assembly: AssemblyConfiguration("Debug")]
@@ -23,8 +23,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("Roger Knapp")]
 [assembly: AssemblyCopyright("Copyright 2009 by Roger Knapp, Licensed under the Apache License, Version 2.0")]
 
-[assembly: AssemblyVersion("2.13.222.435")]
-[assembly: AssemblyFileVersion("2.13.222.435")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: ObfuscateAssembly(false)]
 [assembly: ComVisibleAttribute(false)]
