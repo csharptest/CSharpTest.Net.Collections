@@ -40,35 +40,4 @@ namespace CSharpTest.Net.Serialization
         byte[] ISerializer<byte[]>.ReadFrom(Stream stream)
         { return IOStream.ReadAllBytes(stream); }
     }
-
-#if !NET20
-
-    /// <summary>
-    /// Extension methods used with ISerializer&lt;T> for byte[] transformations
-    /// </summary>
-    public static class SerializerExtensions
-    {
-        /// <summary>
-        /// Enables creation of the type TKey from an array of bytes
-        /// </summary>
-        public static TKey FromByteArray<TKey>(this ISerializer<TKey> ser, byte[] value)
-        {
-            using (MemoryStream ms = new MemoryStream(value))
-                return ser.ReadFrom(ms);
-        }
-
-        /// <summary>
-        /// Enables creation of an array of bytes from type TKey
-        /// </summary>
-        public static byte[] ToByteArray<TKey>(this ISerializer<TKey> ser, TKey value)
-        {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                ser.WriteTo(value, ms);
-                return ms.ToArray();
-            }
-        }
-    }
-
-#endif
 }

@@ -11,30 +11,30 @@
     <RootNamespace>CSharpTest.Net</RootNamespace>
     <AssemblyName>CSharpTest.Net.Collections</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
-    <OutputPath>..\bin\</OutputPath>
-    <IntermediateOutputPath>$(OutputPath)obj\$(AssemblyName)\</IntermediateOutputPath>
-    <DocumentationFile Condition="'$(OutputType)' == 'Library'">$(OutputPath)$(AssemblyName).xml</DocumentationFile>
-    <DebugSymbols>True</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
-    <DefineConstants>NET20;TRACE</DefineConstants>
-    <ErrorReport>none</ErrorReport>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <WarningLevel>4</WarningLevel>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\keys\csharptest.net.snk</AssemblyOriginatorKeyFile>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>3.5</OldToolsVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
     <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE;NET20</DefineConstants>
-    <DocumentationFile>..\bin\CSharpTest.Net.Collections.xml</DocumentationFile>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>none</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DocumentationFile>bin\$(AssemblyName).XML</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <Optimize>True</Optimize>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>none</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DocumentationFile>bin\$(AssemblyName).XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -94,7 +94,6 @@
     <Compile Include="IO\FileStreamFactory.cs" />
     <Compile Include="IO\FragmentedFile.cs" />
     <Compile Include="IO\IOStream.cs" />
-    <Compile Include="IO\ReplaceFile.cs" />
     <Compile Include="IO\StreamCache.cs" />
     <Compile Include="IO\TempFile.cs" />
     <Compile Include="IO\TransactedCompoundFile.cs" />
@@ -124,7 +123,6 @@
     <Compile Include="Synchronization\WriteLock.cs" />
     <Compile Include="Synchronization\WriterOnlyLocking.cs" />
     <Compile Include="Utils\Check.cs" />
-    <Compile Include="Utils\FileUtils.cs" />
     <Compile Include="Utils\ObjectKeepAlive.cs" />
     <Compile Include="Utils\WeakReference.cs" />
   </ItemGroup>
@@ -135,7 +133,6 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="CmdTool.config" />
-    <None Include="Resources\Resources.resx" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="LICENSE-2.0.txt" />

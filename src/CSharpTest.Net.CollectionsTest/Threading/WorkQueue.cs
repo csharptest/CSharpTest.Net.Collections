@@ -16,9 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-#if NET20
 using Action = System.Threading.ThreadStart;
-#endif
 
 namespace CSharpTest.Net.Threading
 {

@@ -54,7 +54,7 @@ namespace CSharpTest.Net.Library.Test
             int[] count = new int[1];
             using (WorkQueue worker = new WorkQueue(Math.Max(2, Environment.ProcessorCount)))
             {
-                Action a = delegate() { Interlocked.Increment(ref count[0]); Thread.Sleep(1); };
+                ThreadStart a = delegate() { Interlocked.Increment(ref count[0]); Thread.Sleep(1); };
                 for (int i = 0; i < 10000; i++)
                     worker.Enqueue(a);
             }

@@ -94,56 +94,5 @@ namespace CSharpTest.Net.IO
             output.Flush();
             return bytesRead;
         }
-
-
-
-        /// <summary> Compress the existing file using an in-place replace. </summary>
-        public static void Compress(string filename) { Compress(filename, filename); }
-        /// <summary> Compress the existing file to the specified target. </summary>
-        public static void Compress(string source, string target)
-        {
-            using (ReplaceFile replace = new ReplaceFile(target))
-            using (FileStream sourceStream = File.Open(source, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                using (Stream targetStream = replace.Create())
-                {
-                    if (sourceStream.Length != IOStream.Compress(sourceStream, targetStream))
-						throw new System.IO.IOException(Resources.IOStreamCompressionFailed);
-                }
-
-                sourceStream.Dispose();
-                replace.Commit();
-            }
-        }
-        /// <summary> Compress the contents of the source stream into the target stream. </summary>
-        public static long Compress(Stream source, Stream target)
-        {
-            using (Stream gz = new GZipStream(target, CompressionMode.Compress, true))
-                return IOStream.CopyStream(source, gz);
-        }
-
-        /// <summary> Decompress the existing file using an in-place replace. </summary>
-        public static void Decompress(string filename) { Decompress(filename, filename); }
-        /// <summary> Decompress the existing file to the specified target. </summary>
-        public static void Decompress(string source, string target)
-        {
-            using (ReplaceFile replace = new ReplaceFile(target))
-            using (FileStream sourceStream = File.Open(source, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                using (Stream targetStream = replace.Create())
-                    IOStream.Decompress(sourceStream, targetStream);
-                if (sourceStream.Length != sourceStream.Position)
-					throw new System.IO.IOException(Resources.IOStreamCompressionFailed);
-
-                sourceStream.Dispose();
-                replace.Commit();
-            }
-        }
-        /// <summary> Decompress the source stream to the specified target stream. </summary>
-        public static long Decompress(Stream source, Stream target)
-        {
-            using (Stream gz = new GZipStream(source, CompressionMode.Decompress, true))
-                return IOStream.CopyStream(gz, target);
-        }
     }
 }
