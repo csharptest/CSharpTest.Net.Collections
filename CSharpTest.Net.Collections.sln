@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest.Net.Collections", "src\CSharpTest.Net.Collections\CSharpTest.Net.Collections.csproj", "{FBD5EDD1-445C-46D1-A0B2-4B68CB51EADB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest.Net.BPlusTreeTest", "src\CSharpTest.Net.BPlusTreeTest\CSharpTest.Net.BPlusTreeTest.csproj", "{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest.Net.CollectionsTest", "src\CSharpTest.Net.CollectionsTest\CSharpTest.Net.CollectionsTest.csproj", "{097601FB-7E62-47DA-8E48-B56C9AD5DF20}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{794876C0-9497-427F-922C-26B92DA08A73}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FBD5EDD1-445C-46D1-A0B2-4B68CB51EADB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBD5EDD1-445C-46D1-A0B2-4B68CB51EADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBD5EDD1-445C-46D1-A0B2-4B68CB51EADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBD5EDD1-445C-46D1-A0B2-4B68CB51EADB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{097601FB-7E62-47DA-8E48-B56C9AD5DF20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{097601FB-7E62-47DA-8E48-B56C9AD5DF20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{097601FB-7E62-47DA-8E48-B56C9AD5DF20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{097601FB-7E62-47DA-8E48-B56C9AD5DF20}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
