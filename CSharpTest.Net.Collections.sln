@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest.Net.Collections", "src\CSharpTest.Net.Collections\CSharpTest.Net.Collections.csproj", "{FBD5EDD1-445C-46D1-A0B2-4B68CB51EADB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest.Net.BPlusTreeTest", "src\CSharpTest.Net.BPlusTreeTest\CSharpTest.Net.BPlusTreeTest.csproj", "{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest.Net.BPlusTree.Test", "src\CSharpTest.Net.BPlusTreeTest\CSharpTest.Net.BPlusTree.Test.csproj", "{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest.Net.CollectionsTest", "src\CSharpTest.Net.CollectionsTest\CSharpTest.Net.CollectionsTest.csproj", "{097601FB-7E62-47DA-8E48-B56C9AD5DF20}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest.Net.Collections.Test", "src\CSharpTest.Net.CollectionsTest\CSharpTest.Net.Collections.Test.csproj", "{097601FB-7E62-47DA-8E48-B56C9AD5DF20}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{794876C0-9497-427F-922C-26B92DA08A73}"
 	ProjectSection(SolutionItems) = preProject

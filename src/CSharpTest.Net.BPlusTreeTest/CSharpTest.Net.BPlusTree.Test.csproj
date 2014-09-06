@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>CSharpTest.Net.BPlusTree.Test</RootNamespace>
+    <AssemblyName>CSharpTest.Net.BPlusTree.Test</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>none</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>none</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data">
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpTest.Net.Collections\CSharpTest.Net.Collections.csproj">
+      <Project>{fbd5edd1-445c-46d1-a0b2-4b68cb51eadb}</Project>
+      <Name>CSharpTest.Net.Collections</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Bases\Comparable.cs" />
+    <Compile Include="BasicMemoryTests.cs" />
+    <Compile Include="BasicTests.cs" />
+    <Compile Include="Crypto\Hash.cs" />
+    <Compile Include="Reflection\PropertyType.cs" />
+    <Compile Include="Reflection\PropertyValue.cs" />
+    <Compile Include="SampleCustomTypeTest.cs" />
+    <Compile Include="SampleTypes\DataValue.cs" />
+    <Compile Include="SampleTypes\DataValueSerializer.cs" />
+    <Compile Include="SampleTypes\KeyInfo.cs" />
+    <Compile Include="SampleTypes\KeyInfoComparer.cs" />
+    <Compile Include="SampleTypes\KeyInfoSerializer.cs" />
+    <Compile Include="Shared\Check.cs" />
+    <Compile Include="TestBackupAndRecovery.cs" />
+    <Compile Include="TestBPlusTreeOptions.cs" />
+    <Compile Include="TestCustomStorage.cs" />
+    <Compile Include="TestFileSerialized.cs" />
+    <Compile Include="SequenceTests.cs" />
+    <Compile Include="TestCollection.cs" />
+    <Compile Include="TestDictionary.cs" />
+    <Compile Include="TestInfo.cs" />
+    <Compile Include="BasicTestsVersion2.cs" />
+    <Compile Include="TestBulkInsert.cs" />
+    <Compile Include="TestMultiInstance.cs" />
+    <Compile Include="TestSimpleDictionary.cs" />
+    <Compile Include="TestTransactionLog.cs" />
+    <Compile Include="ThreadedBTreeTest.cs" />
+    <Compile Include="ThreadedMassInsertTest.cs" />
+    <Compile Include="Threading\IWorkQueue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Threading\WorkQueue.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

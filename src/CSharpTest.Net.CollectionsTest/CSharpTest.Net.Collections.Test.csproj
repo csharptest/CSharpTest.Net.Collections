@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{097601FB-7E62-47DA-8E48-B56C9AD5DF20}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>CSharpTest.Net.Library.Test</RootNamespace>
+    <AssemblyName>CSharpTest.Net.Collections.Test</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>none</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>none</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.XML" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\CSharpTest.Net.BPlusTreeTest\TestCollection.cs">
+      <Link>TestCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\CSharpTest.Net.BPlusTreeTest\TestDictionary.cs">
+      <Link>TestDictionary.cs</Link>
+    </Compile>
+    <Compile Include="Bases\Comparable.cs" />
+    <Compile Include="ExampleCode.cs" />
+    <Compile Include="IO\SegmentedMemoryStream.cs" />
+    <Compile Include="IO\SharedMemoryStream.cs" />
+    <Compile Include="Shared\Check.cs" />
+    <Compile Include="SynchronizedDictionary.cs" />
+    <Compile Include="TestLurchTable.cs" />
+    <Compile Include="TestLurchTableThreading.cs" />
+    <Compile Include="TestTransactedCompoundFile.cs" />
+    <Compile Include="TestBTreeList.cs" />
+    <Compile Include="LockingTests\BaseLockTest.cs" />
+    <Compile Include="LockingTests\BaseThreadedReaderWriterTest.cs" />
+    <Compile Include="LockingTests\BaseThreadedWriterTest.cs" />
+    <Compile Include="LockingTests\TestLockingStructs.cs" />
+    <Compile Include="LockingTests\TestReservedWriteLocking.cs" />
+    <Compile Include="LockingTests\TestSimpleReadWriteLocking.cs" />
+    <Compile Include="LockingTests\TestIgnoreLocking.cs" />
+    <Compile Include="LockingTests\TestReaderWriterLocking.cs" />
+    <Compile Include="LockingTests\TestExclusiveLocking.cs" />
+    <Compile Include="LockingTests\TestWriterOnlyLocking.cs" />
+    <Compile Include="LockingTests\ThreadedReaderWriter.cs" />
+    <Compile Include="Threading\IWorkQueue.cs" />
+    <Compile Include="Threading\WorkQueue.cs" />
+    <Compile Include="TestBTreeDictionary.cs" />
+    <Compile Include="TestFactories.cs" />
+    <Compile Include="TestOrderedEnumeration.cs" />
+    <Compile Include="TestCrc32.cs" />
+    <Compile Include="TestDisposable.cs" />
+    <Compile Include="TestFragmentedFile.cs" />
+    <Compile Include="TestGenericCollection.cs" />
+    <Compile Include="TestObjectKeepAlive.cs" />
+    <Compile Include="TestPrimitiveSerializer.cs" />
+    <Compile Include="TestBinaryComparer.cs" />
+    <Compile Include="TestDisposingList.cs" />
+    <Compile Include="TestEquatable.cs" />
+    <Compile Include="TestOrdinalList.cs" />
+    <Compile Include="TestSetList.cs" />
+    <Compile Include="TestStreamCache.cs" />
+    <Compile Include="TestTempFiles.cs" />
+    <Compile Include="TestVariantSerializer.cs" />
+    <Compile Include="TestWeakReferenceT.cs" />
+    <Compile Include="TestWorkQueue.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpTest.Net.Collections\CSharpTest.Net.Collections.csproj">
+      <Project>{fbd5edd1-445c-46d1-a0b2-4b68cb51eadb}</Project>
+      <Name>CSharpTest.Net.Collections</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
