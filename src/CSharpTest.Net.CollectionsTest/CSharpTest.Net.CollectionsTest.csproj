@@ -51,6 +51,7 @@
       <Link>TestDictionary.cs</Link>
     </Compile>
     <Compile Include="Bases\Comparable.cs" />
+    <Compile Include="ExampleCode.cs" />
     <Compile Include="IO\SegmentedMemoryStream.cs" />
     <Compile Include="IO\SharedMemoryStream.cs" />
     <Compile Include="Shared\Check.cs" />
