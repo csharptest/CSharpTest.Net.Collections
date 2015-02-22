@@ -363,7 +363,18 @@ namespace CSharpTest.Net.Collections
                 _exclusive = exclusiveTreeAccess;
                 _locked = _exclusive ? _tree._selfLock.TryWrite(tree._options.LockTimeout) : _tree._selfLock.TryRead(tree._options.LockTimeout);
                 LockTimeoutException.Assert(_locked);
-                Pin = _tree._storage.LockRoot(type);
+                try
+                {
+                    Pin = _tree._storage.LockRoot(type);
+                }
+                catch
+                {
+                    if (_exclusive)
+                        _tree._selfLock.ReleaseWrite();
+                    else
+                        _tree._selfLock.ReleaseRead();
+                    throw;
+                }
             }
             void IDisposable.Dispose()
             {
