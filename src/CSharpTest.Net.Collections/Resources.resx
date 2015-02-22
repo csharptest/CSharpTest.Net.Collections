@@ -167,4 +167,8 @@
   <data name="StringConverterTryParse(System.Type type)" xml:space="preserve">
     <value>The type {0} is not convertable from a string.</value>
   </data>
+  <data name="LockTimeoutException" xml:space="preserve">
+    <value>Failed to aquire the lock in the specified time.</value>
+    <comment>:System.TimeoutException</comment>
+  </data>
 </root>
