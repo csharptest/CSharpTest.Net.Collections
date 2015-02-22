@@ -225,7 +225,14 @@ namespace CSharpTest.Net.Collections
             _logSync = new object();
             _transactionId = 1;
             _logfile = null;
-            _fLength = File.Exists(_options.FileName) ? new FileInfo(_options.FileName).Length : 0;
+            try
+            {
+                _fLength = File.Exists(_options.FileName) ? new FileInfo(_options.FileName).Length : 0;
+            }
+            catch (FileNotFoundException)
+            {
+                _fLength = 0;
+            }
         }
 
         /// <summary>

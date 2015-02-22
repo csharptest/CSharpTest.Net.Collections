@@ -174,13 +174,18 @@ namespace CSharpTest.Net.Collections
                 }
                 finally
                 {
-                    if (locked)
-                        _selfLock.ReleaseWrite();
-                    //Do not dispose, this may be a shared lock:
-                    //_selfLock.Dispose();
-
-                    if (_options.LogFile != null)
-                        _options.LogFile.Dispose();
+                    try
+                    {
+                        if (_options.LogFile != null)
+                            _options.LogFile.Dispose();
+                    }
+                    finally
+                    {
+                        if (locked)
+                            _selfLock.ReleaseWrite();
+                        //Do not dispose, this may be a shared lock:
+                        //_selfLock.Dispose();
+                    }
                 }
             }
             finally
