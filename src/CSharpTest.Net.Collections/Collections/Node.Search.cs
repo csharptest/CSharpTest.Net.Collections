@@ -34,13 +34,12 @@ namespace CSharpTest.Net.Collections
             }
             public bool UpdateValue(TKey key, ref TValue value)
             {
-                _updated = true;
                 _oldValue = value;
                 if (_fnUpdate != null)
                     value = _fnUpdate(key, value);
                 else
                     value = _newValue;
-                return !EqualityComparer<TValue>.Default.Equals(value, _oldValue);
+                return (_updated = !EqualityComparer<TValue>.Default.Equals(value, _oldValue));
             }
             public bool Updated { get { return _updated; } }
         }
