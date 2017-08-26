@@ -54,7 +54,7 @@ namespace CSharpTest.Net.Library.Test
             int ix = rand.Next(items.Count);
             foreach (T item in items)
                 if (ix-- == 0) return item;
-            throw new ApplicationException();
+            throw new Exception();
         }
 
         private void TestWriteWithOptions(TransactedCompoundFile.Options options)

@@ -61,7 +61,7 @@ namespace CSharpTest.Net.Synchronization
                 _lock.AcquireReaderLock(timeout);
                 return true;
             }
-            catch (ApplicationException)
+            catch (Exception)
             {
                 return false;
             }
@@ -86,7 +86,7 @@ namespace CSharpTest.Net.Synchronization
                 _lock.AcquireWriterLock(timeout);
                 return true;
             }
-            catch (ApplicationException)
+            catch (Exception)
             {
                 return false;
             }

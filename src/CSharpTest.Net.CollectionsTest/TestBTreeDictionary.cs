@@ -72,7 +72,7 @@ namespace CSharpTest.Net.Library.Test
             {
                 if (i == 988)
                     i = 988;
-                if (!verify().TryAdd(i, myTestValue1)) throw new ApplicationException();
+                if (!verify().TryAdd(i, myTestValue1)) throw new Exception();
             }
 
             Trace.TraceInformation("{0} insert  {1} in {2}", name, count, time.ElapsedMilliseconds);
@@ -80,21 +80,21 @@ namespace CSharpTest.Net.Library.Test
             time.Start();
 
             for (int i = start; i != stop; i += incr)
-                if (!verify().TryGetValue(i, out test) || test != myTestValue1) throw new ApplicationException();
+                if (!verify().TryGetValue(i, out test) || test != myTestValue1) throw new Exception();
 
             Trace.TraceInformation("{0} seek    {1} in {2}", name, count, time.ElapsedMilliseconds);
             time.Reset();
             time.Start();
 
             for (int i = start; i != stop; i += incr)
-                if (!verify().TryUpdate(i, myTestValue2)) throw new ApplicationException();
+                if (!verify().TryUpdate(i, myTestValue2)) throw new Exception();
 
             Trace.TraceInformation("{0} modify  {1} in {2}", name, count, time.ElapsedMilliseconds);
             time.Reset();
             time.Start();
 
             for (int i = start; i != stop; i += incr)
-                if (!verify().TryGetValue(i, out test) || test != myTestValue2) throw new ApplicationException();
+                if (!verify().TryGetValue(i, out test) || test != myTestValue2) throw new Exception();
 
             Trace.TraceInformation("{0} seek#2  {1} in {2}", name, count, time.ElapsedMilliseconds);
             time.Reset();
@@ -102,9 +102,9 @@ namespace CSharpTest.Net.Library.Test
 
             int tmpCount = 0;
             foreach (KeyValuePair<int, string> tmp in verify())
-                if (tmp.Value != myTestValue2) throw new ApplicationException();
+                if (tmp.Value != myTestValue2) throw new Exception();
                 else tmpCount++;
-            if (tmpCount != count) throw new ApplicationException();
+            if (tmpCount != count) throw new Exception();
 
             Trace.TraceInformation("{0} foreach {1} in {2}", name, count, time.ElapsedMilliseconds);
             time.Reset();
@@ -114,13 +114,13 @@ namespace CSharpTest.Net.Library.Test
             {
                 if (i == 16)
                     i = 16;
-                if (!verify().Remove(i)) throw new ApplicationException();
+                if (!verify().Remove(i)) throw new Exception();
             }
 
             Trace.TraceInformation("{0} delete  {1} in {2}", name, count, time.ElapsedMilliseconds);
 
             for (int i = start; i != stop; i += incr)
-                if (verify().TryGetValue(i, out test)) throw new ApplicationException();
+                if (verify().TryGetValue(i, out test)) throw new Exception();
         }
 
         [Test]

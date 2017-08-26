@@ -116,7 +116,7 @@ namespace CSharpTest.Net.Library.Test
                 GC.KeepAlive(Singleton<BadObject>.Instance);
                 Assert.Fail();
             }
-            catch (ApplicationException ae)
+            catch (Exception ae)
             {
                 Assert.AreEqual("BadObject", ae.GetBaseException().Message);
             }
@@ -125,7 +125,7 @@ namespace CSharpTest.Net.Library.Test
                 Singleton<BadObject>.Factory.Create();
                 Assert.Fail();
             }
-            catch (ApplicationException ae)
+            catch (Exception ae)
             {
                 Assert.AreEqual("BadObject", ae.GetBaseException().Message);
             }

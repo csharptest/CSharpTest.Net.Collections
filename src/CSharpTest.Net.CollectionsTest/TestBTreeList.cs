@@ -59,14 +59,14 @@ namespace CSharpTest.Net.Library.Test
             time.Start();
             //large order-forward
             for (int i = start; i != stop; i += incr)
-                if (!data.TryAddItem(i)) throw new ApplicationException();
+                if (!data.TryAddItem(i)) throw new Exception();
 
             Trace.TraceInformation("{0} insert  {1} in {2}", name, count, time.ElapsedMilliseconds);
             time.Reset();
             time.Start();
 
             for (int i = start; i != stop; i += incr)
-                if (!data.Contains(i)) throw new ApplicationException();
+                if (!data.Contains(i)) throw new Exception();
 
             Trace.TraceInformation("{0} seek    {1} in {2}", name, count, time.ElapsedMilliseconds);
             time.Reset();
@@ -74,21 +74,21 @@ namespace CSharpTest.Net.Library.Test
 
             int tmpCount = 0;
             foreach (int tmp in data)
-                if (tmp < Math.Min(start, stop) || tmp > Math.Max(start, stop)) throw new ApplicationException();
+                if (tmp < Math.Min(start, stop) || tmp > Math.Max(start, stop)) throw new Exception();
                 else tmpCount++;
-            if (tmpCount != count) throw new ApplicationException();
+            if (tmpCount != count) throw new Exception();
 
             Trace.TraceInformation("{0} foreach {1} in {2}", name, count, time.ElapsedMilliseconds);
             time.Reset();
             time.Start();
 
             for (int i = start; i != stop; i += incr)
-                if (!data.Remove(i)) throw new ApplicationException();
+                if (!data.Remove(i)) throw new Exception();
 
             Trace.TraceInformation("{0} delete  {1} in {2}", name, count, time.ElapsedMilliseconds);
 
             for (int i = start; i != stop; i += incr)
-                if (data.Contains(i)) throw new ApplicationException();
+                if (data.Contains(i)) throw new Exception();
         }
 
         [Test]

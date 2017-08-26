@@ -117,47 +117,47 @@ namespace CSharpTest.Net.Collections
                 foundFirst = foundFirst.Children[0].Value;
 
             if (!ReferenceEquals(_first, foundFirst))
-                throw new ApplicationException("The _first node reference is incorrect.");
+                throw new Exception("The _first node reference is incorrect.");
 
             Node foundLast = _root;
             while (!foundLast.IsLeaf)
                 foundLast = foundLast.Children[foundLast.Count - 1].Value;
 
             if (!ReferenceEquals(_last, foundLast))
-                throw new ApplicationException("The _last node reference is incorrect.");
+                throw new Exception("The _last node reference is incorrect.");
 
             int counter = 0;
             Node tmp = _first;
             while (tmp != null)
             {
                 if (tmp.Next == null && !ReferenceEquals(_last, tmp))
-                    throw new ApplicationException("Forward links corrupted.");
+                    throw new Exception("Forward links corrupted.");
                 if (!tmp.IsLeaf)
-                    throw new ApplicationException("Non Leaf in linked list.");
+                    throw new Exception("Non Leaf in linked list.");
                 counter += tmp.Count;
                 tmp = tmp.Next;
             }
             if (counter != Count)
-                throw new ApplicationException(string.Format("Found {0} items in links, {1} expected.", counter,
+                throw new Exception(string.Format("Found {0} items in links, {1} expected.", counter,
                     Count));
             counter = 0;
             tmp = _last;
             while (tmp != null)
             {
                 if (tmp.Prev == null && !ReferenceEquals(_first, tmp))
-                    throw new ApplicationException("Forward links corrupted.");
+                    throw new Exception("Forward links corrupted.");
                 if (!tmp.IsLeaf)
-                    throw new ApplicationException("Non Leaf in linked list.");
+                    throw new Exception("Non Leaf in linked list.");
                 counter += tmp.Count;
                 tmp = tmp.Prev;
             }
             if (counter != Count)
-                throw new ApplicationException(string.Format("Found {0} items in links, {1} expected.", counter,
+                throw new Exception(string.Format("Found {0} items in links, {1} expected.", counter,
                     Count));
 
             counter = DescendAssert(_root);
             if (counter != Count)
-                throw new ApplicationException(string.Format("Tree crawl found {0} items, {1} expected.", counter,
+                throw new Exception(string.Format("Tree crawl found {0} items, {1} expected.", counter,
                     Count));
 #endif
         }
@@ -176,7 +176,7 @@ namespace CSharpTest.Net.Collections
                     else
                     {
                         if (!eq.Equals(default(TValue), node.Values[i].Value))
-                            throw new ApplicationException("Unexpected non-default value after count.");
+                            throw new Exception("Unexpected non-default value after count.");
                     }
             else
                 for (int i = 0; i < node.Children.Length; i++)
@@ -187,11 +187,11 @@ namespace CSharpTest.Net.Collections
                     else
                     {
                         if (node.Children[i].Value != null)
-                            throw new ApplicationException("Unexpected non-null child after count.");
+                            throw new Exception("Unexpected non-null child after count.");
                     }
 
             if (count == 0 && Count != 0)
-                throw new ApplicationException("Unexpected empty count.");
+                throw new Exception("Unexpected empty count.");
             return count;
         }
 #endif

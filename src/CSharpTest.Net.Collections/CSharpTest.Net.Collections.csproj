@@ -134,7 +134,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="CmdTool.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="LICENSE-2.0.txt" />

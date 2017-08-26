@@ -46,20 +46,37 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\CSharpTest.Net.BPlusTreeTest\TestCollection.cs">
-      <Link>TestCollection.cs</Link>
-    </Compile>
-    <Compile Include="..\CSharpTest.Net.BPlusTreeTest\TestDictionary.cs">
-      <Link>TestDictionary.cs</Link>
-    </Compile>
     <Compile Include="Bases\Comparable.cs" />
+    <Compile Include="BasicMemoryTests.cs" />
+    <Compile Include="BasicTests.cs" />
+    <Compile Include="BasicTestsVersion2.cs" />
+    <Compile Include="Crypto\Hash.cs" />
     <Compile Include="ExampleCode.cs" />
     <Compile Include="IO\SegmentedMemoryStream.cs" />
     <Compile Include="IO\SharedMemoryStream.cs" />
+    <Compile Include="Reflection\PropertyType.cs" />
+    <Compile Include="Reflection\PropertyValue.cs" />
+    <Compile Include="SampleCustomTypeTest.cs" />
+    <Compile Include="SampleTypes\DataValue.cs" />
+    <Compile Include="SampleTypes\DataValueSerializer.cs" />
+    <Compile Include="SampleTypes\KeyInfo.cs" />
+    <Compile Include="SampleTypes\KeyInfoComparer.cs" />
+    <Compile Include="SampleTypes\KeyInfoSerializer.cs" />
+    <Compile Include="SequenceTests.cs" />
     <Compile Include="Shared\Check.cs" />
     <Compile Include="SynchronizedDictionary.cs" />
+    <Compile Include="TestBackupAndRecovery.cs" />
+    <Compile Include="TestBPlusTreeOptions.cs" />
+    <Compile Include="TestBulkInsert.cs" />
+    <Compile Include="TestCollection.cs" />
+    <Compile Include="TestCustomStorage.cs" />
+    <Compile Include="TestDictionary.cs" />
+    <Compile Include="TestFileSerialized.cs" />
+    <Compile Include="TestInfo.cs" />
     <Compile Include="TestLurchTable.cs" />
     <Compile Include="TestLurchTableThreading.cs" />
+    <Compile Include="TestMultiInstance.cs" />
+    <Compile Include="TestSimpleDictionary.cs" />
     <Compile Include="TestTransactedCompoundFile.cs" />
     <Compile Include="TestBTreeList.cs" />
     <Compile Include="LockingTests\BaseLockTest.cs" />
@@ -73,6 +90,9 @@
     <Compile Include="LockingTests\TestExclusiveLocking.cs" />
     <Compile Include="LockingTests\TestWriterOnlyLocking.cs" />
     <Compile Include="LockingTests\ThreadedReaderWriter.cs" />
+    <Compile Include="TestTransactionLog.cs" />
+    <Compile Include="ThreadedBTreeTest.cs" />
+    <Compile Include="ThreadedMassInsertTest.cs" />
     <Compile Include="Threading\IWorkQueue.cs" />
     <Compile Include="Threading\WorkQueue.cs" />
     <Compile Include="TestBTreeDictionary.cs" />

@@ -29,7 +29,7 @@ namespace CSharpTest.Net
     [DebuggerNonUserCode]
     [CompilerGenerated]
     [GeneratedCode("CSharpTest.Net.Generators", "1.11.225.410")]
-    public abstract class BaseAssertionException : ApplicationException
+    public abstract class BaseAssertionException : Exception
     {
         /// <summary> The base class for BPlutTree runtime assertions </summary>
         protected BaseAssertionException(SerializationInfo info, StreamingContext context)

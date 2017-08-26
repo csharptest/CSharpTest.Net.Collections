@@ -351,7 +351,7 @@ namespace CSharpTest.Net
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("CSharpTest.Net.Generators", "2.0")]
-    public partial class DebugAssertionFailedException : System.ApplicationException
+    public partial class DebugAssertionFailedException : System.Exception
     {
         /// <summary>
         /// Serialization constructor
@@ -405,7 +405,7 @@ namespace CSharpTest.Net
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("CSharpTest.Net.Generators", "2.0")]
-    public partial class DuplicateKeyException : System.ApplicationException
+    public partial class DuplicateKeyException : System.Exception
     {
         /// <summary>
         /// Serialization constructor
@@ -591,7 +591,7 @@ namespace CSharpTest.Net
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("CSharpTest.Net.Generators", "2.0")]
-    public partial class LurchTableCorruptionException : System.ApplicationException
+    public partial class LurchTableCorruptionException : System.Exception
     {
         /// <summary>
         /// Serialization constructor

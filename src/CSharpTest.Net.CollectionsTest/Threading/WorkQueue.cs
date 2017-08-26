@@ -139,7 +139,7 @@ namespace CSharpTest.Net.Threading
                     }
 
                 if (shutdownFailed)
-                    throw new ApplicationException("WorkQueue shutdown failed, unable to join worker threads.");
+                    throw new Exception("WorkQueue shutdown failed, unable to join worker threads.");
             }
             finally
             {

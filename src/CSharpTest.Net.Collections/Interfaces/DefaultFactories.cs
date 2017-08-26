@@ -32,7 +32,7 @@ namespace CSharpTest.Net.Interfaces
             get
             {
                 if (Lazy._error != null)
-                    throw new ApplicationException(Resources.FailedToConstructSingleton(typeof(T)), Lazy._error);
+                    throw new Exception(Resources.FailedToConstructSingleton(typeof(T)), Lazy._error);
                 return Lazy._instance;
             }
         }
