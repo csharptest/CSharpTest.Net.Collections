@@ -26,19 +26,19 @@ namespace CSharpTest.Net.Synchronization
     /// </summary>
     public class ReaderWriterLocking : ILockStrategy
     {
-        private readonly ReaderWriterLock _lock;
+        private readonly ReaderWriterLockSlim _lock;
 
         /// <summary>
         ///     wraps the reader/writer lock
         /// </summary>
-        public ReaderWriterLocking() : this(new ReaderWriterLock())
+        public ReaderWriterLocking() : this(new ReaderWriterLockSlim())
         {
         }
 
         /// <summary>
         ///     wraps the reader/writer lock
         /// </summary>
-        public ReaderWriterLocking(ReaderWriterLock lck)
+        public ReaderWriterLocking(ReaderWriterLockSlim lck)
         {
             _lock = lck;
         }
@@ -48,7 +48,7 @@ namespace CSharpTest.Net.Synchronization
         }
 
         /// <summary> Changes every time a write lock is aquired.  If WriteVersion == 0, no write locks have been issued. </summary>
-        public int WriteVersion => _lock.WriterSeqNum;
+        public int WriteVersion => _lock.RecursiveWriteCount;
 
         /// <summary>
         ///     Returns true if the lock was successfully obtained within the timeout specified
@@ -56,15 +56,7 @@ namespace CSharpTest.Net.Synchronization
         [DebuggerNonUserCode]
         public bool TryRead(int timeout)
         {
-            try
-            {
-                _lock.AcquireReaderLock(timeout);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return _lock.TryEnterReadLock(timeout);
         }
 
         /// <summary>
@@ -72,7 +64,7 @@ namespace CSharpTest.Net.Synchronization
         /// </summary>
         public void ReleaseRead()
         {
-            _lock.ReleaseReaderLock();
+            _lock.ExitReadLock();
         }
 
         /// <summary>
@@ -81,15 +73,7 @@ namespace CSharpTest.Net.Synchronization
         [DebuggerNonUserCode]
         public bool TryWrite(int timeout)
         {
-            try
-            {
-                _lock.AcquireWriterLock(timeout);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return _lock.TryEnterWriteLock(timeout);
         }
 
         /// <summary>
@@ -97,7 +81,7 @@ namespace CSharpTest.Net.Synchronization
         /// </summary>
         public void ReleaseWrite()
         {
-            _lock.ReleaseWriterLock();
+            _lock.ExitWriteLock();
         }
 
         /// <summary>

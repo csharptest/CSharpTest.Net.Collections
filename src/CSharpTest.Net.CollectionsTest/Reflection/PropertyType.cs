@@ -16,6 +16,7 @@
 #endregion
 
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace CSharpTest.Net.Reflection
@@ -44,13 +45,13 @@ namespace CSharpTest.Net.Reflection
             Type temp = _type;
             while (temp != typeof(object) && _member == null)
             {
-                _member = temp.GetProperty(name, baseFlags | BindingFlags.GetProperty | BindingFlags.SetProperty);
+                _member = temp.GetTypeInfo().GetProperty(name, baseFlags | BindingFlags.GetProperty | BindingFlags.SetProperty);
                 if (_member == null)
-                    _member = temp.GetField(name, baseFlags | BindingFlags.GetField | BindingFlags.SetField);
-                temp = temp.BaseType;
+                    _member = temp.GetTypeInfo().GetField(name, baseFlags | BindingFlags.GetField | BindingFlags.SetField);
+                temp = temp.GetTypeInfo().BaseType;
             }
             if (_member == null)
-                throw new MissingMemberException(_type.FullName, name);
+                throw new MissingMemberException(_type.FullName);
         }
 
         /// <summary>
@@ -77,7 +78,7 @@ namespace CSharpTest.Net.Reflection
         /// </summary>
         public object[] GetCustomAttributes(bool inherit)
         {
-            return _member.GetCustomAttributes(inherit);
+            return _member.GetCustomAttributes(inherit).ToArray();
         }
 
         /// <summary>
@@ -86,7 +87,7 @@ namespace CSharpTest.Net.Reflection
         /// </summary>
         public object[] GetCustomAttributes(Type attributeType, bool inherit)
         {
-            return _member.GetCustomAttributes(attributeType, inherit);
+            return _member.GetCustomAttributes(attributeType, inherit).ToArray();
         }
 
         /// <summary>

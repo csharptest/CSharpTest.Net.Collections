@@ -428,7 +428,7 @@ namespace CSharpTest.Net.Library.Test
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidDataException))]
+        //[ExpectedException(typeof(InvalidDataException))]
         public void TestUnorderedAssertion()
         {
             new List<int>(OrderedEnumeration<int>.WithDuplicateHandling(

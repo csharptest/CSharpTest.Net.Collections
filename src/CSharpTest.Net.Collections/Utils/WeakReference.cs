@@ -16,26 +16,19 @@
 #endregion
 
 using System;
-using System.Runtime.Serialization;
 
 namespace CSharpTest.Net.Utils
 {
     /// <summary>
     ///     A strong-typed derivation of the WeakReference class
     /// </summary>
-    [Serializable]
+    
     public class WeakReference<T> : WeakReference
         where T : class
     {
         /// <summary> Creates a new WeakReference that keeps track of target. </summary>
         public WeakReference(T instance)
             : base(instance)
-        {
-        }
-
-        /// <summary />
-        protected WeakReference(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
         }
 

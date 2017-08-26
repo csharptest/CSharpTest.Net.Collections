@@ -25,7 +25,7 @@ namespace CSharpTest.Net.IO
     ///     A memory stream that can be cloned to create an instance for another thread to access
     ///     the same memory pool.
     /// </summary>
-    public class SharedMemoryStream : SegmentedMemoryStream, ICloneable, IFactory<Stream>
+    public class SharedMemoryStream : SegmentedMemoryStream, ICloneable<SharedMemoryStream>, IFactory<Stream>
     {
         /// <summary>
         ///     Creates a memory stream that uses 32k segments for storage
@@ -47,11 +47,6 @@ namespace CSharpTest.Net.IO
         public SharedMemoryStream(SharedMemoryStream from)
             : base(Check.NotNull(from))
         {
-        }
-
-        object ICloneable.Clone()
-        {
-            return Clone();
         }
 
         Stream IFactory<Stream>.Create()

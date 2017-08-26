@@ -84,15 +84,6 @@ namespace CSharpTest.Net.IO
             base.Dispose(disposing);
         }
 
-        /// <summary> Disposes of this.Stream </summary>
-        public override void Close()
-        {
-            if (_stream != null)
-                _stream.Close();
-
-            base.Close();
-        }
-
         /// <summary>
         ///     When overridden in a derived class, clears all buffers for this stream and causes any buffered data to be written
         ///     to the underlying device.

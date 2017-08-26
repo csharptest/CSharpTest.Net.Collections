@@ -33,7 +33,7 @@ namespace CSharpTest.Net.BPlusTree.Test
 
         private void DeleteStuff(BPlusTree<Guid, TestInfo> tree)
         {
-            while (!mreStop.WaitOne(0, false))
+            while (!mreStop.WaitOne(0))
                 if (tree.Count > 1000)
                 {
                     int limit = tree.Count - 1000;
@@ -53,7 +53,7 @@ namespace CSharpTest.Net.BPlusTree.Test
 
         private void FetchStuff(BPlusTree<Guid, TestInfo> tree)
         {
-            while (!mreStop.WaitOne(0, false))
+            while (!mreStop.WaitOne(0))
                 foreach (Guid k in tree.Keys)
                 {
                     TestInfo ti;
@@ -64,7 +64,7 @@ namespace CSharpTest.Net.BPlusTree.Test
 
         private void UpdateStuff(BPlusTree<Guid, TestInfo> tree)
         {
-            while (!mreStop.WaitOne(0, false))
+            while (!mreStop.WaitOne(0))
                 foreach (KeyValuePair<Guid, TestInfo> pair in tree)
                 {
                     bool updated = tree.TryUpdate(pair.Key, (k, v) =>
@@ -86,7 +86,7 @@ namespace CSharpTest.Net.BPlusTree.Test
 
         private void AddStuff(BPlusTree<Guid, TestInfo> tree)
         {
-            while (!mreStop.WaitOne(0, false))
+            while (!mreStop.WaitOne(0))
             {
                 foreach (KeyValuePair<Guid, TestInfo> pair in CreateData(100))
                     tree.Add(pair.Key, pair.Value);
@@ -96,7 +96,7 @@ namespace CSharpTest.Net.BPlusTree.Test
 
         private void AddRanges(BPlusTree<Guid, TestInfo> tree)
         {
-            while (!mreStop.WaitOne(0, false))
+            while (!mreStop.WaitOne(0))
             {
                 tree.AddRange(CreateData(100));
                 AddIdle(tree);
@@ -105,7 +105,7 @@ namespace CSharpTest.Net.BPlusTree.Test
 
         private void BulkyInserts(BPlusTree<Guid, TestInfo> tree)
         {
-            while (!mreStop.WaitOne(0, false))
+            while (!mreStop.WaitOne(0))
             {
                 tree.BulkInsert(CreateData(100));
                 AddIdle(tree);

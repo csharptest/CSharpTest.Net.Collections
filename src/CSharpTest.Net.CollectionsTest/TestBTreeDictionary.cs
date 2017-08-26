@@ -144,7 +144,7 @@ namespace CSharpTest.Net.Library.Test
         public void TestClone()
         {
             BTreeDictionary<int, string> data = new BTreeDictionary<int, string>(Comparer, GetSample());
-            BTreeDictionary<int, string> copy = (BTreeDictionary<int, string>) ((ICloneable) data).Clone();
+            BTreeDictionary<int, string> copy = ((ICloneable<BTreeDictionary<int, string>>)data).Clone();
             using (IEnumerator<KeyValuePair<int, string>> e1 = data.GetEnumerator())
             using (IEnumerator<KeyValuePair<int, string>> e2 = copy.GetEnumerator())
             {
@@ -279,7 +279,7 @@ namespace CSharpTest.Net.Library.Test
             ek.Reset();
             Assert.IsTrue(ek.MoveNext());
             Assert.AreEqual(firstkey, ek.Current);
-            Assert.AreEqual(firstkey, ((IEnumerator) ek).Current);
+            Assert.AreEqual(firstkey, ((IEnumerator)ek).Current);
 
             //Value collection
             Assert.AreEqual(data.Count, data.Values.Count);
@@ -294,7 +294,7 @@ namespace CSharpTest.Net.Library.Test
             Assert.AreNotEqual(firstvalue, ev.Current);
             ev.Reset();
             Assert.IsTrue(ev.MoveNext());
-            Assert.AreEqual(firstvalue, ((IEnumerator) ev).Current);
+            Assert.AreEqual(firstvalue, ((IEnumerator)ev).Current);
         }
 
         [Test]
@@ -311,7 +311,7 @@ namespace CSharpTest.Net.Library.Test
 
             foreach (
                 KeyValuePair<int, int> range in
-                new Dictionary<int, int> {{6, 25}, {7, 25}, {8, 25}, {9, 25}, {22, 25}, {28, 28}})
+                new Dictionary<int, int> { { 6, 25 }, { 7, 25 }, { 8, 25 }, { 9, 25 }, { 22, 25 }, { 28, 28 } })
             {
                 ix = range.Key;
                 foreach (KeyValuePair<int, string> kv in data.EnumerateRange(ix, range.Value))

@@ -109,7 +109,7 @@ namespace CSharpTest.Net.Library.Test
         public void TestClone()
         {
             BTreeList<int> data = new BTreeList<int>(Comparer, GetSample());
-            BTreeList<int> copy = (BTreeList<int>) ((ICloneable) data).Clone();
+            BTreeList<int> copy = ((ICloneable< BTreeList<int>>) data).Clone();
             using (IEnumerator<int> e1 = data.GetEnumerator())
             using (IEnumerator<int> e2 = copy.GetEnumerator())
             {
@@ -142,7 +142,7 @@ namespace CSharpTest.Net.Library.Test
         }
 
         [Test]
-        [ExpectedException(typeof(NotSupportedException))]
+        //[ExpectedException(typeof(NotSupportedException))]
         public void TestExceptionOnInsertAt()
         {
             IList<int> tmp = new BTreeList<int>();
@@ -151,7 +151,7 @@ namespace CSharpTest.Net.Library.Test
         }
 
         [Test]
-        [ExpectedException(typeof(NotSupportedException))]
+        //[ExpectedException(typeof(NotSupportedException))]
         public void TestExceptionOnModifyIndex()
         {
             IList<int> tmp = new BTreeList<int>();

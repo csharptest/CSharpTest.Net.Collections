@@ -22,12 +22,12 @@ namespace CSharpTest.Net.Interfaces
     /// <summary>
     ///     Provides a strongly typed shallow copy of the current object
     /// </summary>
-    public interface ICloneable<T> : ICloneable
+    public interface ICloneable<T>
         where T : ICloneable<T>
     {
         /// <summary>
         ///     Returns a shallow clone of this object.
         /// </summary>
-        new T Clone();
+        T Clone();
     }
 }

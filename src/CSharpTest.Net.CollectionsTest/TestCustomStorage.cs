@@ -128,7 +128,7 @@ namespace CSharpTest.Net.BPlusTree.Test
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        //[ExpectedException(typeof(InvalidOperationException))]
         public void TestFailedWrite()
         {
             BPlusTreeOptions<int, string> options = Options;

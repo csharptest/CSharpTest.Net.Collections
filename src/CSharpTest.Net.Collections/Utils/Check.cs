@@ -43,54 +43,6 @@ internal static class Check
     }
 
     /// <summary>
-    ///     Verifies that the condition is true and if it fails constructs the specified type of
-    ///     exception with any arguments provided and throws.
-    /// </summary>
-    public static void Assert<TException>(bool condition, string message)
-        where TException : Exception, new()
-    {
-        if (!condition)
-        {
-            ConstructorInfo ci = typeof(TException).GetConstructor(new[] {typeof(string)});
-            if (ci != null)
-            {
-                TException e = (TException) ci.Invoke(new object[] {message});
-                throw e;
-            }
-            throw new TException();
-        }
-    }
-
-    /// <summary>
-    ///     Verifies that the condition is true and if it fails throws the execption returned
-    ///     by fnExceptionBuilder()
-    /// </summary>
-    public static void Assert(bool condition, ExceptionBuilder fnExceptionBuilder)
-    {
-        if (!condition)
-            throw fnExceptionBuilder();
-    }
-
-    /// <summary>
-    ///     Verifies that the condition is true and if it fails constructs the specified type of
-    ///     exception with any arguments provided and throws.
-    /// </summary>
-    public static void Assert<TException>(bool condition, string message, Exception innerException)
-        where TException : Exception, new()
-    {
-        if (!condition)
-        {
-            ConstructorInfo ci = typeof(TException).GetConstructor(new[] {typeof(string), typeof(Exception)});
-            if (ci != null)
-            {
-                TException e = (TException) ci.Invoke(new object[] {message, innerException});
-                throw e;
-            }
-            throw new TException();
-        }
-    }
-
-    /// <summary>
     ///     Verifies that value is not null and returns the value or throws ArgumentNullException
     /// </summary>
     public static T NotNull<T>(T value)
@@ -197,7 +149,7 @@ internal static class Check
         NotNull(toType);
         if (fromValue == null)
         {
-            if (toType.IsValueType)
+            if (toType.GetTypeInfo().IsValueType)
                 throw new ArgumentException(string.Format("Can not set value of type {0} to null.", toType));
         }
         else
@@ -212,7 +164,7 @@ internal static class Check
     /// </summary>
     public static void IsAssignable(Type toType, Type fromType)
     {
-        if (!NotNull(toType).IsAssignableFrom(NotNull(fromType)))
+        if (!NotNull(toType).GetTypeInfo().IsAssignableFrom(NotNull(fromType)))
             throw new ArgumentException(string.Format("Can not set value of type {0} to a value of type {1}.", toType,
                 fromType));
     }

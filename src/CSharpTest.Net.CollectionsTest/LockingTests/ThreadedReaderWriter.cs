@@ -52,7 +52,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             _lck = lck;
             _delegate = HoldLock;
             _async = _delegate.BeginInvoke(null, null);
-            if (!_started.WaitOne(1000, false))
+            if (!_started.WaitOne(1000))
             {
                 _delegate.EndInvoke(_async);
                 Assert.Fail("Unable to acquire lock");

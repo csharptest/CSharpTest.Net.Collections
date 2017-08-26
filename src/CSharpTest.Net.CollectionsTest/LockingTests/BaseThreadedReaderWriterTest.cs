@@ -144,7 +144,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                         delegate
                         {
                             Random r = new Random();
-                            while (!stop.WaitOne(0, false))
+                            while (!stop.WaitOne(0))
                             {
                                 Interlocked.Increment(ref iterations[0]);
                                 for (int i = 0; i < 100; i++)
@@ -170,7 +170,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
         }
 
         [Test]
-        [ExpectedException(typeof(TimeoutException))]
+        //[ExpectedException(typeof(TimeoutException))]
         public void TestThreadedReadTimeout()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -183,7 +183,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
         }
 
         [Test]
-        [ExpectedException]
+        //[ExpectedException]
         public void TestExcessiveReleaseWrite()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -193,7 +193,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
         }
 
         [Test]
-        [ExpectedException]
+        //[ExpectedException]
         public void TestExcessiveReleaseRead()
         {
             using (ILockStrategy l = LockFactory.Create())

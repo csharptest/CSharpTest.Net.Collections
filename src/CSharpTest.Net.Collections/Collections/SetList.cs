@@ -455,11 +455,6 @@ namespace CSharpTest.Net.Collections
             return new SetList<T>(new List<T>(_list), _comparer);
         }
 
-        object ICloneable.Clone()
-        {
-            return Clone();
-        }
-
         #endregion
     }
 }

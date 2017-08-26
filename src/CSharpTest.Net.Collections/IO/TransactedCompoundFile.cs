@@ -52,7 +52,7 @@ namespace CSharpTest.Net.IO
         /// <summary>
         ///     Advanced Options used to construct a TransactedCompoundFile
         /// </summary>
-        public class Options : ICloneable
+        public class Options : ICloneable<Options>
         {
             private int _blockSize;
 
@@ -131,11 +131,6 @@ namespace CSharpTest.Net.IO
             ///     See comments on the LoadingRule enumerated type and Commit(Action,T)
             /// </summary>
             public LoadingRule LoadingRule { get; set; }
-
-            object ICloneable.Clone()
-            {
-                return Clone();
-            }
 
             /// <summary>
             ///     Returns a copy of the options currently specified.
@@ -305,25 +300,6 @@ namespace CSharpTest.Net.IO
 
         #region void FlushStream(Stream stream)
 
-#if !NET40
-        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
-        private static extern bool FlushFileBuffers(IntPtr hFile);
-        private void FlushStream(Stream stream)
-        {
-            FileStream fs = stream as FileStream;
-            if (fs == null || (_options.FileOptions & FileOptions.WriteThrough) != 0)
-            {
-                stream.Flush();
-            }
-            else
-            {
-                SafeFileHandle handle = (SafeFileHandle) fs.GetType()
-                    .GetField("_handle", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(fs);
-                if (!FlushFileBuffers(handle.DangerousGetHandle()))
-                    throw new Win32Exception();
-            }
-        }
-#else
         void FlushStream(Stream stream)
         {
             FileStream fs = stream as FileStream;
@@ -332,7 +308,6 @@ namespace CSharpTest.Net.IO
             else
                 fs.Flush(true);
         }
-#endif
 
         #endregion
 

@@ -59,7 +59,7 @@ namespace CSharpTest.Net.Library.Test
 
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        //[ExpectedException(typeof(ArgumentException))]
         public void TestBadPathOnAttach()
         {
             TempFile f = TempFile.Attach("@~+_(%!&($_~!(&*+%_~&^%^|||&&&\\\\ THIS IS AN INVALID FILE NAME.*");
@@ -280,7 +280,7 @@ namespace CSharpTest.Net.Library.Test
         }
 
         [Test]
-        [ExpectedException(typeof(ObjectDisposedException))]
+        //[ExpectedException(typeof(ObjectDisposedException))]
         public void TestInfoOnDisposed()
         {
             TempFile f = new TempFile();
@@ -305,7 +305,7 @@ namespace CSharpTest.Net.Library.Test
         }
 
         [Test]
-        [ExpectedException(typeof(ObjectDisposedException))]
+        //[ExpectedException(typeof(ObjectDisposedException))]
         public void TestPathOnDisposed()
         {
             TempFile f = new TempFile();

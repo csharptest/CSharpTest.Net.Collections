@@ -170,8 +170,8 @@ namespace CSharpTest.Net.BPlusTree.Test
                 }
                 byte[] bytes = tmp.ReadAllBytes();
 
-                Converter<KeyValuePair<int, byte[]>, byte[]>[] TestVariants =
-                    new Converter<KeyValuePair<int, byte[]>, byte[]>[]
+                Func<KeyValuePair<int, byte[]>, byte[]>[] TestVariants =
+                    new Func<KeyValuePair<int, byte[]>, byte[]>[]
                     {
                         kv =>
                         {
@@ -192,7 +192,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     };
 
                 for (int corruptionIx = 0; corruptionIx < bytes.Length; corruptionIx++)
-                    foreach (Converter<KeyValuePair<int, byte[]>, byte[]> testcase in TestVariants)
+                    foreach (Func<KeyValuePair<int, byte[]>, byte[]> testcase in TestVariants)
                     {
                         byte[] corrupt = testcase(new KeyValuePair<int, byte[]>(corruptionIx, (byte[]) bytes.Clone()));
                         tmp.WriteAllBytes(corrupt);

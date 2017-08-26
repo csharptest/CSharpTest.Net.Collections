@@ -316,7 +316,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     }
                 };
 
-                Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000, false));
+                Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000));
                 Assert.IsTrue(canwrite);
                 Assert.IsTrue(canread);
 
@@ -324,7 +324,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                 using (dictionary.CallLevelLock.Write())
                 {
                     //they can't read or write
-                    Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000, false));
+                    Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000));
                     Assert.IsFalse(canwrite);
                     Assert.IsFalse(canread);
                     //but we can
@@ -333,14 +333,14 @@ namespace CSharpTest.Net.BPlusTree.Test
                     Assert.IsTrue(canread);
                 }
                 //lock release all is well
-                Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000, false));
+                Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000));
                 Assert.IsTrue(canwrite);
                 Assert.IsTrue(canread);
 
                 //We can also make sure noone else gains exclusive access with a read lock
                 using (dictionary.CallLevelLock.Read())
                 {
-                    Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000, false));
+                    Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000));
                     Assert.IsTrue(canwrite);
                     Assert.IsTrue(canread);
                 }

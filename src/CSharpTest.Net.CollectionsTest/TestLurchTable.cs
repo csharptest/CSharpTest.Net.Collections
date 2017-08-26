@@ -398,7 +398,7 @@ namespace CSharpTest.Net.Library.Test
         }
 
         [Test]
-        [ExpectedException(typeof(ObjectDisposedException))]
+        //[ExpectedException(typeof(ObjectDisposedException))]
         public void TestDisposed()
         {
             IConcurrentDictionary<int, string> test = new LurchTableTest<int, string>();

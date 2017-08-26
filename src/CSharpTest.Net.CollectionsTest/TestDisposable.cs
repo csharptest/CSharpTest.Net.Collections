@@ -57,7 +57,7 @@ namespace CSharpTest.Net.Library.Test
         }
 
         [Test]
-        [ExpectedException(typeof(ObjectDisposedException))]
+        //[ExpectedException(typeof(ObjectDisposedException))]
         public void TestAssertWhenDisposed()
         {
             MyDisposable o = new MyDisposable();

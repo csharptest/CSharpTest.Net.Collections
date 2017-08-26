@@ -72,7 +72,7 @@ namespace CSharpTest.Net.BPlusTree.Test
         [Test]
         public void TestICloneable()
         {
-            ICloneable opt = new BPlusTree<int, int>.Options(PrimitiveSerializer.Int32, PrimitiveSerializer.Int32)
+            var opt = new BPlusTree<int, int>.Options(PrimitiveSerializer.Int32, PrimitiveSerializer.Int32)
             {
                 CreateFile = CreatePolicy.IfNeeded,
                 BTreeOrder = 4

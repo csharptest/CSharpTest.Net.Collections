@@ -238,10 +238,6 @@ namespace CSharpTest.Net.Collections
                     {
                         _storage.Storage.Destroy(sh);
                     }
-                    catch (ThreadAbortException)
-                    {
-                        throw;
-                    }
                     catch
                     {
                     }

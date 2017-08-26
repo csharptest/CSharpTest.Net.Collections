@@ -251,7 +251,7 @@ namespace CSharpTest.Net.Collections
         /// <summary>
         ///     Defines the options nessessary to construct a BPlusTree implementation
         /// </summary>
-        [Browsable(false)]
+        
         public sealed class Options : BPlusTreeOptions<TKey, TValue>
         {
             private int _concurrentWriters = 8;

@@ -37,115 +37,25 @@ namespace CSharpTest.Net.Crypto
             _hashCode = hashCode;
         }
 
-        /// <summary> Returns the OID of the hash algorithm </summary>
-        public string AlgorithmOID => CryptoConfig.MapNameToOID(AlgorithmName);
-
-        /// <summary> Returns the name of the hash algorithm </summary>
-        public string AlgorithmName
-        {
-            get
-            {
-                switch (_hashCode.Length)
-                {
-                    case 16: return "MD5";
-                    case 20: return "SHA1";
-                    case 32: return "SHA256";
-                    case 48: return "SHA384";
-                    case 64: return "SHA512";
-                    default: throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
-
         /// <summary> Returns the length in bytes of the hash code </summary>
         public int Length => _hashCode.Length;
 
         /// <summary> Returns a hash of the hash code :) </summary>
         protected override int HashCode => BinaryComparer.GetHashCode(_hashCode);
 
-        private static Hash Create<T>(byte[] data)
-            where T : HashAlgorithm, new()
-        {
-            using (T algo = new T())
-            {
-                return new Hash(algo.ComputeHash(data == null ? Empty : data));
-            }
-        }
-
-        private static Hash Create<T>(Stream data)
-            where T : HashAlgorithm, new()
-        {
-            using (data)
-            using (T algo = new T())
-            {
-                return new Hash(algo.ComputeHash(data == null ? Stream.Null : data));
-            }
-        }
-
-        /// <summary> Computes an MD5 hash </summary>
-        public static Hash MD5(byte[] bytes)
-        {
-            return Create<MD5CryptoServiceProvider>(bytes);
-        }
-
-        /// <summary> Computes an MD5 hash </summary>
-        public static Hash MD5(Stream bytes)
-        {
-            return Create<MD5CryptoServiceProvider>(bytes);
-        }
-
-        /// <summary> Computes an SHA1 hash </summary>
-        public static Hash SHA1(byte[] bytes)
-        {
-            return Create<SHA1Managed>(bytes);
-        }
-
-        /// <summary> Computes an SHA1 hash </summary>
-        public static Hash SHA1(Stream bytes)
-        {
-            return Create<SHA1Managed>(bytes);
-        }
-
         /// <summary> Computes an SHA256 hash </summary>
         public static Hash SHA256(byte[] bytes)
         {
-            return Create<SHA256Managed>(bytes);
-        }
-
-        /// <summary> Computes an SHA256 hash </summary>
-        public static Hash SHA256(Stream bytes)
-        {
-            return Create<SHA256Managed>(bytes);
-        }
-
-        /// <summary> Computes an SHA384 hash </summary>
-        public static Hash SHA384(byte[] bytes)
-        {
-            return Create<SHA384Managed>(bytes);
-        }
-
-        /// <summary> Computes an SHA384 hash </summary>
-        public static Hash SHA384(Stream bytes)
-        {
-            return Create<SHA384Managed>(bytes);
-        }
-
-        /// <summary> Computes an SHA512 hash </summary>
-        public static Hash SHA512(byte[] bytes)
-        {
-            return Create<SHA512Managed>(bytes);
-        }
-
-        /// <summary> Computes an SHA512 hash </summary>
-        public static Hash SHA512(Stream bytes)
-        {
-            return Create<SHA512Managed>(bytes);
+            using (SHA256 sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                return new Hash(sha256.ComputeHash(bytes));
+            }
         }
 
         /// <summary> Creates a comparable Hash object from the given hashcode bytes </summary>
         public static Hash FromBytes(byte[] bytes)
         {
-            return new Hash((byte[]) bytes.Clone());
+            return new Hash((byte[])bytes.Clone());
         }
 
         /// <summary> Creates a comparable Hash object from the base-64 encoded hashcode bytes </summary>
@@ -157,9 +67,9 @@ namespace CSharpTest.Net.Crypto
         /// <summary>
         ///     Creates the hash algorithm associated with this length of hash
         /// </summary>
-        public HashAlgorithm CreateAlgorithm()
+        public IncrementalHash CreateAlgorithm()
         {
-            return Check.IsAssignable<HashAlgorithm>(CryptoConfig.CreateFromName(AlgorithmName));
+            return IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         }
 
         /// <summary>
@@ -174,10 +84,10 @@ namespace CSharpTest.Net.Crypto
                 return Combine(other._hashCode);
 
             //We have two hash values of equal lenth, we can now easily combine them.
-            HashAlgorithm alg = CreateAlgorithm();
-            alg.TransformBlock(_hashCode, 0, _hashCode.Length, _hashCode, 0);
-            alg.TransformFinalBlock(other._hashCode, 0, _hashCode.Length);
-            return FromBytes(alg.Hash);
+            IncrementalHash alg = CreateAlgorithm();
+            alg.AppendData(_hashCode, 0, _hashCode.Length);
+            alg.AppendData(other._hashCode, 0, _hashCode.Length);
+            return FromBytes(alg.GetHashAndReset());
         }
 
         /// <summary>
@@ -186,13 +96,13 @@ namespace CSharpTest.Net.Crypto
         /// </summary>
         public Hash Combine(byte[] bytes)
         {
-            return Combine(FromBytes(CreateAlgorithm().ComputeHash(Check.NotNull(bytes))));
+            return Combine(SHA256(Check.NotNull(bytes)));
         }
 
         /// <summary> Returns a copy of the hash code bytes </summary>
         public byte[] ToArray()
         {
-            return (byte[]) _hashCode.Clone();
+            return (byte[])_hashCode.Clone();
         }
 
         /// <summary> Returns the hash code as a base-64 encoded string </summary>

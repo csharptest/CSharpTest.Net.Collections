@@ -8,6 +8,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System.Reflection;
+
 namespace CSharpTest.Net
 {
     using System;
@@ -26,7 +28,6 @@ namespace CSharpTest.Net
     {
         private static global::System.Resources.ResourceManager resourceMan;
         private static global::System.Globalization.CultureInfo resourceCulture;
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources()
         {
         }
@@ -40,7 +41,7 @@ namespace CSharpTest.Net
             {
                 if (object.ReferenceEquals(resourceMan, null))
                 {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CSharpTest.Net.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CSharpTest.Net.Resources", typeof(Resources).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -217,19 +218,12 @@ namespace CSharpTest.Net
     /// Exception class: AssertionFailedException
     /// A runtime assertion failed while performing the operation.
     /// </summary>
-    [System.SerializableAttribute()]
     [global::System.Diagnostics.DebuggerStepThroughAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("CSharpTest.Net.Generators", "2.0")]
     public partial class AssertionFailedException : BaseAssertionException
     {
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        protected AssertionFailedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        {
-        }
         /// <summary>
         /// Used to create this exception from an hresult and message bypassing the message formatting
         /// </summary>
@@ -292,19 +286,12 @@ namespace CSharpTest.Net
     /// Exception class: DeadlockException
     /// A lock timeout has expired due to a possible deadlock.
     /// </summary>
-    [System.SerializableAttribute()]
     [global::System.Diagnostics.DebuggerStepThroughAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("CSharpTest.Net.Generators", "2.0")]
     public partial class DeadlockException : BaseAssertionException
     {
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        protected DeadlockException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        {
-        }
         /// <summary>
         /// Used to create this exception from an hresult and message bypassing the message formatting
         /// </summary>
@@ -346,19 +333,12 @@ namespace CSharpTest.Net
     /// Exception class: DebugAssertionFailedException
     /// Debug Assertion Failed: {0}
     /// </summary>
-    [System.SerializableAttribute()]
     [global::System.Diagnostics.DebuggerStepThroughAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("CSharpTest.Net.Generators", "2.0")]
     public partial class DebugAssertionFailedException : System.Exception
     {
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        protected DebugAssertionFailedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        {
-        }
         /// <summary>
         /// Used to create this exception from an hresult and message bypassing the message formatting
         /// </summary>
@@ -400,19 +380,12 @@ namespace CSharpTest.Net
     /// Exception class: DuplicateKeyException
     /// The specified key already exists in the collection.
     /// </summary>
-    [System.SerializableAttribute()]
     [global::System.Diagnostics.DebuggerStepThroughAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("CSharpTest.Net.Generators", "2.0")]
     public partial class DuplicateKeyException : System.Exception
     {
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        protected DuplicateKeyException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        {
-        }
         /// <summary>
         /// Used to create this exception from an hresult and message bypassing the message formatting
         /// </summary>
@@ -454,19 +427,12 @@ namespace CSharpTest.Net
     /// Exception class: InvalidConfigurationValueException
     /// The configuration value '{0}' is invalid.
     /// </summary>
-    [System.SerializableAttribute()]
     [global::System.Diagnostics.DebuggerStepThroughAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("CSharpTest.Net.Generators", "2.0")]
     public partial class InvalidConfigurationValueException : ArgumentException
     {
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        protected InvalidConfigurationValueException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        {
-        }
         /// <summary>
         /// Used to create this exception from an hresult and message bypassing the message formatting
         /// </summary>
@@ -532,19 +498,12 @@ namespace CSharpTest.Net
     /// Exception class: InvalidNodeHandleException
     /// A storage handle was invalid or has been corrupted.
     /// </summary>
-    [System.SerializableAttribute()]
     [global::System.Diagnostics.DebuggerStepThroughAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("CSharpTest.Net.Generators", "2.0")]
     public partial class InvalidNodeHandleException : BaseAssertionException
     {
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        protected InvalidNodeHandleException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        {
-        }
         /// <summary>
         /// Used to create this exception from an hresult and message bypassing the message formatting
         /// </summary>
@@ -586,19 +545,12 @@ namespace CSharpTest.Net
     /// Exception class: LurchTableCorruptionException
     /// The LurchTable internal datastructure appears to be corrupted.
     /// </summary>
-    [System.SerializableAttribute()]
     [global::System.Diagnostics.DebuggerStepThroughAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("CSharpTest.Net.Generators", "2.0")]
     public partial class LurchTableCorruptionException : System.Exception
     {
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        protected LurchTableCorruptionException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        {
-        }
         /// <summary>
         /// Used to create this exception from an hresult and message bypassing the message formatting
         /// </summary>
@@ -640,19 +592,12 @@ namespace CSharpTest.Net
     /// Exception class: LockTimeoutException
     /// Failed to aquire the lock in the specified time.
     /// </summary>
-    [System.SerializableAttribute()]
     [global::System.Diagnostics.DebuggerStepThroughAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("CSharpTest.Net.Generators", "2.0")]
     public partial class LockTimeoutException :System.TimeoutException
     {
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        protected LockTimeoutException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        {
-        }
         /// <summary>
         /// Used to create this exception from an hresult and message bypassing the message formatting
         /// </summary>

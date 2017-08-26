@@ -140,7 +140,7 @@ namespace CSharpTest.Net.Collections
     /// <summary>
     ///     Defines the options nessessary to construct a BPlusTree implementation
     /// </summary>
-    public abstract class BPlusTreeOptions<TKey, TValue> : ICloneable
+    public abstract class BPlusTreeOptions<TKey, TValue> : ICloneable<BPlusTreeOptions<TKey, TValue>>
     {
         private CachePolicy _cachePolicy = CachePolicy.Recent;
         private ILockStrategy _callLevelLock = IgnoreLocking.Instance;
@@ -522,11 +522,6 @@ namespace CSharpTest.Net.Collections
                     "The valid range is from 0 to MaxValue.");
                 _keepAliveTimeout = value;
             }
-        }
-
-        object ICloneable.Clone()
-        {
-            return MemberwiseClone();
         }
 
         /// <summary>

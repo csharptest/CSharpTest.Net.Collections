@@ -28,7 +28,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
         protected readonly ILockFactory LockFactory = new LockFactory<SimpleReadWriteLocking>();
 
         [Test]
-        [ExpectedException(typeof(SynchronizationLockException))]
+        //[ExpectedException(typeof(SynchronizationLockException))]
         public void TestIdiotReaderUsesDispose()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -41,7 +41,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
         }
 
         [Test]
-        [ExpectedException(typeof(SynchronizationLockException))]
+        //[ExpectedException(typeof(SynchronizationLockException))]
         public void TestIdiotUsesSafeLockDispose()
         {
             object instance = new object();
@@ -53,7 +53,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
         }
 
         [Test]
-        [ExpectedException(typeof(SynchronizationLockException))]
+        //[ExpectedException(typeof(SynchronizationLockException))]
         public void TestIdiotWriterUsesDispose()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -105,7 +105,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
         }
 
         [Test]
-        [ExpectedException(typeof(TimeoutException))]
+        //[ExpectedException(typeof(TimeoutException))]
         public void TestSafeLockTimeout()
         {
             object instance = new object();
@@ -117,7 +117,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        //[ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void TestSafeLockTimeoutWithTException()
         {
             object instance = new object();

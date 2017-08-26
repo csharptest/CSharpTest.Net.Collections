@@ -76,7 +76,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
 
 
         [Test]
-        [ExpectedException(typeof(TimeoutException))]
+        //[ExpectedException(typeof(TimeoutException))]
         public void TestThreadedWriteTimeout()
         {
             using (ILockStrategy l = LockFactory.Create())

@@ -64,7 +64,7 @@ namespace CSharpTest.Net.IO
         protected override void Dispose(bool disposing)
         {
             for (int i = 0; i < _handles.Length; i++)
-                _handles[i].Close();
+                _handles[i].Dispose();
             for (int i = 0; i < _streams.Length; i++)
                 if (_streams[i] != null)
                     _streams[i].Dispose();
@@ -143,11 +143,6 @@ namespace CSharpTest.Net.IO
             {
                 GC.SuppressFinalize(this);
                 Dispose(false);
-            }
-
-            public override void Close()
-            {
-                Dispose(true);
             }
 
             protected override void Dispose(bool disposing)

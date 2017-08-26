@@ -67,6 +67,26 @@ namespace CSharpTest.Net.Threading
         }
     }
 
+    public class ErrorEventArgs : EventArgs
+    {
+        private Exception e;
+
+        public ErrorEventArgs(Exception e)
+        {
+            this.e = e;
+        }
+
+        public Exception GetException()
+        {
+            return e;
+        }
+    }
+
+    public delegate void ErrorEventHandler(
+        object sender,
+        ErrorEventArgs e
+    );
+
     /// <summary>
     ///     An extremely basic WorkQueue using a fixed number of threads to execute Action&lt;T>
     ///     over the enqueued instances of type T, aggregates an instance of WorkQueue()
@@ -95,7 +115,6 @@ namespace CSharpTest.Net.Threading
             for (int i = 0; i < nThreads; i++)
             {
                 _workers[i] = new Thread(Run);
-                _workers[i].SetApartmentState(ApartmentState.MTA);
                 _workers[i].IsBackground = true;
                 _workers[i].Name = string.Format("WorkQueue[{0}]", i);
                 _workers[i].Start();
@@ -133,7 +152,7 @@ namespace CSharpTest.Net.Threading
                     if (!t.Join(timeout))
                     {
                         completed = false;
-                        t.Abort();
+                       
                         if (!t.Join(10000))
                             shutdownFailed = true;
                     }
@@ -190,7 +209,7 @@ namespace CSharpTest.Net.Threading
                     }
                     else
                     {
-                        if (_quit.WaitOne(0, false))
+                        if (_quit.WaitOne(0))
                             break;
 
                         _ready.Reset();
@@ -201,10 +220,6 @@ namespace CSharpTest.Net.Threading
                 try
                 {
                     _process(item);
-                }
-                catch (ThreadAbortException)
-                {
-                    return;
                 }
                 catch (Exception e)
                 {

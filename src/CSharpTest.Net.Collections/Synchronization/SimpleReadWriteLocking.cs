@@ -89,8 +89,7 @@ namespace CSharpTest.Net.Synchronization
         public virtual void Dispose()
         {
             object exit = Interlocked.Exchange(ref _sync, null);
-            if (_event != null)
-                _event.Close();
+            _event?.Dispose();
 
             if (exit == null)
                 return;
@@ -281,12 +280,12 @@ namespace CSharpTest.Net.Synchronization
                 if (loop < spinLoops)
                 {
                     loop++;
-                    Thread.SpinWait(SpinWaitTime);
+                    SpinWait.SpinUntil(null, SpinWaitTime);
                     continue;
                 }
                 // if we are still waiting on readers after spinning for a few loops
                 // we can just start polling the event.  
-                if (!_event.WaitOne(10, false))
+                if (!_event.WaitOne(10))
                     loop += 10;
             }
 

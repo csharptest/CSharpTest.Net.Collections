@@ -210,7 +210,7 @@ namespace CSharpTest.Net.Collections
 
         private struct InsertionInfo : ICreateOrUpdateValue<TKey, TValue>
         {
-            private readonly Converter<TKey, TValue> _factory;
+            private readonly Func<TKey, TValue> _factory;
             private readonly KeyValueUpdate<TKey, TValue> _updater;
             private readonly bool _canUpdate;
             public TValue Value { get; private set; }
@@ -240,7 +240,7 @@ namespace CSharpTest.Net.Collections
                 return true;
             }
 
-            public InsertionInfo(Converter<TKey, TValue> factory, KeyValueUpdate<TKey, TValue> updater)
+            public InsertionInfo(Func<TKey, TValue> factory, KeyValueUpdate<TKey, TValue> updater)
                 : this()
             {
                 _factory = Check.NotNull(factory);

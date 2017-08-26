@@ -71,8 +71,6 @@ namespace CSharpTest.Net.Collections
         /// <summary>
         ///     Constructs a BPlusTree using a Version 1 file format
         /// </summary>
-        [Browsable(false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
         public BPlusTree(Options optionsV1)
             : this((BPlusTreeOptions<TKey, TValue>) optionsV1)
         {
@@ -81,8 +79,6 @@ namespace CSharpTest.Net.Collections
         /// <summary>
         ///     Constructs a BPlusTree
         /// </summary>
-        [Browsable(false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
         public BPlusTree(BPlusTreeOptions<TKey, TValue> ioptions)
         {
             bool fileExists =
@@ -224,7 +220,7 @@ namespace CSharpTest.Net.Collections
         ///     The <see cref="T:System.Collections.Generic.IDictionary`2" /> is
         ///     read-only.
         /// </exception>
-        public TValue GetOrAdd(TKey key, Converter<TKey, TValue> fnCreate)
+        public TValue GetOrAdd(TKey key, Func<TKey, TValue> fnCreate)
         {
             InsertionInfo ii = new InsertionInfo(fnCreate, IgnoreUpdate);
             AddEntry(key, ref ii);
@@ -235,7 +231,7 @@ namespace CSharpTest.Net.Collections
         ///     Adds an element with the provided key and value to the <see cref="T:System.Collections.Generic.IDictionary`2" />
         ///     by calling the provided factory method to construct the value if the key is not already present in the collection.
         /// </summary>
-        public bool TryAdd(TKey key, Converter<TKey, TValue> fnCreate)
+        public bool TryAdd(TKey key, Func<TKey, TValue> fnCreate)
         {
             InsertionInfo ii = new InsertionInfo(fnCreate, IgnoreUpdate);
             return InsertResult.Inserted == AddEntry(key, ref ii);
@@ -258,7 +254,7 @@ namespace CSharpTest.Net.Collections
         ///     exist,
         ///     or updates a key/value pair if the key already exists.
         /// </summary>
-        public TValue AddOrUpdate(TKey key, Converter<TKey, TValue> fnCreate, KeyValueUpdate<TKey, TValue> fnUpdate)
+        public TValue AddOrUpdate(TKey key, Func<TKey, TValue> fnCreate, KeyValueUpdate<TKey, TValue> fnUpdate)
         {
             InsertionInfo ii = new InsertionInfo(fnCreate, fnUpdate);
             AddEntry(key, ref ii);

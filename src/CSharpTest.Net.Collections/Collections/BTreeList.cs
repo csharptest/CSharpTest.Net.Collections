@@ -19,6 +19,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using CSharpTest.Net.Interfaces;
 
 namespace CSharpTest.Net.Collections
 {
@@ -26,7 +27,7 @@ namespace CSharpTest.Net.Collections
     ///     Implements an IList interface for an in-memory B+Tree of unique values
     /// </summary>
     [DebuggerDisplay("Count = {Count}")]
-    public class BTreeList<T> : IList<T>, ICloneable, IDisposable
+    public class BTreeList<T> : IList<T>, ICloneable<BTreeList<T>>, IDisposable
     {
         /// <summary>The default `order` of the B+Tree structure.</summary>
         public const int DefaultOrder = 64;
@@ -573,11 +574,6 @@ namespace CSharpTest.Net.Collections
             SeekResult result;
             Seek(_root, start, out result);
             return new Enumerator(result.Parent, result.ParentIx, x => Comparer.Compare(x, end) <= 0);
-        }
-
-        object ICloneable.Clone()
-        {
-            return Clone();
         }
 
         /// <summary>

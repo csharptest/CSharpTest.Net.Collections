@@ -26,7 +26,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
     public class TestSimpleReadWriteLocking : BaseThreadedReaderWriterTest<LockFactory<SimpleReadWriteLocking>>
     {
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        //[ExpectedException(typeof(InvalidOperationException))]
         public void DisposedWithReaders()
         {
             ILockStrategy l = LockFactory.Create();
@@ -48,7 +48,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        //[ExpectedException(typeof(InvalidOperationException))]
         public void DisposedWithWriters()
         {
             ILockStrategy l = LockFactory.Create();

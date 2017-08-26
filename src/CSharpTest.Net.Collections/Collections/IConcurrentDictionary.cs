@@ -91,7 +91,7 @@ namespace CSharpTest.Net.Collections
         ///     The <see cref="T:System.Collections.Generic.IDictionary`2" /> is
         ///     read-only.
         /// </exception>
-        TValue GetOrAdd(TKey key, Converter<TKey, TValue> fnCreate);
+        TValue GetOrAdd(TKey key, Func<TKey, TValue> fnCreate);
 
         /// <summary>
         ///     Adds a key/value pair to the <see cref="T:System.Collections.Generic.IDictionary`2" /> if the key does not already
@@ -110,7 +110,7 @@ namespace CSharpTest.Net.Collections
         ///     the factory method fnCreate will be called to produce the new value, if the key exists, the converter method
         ///     fnUpdate will be called to create an updated value.
         /// </remarks>
-        TValue AddOrUpdate(TKey key, Converter<TKey, TValue> fnCreate, KeyValueUpdate<TKey, TValue> fnUpdate);
+        TValue AddOrUpdate(TKey key, Func<TKey, TValue> fnCreate, KeyValueUpdate<TKey, TValue> fnUpdate);
 
         /// <summary>
         ///     Add, update, or fetche a key/value pair from the dictionary via an implementation of the
@@ -122,7 +122,7 @@ namespace CSharpTest.Net.Collections
         ///     Adds an element with the provided key and value to the <see cref="T:System.Collections.Generic.IDictionary`2" />
         ///     by calling the provided factory method to construct the value if the key is not already present in the collection.
         /// </summary>
-        bool TryAdd(TKey key, Converter<TKey, TValue> fnCreate);
+        bool TryAdd(TKey key, Func<TKey, TValue> fnCreate);
 
         /// <summary>
         ///     Modify the value associated with the result of the provided update method

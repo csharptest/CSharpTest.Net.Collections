@@ -146,7 +146,7 @@ namespace CSharpTest.Net.Library.Test
 
             long start = DateTime.UtcNow.Ticks;
             while (start + timeout.Ticks > DateTime.UtcNow.Ticks)
-                Thread.SpinWait(100);
+                SpinWait.SpinUntil(null,100);
 
             //Time has elapsed, yet it nothing is added, and Tick() is not called, it remains in memory
             GC.GetTotalMemory(true);

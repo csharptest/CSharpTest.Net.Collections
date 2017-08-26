@@ -377,7 +377,7 @@ namespace CSharpTest.Net.Collections
         /// </summary>
         /// <param name="key">The key of the element to add.</param>
         /// <param name="fnCreate">Constructs a new value for the key.</param>
-        public TValue GetOrAdd(TKey key, Converter<TKey, TValue> fnCreate)
+        public TValue GetOrAdd(TKey key, Func<TKey, TValue> fnCreate)
         {
             Add2Info info = new Add2Info {Create = fnCreate};
             Insert(key, ref info);
@@ -406,7 +406,7 @@ namespace CSharpTest.Net.Collections
         ///     the factory method fnCreate will be called to produce the new value, if the key exists, the converter method
         ///     fnUpdate will be called to create an updated value.
         /// </remarks>
-        public TValue AddOrUpdate(TKey key, Converter<TKey, TValue> fnCreate, KeyValueUpdate<TKey, TValue> fnUpdate)
+        public TValue AddOrUpdate(TKey key, Func<TKey, TValue> fnCreate, KeyValueUpdate<TKey, TValue> fnUpdate)
         {
             Add2Info info = new Add2Info {Create = fnCreate, Update = fnUpdate};
             Insert(key, ref info);
@@ -427,7 +427,7 @@ namespace CSharpTest.Net.Collections
         ///     Adds an element with the provided key and value to the <see cref="T:System.Collections.Generic.IDictionary`2" />
         ///     by calling the provided factory method to construct the value if the key is not already present in the collection.
         /// </summary>
-        public bool TryAdd(TKey key, Converter<TKey, TValue> fnCreate)
+        public bool TryAdd(TKey key, Func<TKey, TValue> fnCreate)
         {
             Add2Info info = new Add2Info {Create = fnCreate};
             return InsertResult.Inserted == Insert(key, ref info);
@@ -1497,7 +1497,7 @@ namespace CSharpTest.Net.Collections
             private readonly bool _hasAddValue;
             private readonly TValue _addValue;
             public TValue Value;
-            public Converter<TKey, TValue> Create;
+            public Func<TKey, TValue> Create;
             public KeyValueUpdate<TKey, TValue> Update;
 
             public Add2Info(TValue addValue) : this()

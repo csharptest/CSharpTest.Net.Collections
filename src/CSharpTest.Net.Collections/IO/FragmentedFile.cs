@@ -394,7 +394,7 @@ namespace CSharpTest.Net.IO
         /// <param name="ignoreException"> A method that returns true to ignore the exception and continue processing </param>
         /// <returns>Enumeration of the identity and data stream of each block in the file</returns>
         public IEnumerable<KeyValuePair<long, Stream>> ForeachBlock(bool allocatedOnly, bool verifyReads,
-            Converter<Exception, bool> ignoreException)
+            Func<Exception, bool> ignoreException)
         {
             using (Stream s = _streamCache.Open(FileAccess.ReadWrite))
             using (FileBlock block = new FileBlock(_blockSize, _useAlignedIo))
@@ -818,12 +818,6 @@ namespace CSharpTest.Net.IO
                 }
             }
 
-            public override void Close()
-            {
-                Commit();
-                base.Close();
-            }
-
             protected override void Dispose(bool disposing)
             {
                 if (!_reverted)
@@ -839,6 +833,9 @@ namespace CSharpTest.Net.IO
                     if (_restore != null) _restore.Dispose();
                     if (_temp != null) _temp.Dispose();
                 }
+
+                Commit();
+
                 base.Dispose(disposing);
             }
 

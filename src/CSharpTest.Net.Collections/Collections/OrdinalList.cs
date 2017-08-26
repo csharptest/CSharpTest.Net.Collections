@@ -18,6 +18,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using CSharpTest.Net.Interfaces;
 
 namespace CSharpTest.Net.Collections
 {
@@ -29,7 +30,7 @@ namespace CSharpTest.Net.Collections
     ///     is smaller than 8,388,608 (one megabyte of bits).  Pre-allocate with Ceiling = max for better
     ///     performance, or add the integers in reverse order (highest to lowest).
     /// </summary>
-    public class OrdinalList : ICollection<int>, ICollection, IEnumerable, ICloneable
+    public class OrdinalList : ICollection<int>, ICollection, IEnumerable, ICloneable<OrdinalList>
     {
         private byte[] _bits;
 
@@ -61,11 +62,6 @@ namespace CSharpTest.Net.Collections
         {
             get => (int) (((long) _bits.Length << 3) - 1);
             set => AllocFor(value);
-        }
-
-        object ICloneable.Clone()
-        {
-            return Clone();
         }
 
         /// <summary> Empty the OrdinalList </summary>

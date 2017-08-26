@@ -324,7 +324,7 @@ namespace CSharpTest.Net.Collections
         ///     The <see cref="T:System.Collections.Generic.IDictionary`2" /> is
         ///     read-only.
         /// </exception>
-        public TValue GetOrAdd(TKey key, Converter<TKey, TValue> fnCreate)
+        public TValue GetOrAdd(TKey key, Func<TKey, TValue> fnCreate)
         {
             using (Lock.Write())
             {
@@ -360,7 +360,7 @@ namespace CSharpTest.Net.Collections
         ///     Adds an element with the provided key and value to the <see cref="T:System.Collections.Generic.IDictionary`2" />
         ///     by calling the provided factory method to construct the value if the key is not already present in the collection.
         /// </summary>
-        public bool TryAdd(TKey key, Converter<TKey, TValue> fnCreate)
+        public bool TryAdd(TKey key, Func<TKey, TValue> fnCreate)
         {
             using (Lock.Write())
             {
@@ -398,7 +398,7 @@ namespace CSharpTest.Net.Collections
         ///     exist,
         ///     or updates a key/value pair if the key already exists.
         /// </summary>
-        public TValue AddOrUpdate(TKey key, Converter<TKey, TValue> fnCreate, KeyValueUpdate<TKey, TValue> fnUpdate)
+        public TValue AddOrUpdate(TKey key, Func<TKey, TValue> fnCreate, KeyValueUpdate<TKey, TValue> fnUpdate)
         {
             using (Lock.Write())
             {

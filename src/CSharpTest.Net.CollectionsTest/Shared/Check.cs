@@ -51,7 +51,7 @@ internal static class Check
     {
         if (!condition)
         {
-            ConstructorInfo ci = typeof(TException).GetConstructor(new[] {typeof(string)});
+            ConstructorInfo ci = typeof(TException).GetTypeInfo().GetConstructor(new[] {typeof(string)});
             if (ci != null)
             {
                 TException e = (TException) ci.Invoke(new object[] {message});
@@ -80,7 +80,7 @@ internal static class Check
     {
         if (!condition)
         {
-            ConstructorInfo ci = typeof(TException).GetConstructor(new[] {typeof(string), typeof(Exception)});
+            ConstructorInfo ci = typeof(TException).GetTypeInfo().GetConstructor(new[] {typeof(string), typeof(Exception)});
             if (ci != null)
             {
                 TException e = (TException) ci.Invoke(new object[] {message, innerException});
@@ -197,7 +197,7 @@ internal static class Check
         NotNull(toType);
         if (fromValue == null)
         {
-            if (toType.IsValueType)
+            if (toType.GetTypeInfo().IsValueType)
                 throw new ArgumentException(string.Format("Can not set value of type {0} to null.", toType));
         }
         else
@@ -212,7 +212,7 @@ internal static class Check
     /// </summary>
     public static void IsAssignable(Type toType, Type fromType)
     {
-        if (!NotNull(toType).IsAssignableFrom(NotNull(fromType)))
+        if (!NotNull(toType).GetTypeInfo().IsAssignableFrom(NotNull(fromType)))
             throw new ArgumentException(string.Format("Can not set value of type {0} to a value of type {1}.", toType,
                 fromType));
     }

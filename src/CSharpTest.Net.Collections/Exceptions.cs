@@ -19,24 +19,17 @@ using System;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 
 namespace CSharpTest.Net
 {
     /// <summary> The base class for BPlutTree runtime assertions </summary>
-    [Serializable]
+
     [DebuggerStepThrough]
     [DebuggerNonUserCode]
     [CompilerGenerated]
     [GeneratedCode("CSharpTest.Net.Generators", "1.11.225.410")]
     public abstract class BaseAssertionException : Exception
     {
-        /// <summary> The base class for BPlutTree runtime assertions </summary>
-        protected BaseAssertionException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
         /// <summary> The base class for BPlutTree runtime assertions </summary>
         protected BaseAssertionException(string text)
             : base(AssertionText(text))
@@ -55,11 +48,12 @@ namespace CSharpTest.Net
         {
             if (string.IsNullOrEmpty(message))
                 message = Resources.ExceptionStrings.AssertionFailedException;
-#if DEBUG
-            return string.Format("{0}\r\n    at {0}", new StackFrame(2, true));
-#else
+            //TODO:
+            //#if DEBUG
+            //            return string.Format("{0}\r\n    at {0}", new StackFrame(2, true));
+            //#else
             return message;
-#endif
+            //#endif
         }
     }
 

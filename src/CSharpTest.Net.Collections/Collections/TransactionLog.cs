@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using CSharpTest.Net.Collections.Compatibility;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
 
