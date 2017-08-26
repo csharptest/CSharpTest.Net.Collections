@@ -67,8 +67,7 @@ namespace CSharpTest.Net.Bases
                 if (!_isDisposed)
                 {
                     Dispose(disposing);
-                    if (DisposedEvent != null)
-                        DisposedEvent(this, EventArgs.Empty);
+                    DisposedEvent?.Invoke(this, EventArgs.Empty);
                 }
             }
             finally
@@ -90,7 +89,7 @@ namespace CSharpTest.Net.Bases
         }
 
         /// <summary> Raises the ObjectDisposedException if this object has already been disposed </summary>
-        protected virtual void Assert()
+        protected void Assert()
         {
             if (_isDisposed) throw new ObjectDisposedException(GetType().FullName);
         }

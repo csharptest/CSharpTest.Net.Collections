@@ -70,8 +70,8 @@ namespace CSharpTest.Net.Library.Test
 
         private struct TestValue
         {
-            public Guid Id;
-            public int Count;
+            public Guid Id { get; set; }
+            public int Count { get; set; }
         }
 
         private static readonly Random random = new Random();
