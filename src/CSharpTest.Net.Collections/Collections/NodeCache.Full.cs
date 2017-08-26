@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using CSharpTest.Net.Synchronization;
 
 namespace CSharpTest.Net.Collections
@@ -19,12 +22,16 @@ namespace CSharpTest.Net.Collections
     partial class BPlusTree<TKey, TValue>
     {
         /// <summary> performs a perfect cache of the entire tree </summary>
-        sealed class NodeCacheFull : NodeCacheBase
+        private sealed class NodeCacheFull : NodeCacheBase
         {
-            NodeHandle _root;
+            private NodeHandle _root;
+
             public NodeCacheFull(BPlusTreeOptions<TKey, TValue> options)
                 : base(options)
-            {}
+            {
+            }
+
+            protected override NodeHandle RootHandle => _root;
 
             protected override void LoadStorage()
             {
@@ -39,11 +46,6 @@ namespace CSharpTest.Net.Collections
                     _root.SetCacheEntry(new NodeWithLock(rootNode, LockFactory.Create()));
 
                 Assert(rootNode != null, "Unable to load storage root.");
-            }
-
-            protected override NodeHandle RootHandle
-            {
-                get { return _root; }
             }
 
             public override void ResetCache()
@@ -69,7 +71,7 @@ namespace CSharpTest.Net.Collections
                 NodeWithLock nlck = new NodeWithLock(null, LockFactory.Create());
                 handle.SetCacheEntry(nlck);
                 refobj = nlck;
-                bool acquired = nlck.Lock.TryWrite(base.Options.LockTimeout);
+                bool acquired = nlck.Lock.TryWrite(Options.LockTimeout);
                 DeadlockException.Assert(acquired);
                 return nlck.Lock;
             }
@@ -81,18 +83,18 @@ namespace CSharpTest.Net.Collections
                     child.SetCacheEntry(nlck = new NodeWithLock(null, LockFactory.Create()));
 
                 bool acquired;
-                if(ltype == LockType.Read)
-                    acquired = nlck.Lock.TryRead(base.Options.LockTimeout);
+                if (ltype == LockType.Read)
+                    acquired = nlck.Lock.TryRead(Options.LockTimeout);
                 else
-                    acquired = nlck.Lock.TryWrite(base.Options.LockTimeout);
+                    acquired = nlck.Lock.TryWrite(Options.LockTimeout);
                 DeadlockException.Assert(acquired);
                 try
                 {
                     if (nlck.Node == null)
-                    {
-                        using (new SafeLock<DeadlockException>(nlck, base.Options.LockTimeout))
+                        using (new SafeLock<DeadlockException>(nlck, Options.LockTimeout))
+                        {
                             Storage.TryGetNode(child.StoreHandle, out nlck.Node, NodeSerializer);
-                    }
+                        }
 
                     Assert(nlck.Node != null);
                     return new NodePin(child, nlck.Lock, ltype, ltype, nlck, nlck.Node, null);
@@ -107,7 +109,7 @@ namespace CSharpTest.Net.Collections
                 }
             }
 
-            class NodeWithLock
+            private class NodeWithLock
             {
                 public readonly ILockStrategy Lock;
                 public Node Node;

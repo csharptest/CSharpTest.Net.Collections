@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System.Collections.Generic;
 using CSharpTest.Net.Collections;
 using CSharpTest.Net.Interfaces;
@@ -22,7 +25,8 @@ using NUnit.Framework;
 namespace CSharpTest.Net.BPlusTree.Test
 {
     [TestFixture]
-    public class TestSimpleDictionary : TestDictionary<BPlusTree<int, string>, TestSimpleDictionary.BTreeFactory, int, string>
+    public class
+        TestSimpleDictionary : TestDictionary<BPlusTree<int, string>, TestSimpleDictionary.BTreeFactory, int, string>
     {
         public class BTreeFactory : IFactory<BPlusTree<int, string>>
         {
@@ -30,11 +34,11 @@ namespace CSharpTest.Net.BPlusTree.Test
             {
                 BPlusTree<int, string> tree = new BPlusTree<int, string>(
                     new BPlusTree<int, string>.Options(PrimitiveSerializer.Instance, PrimitiveSerializer.Instance)
-                        {
-                            BTreeOrder = 4,
-                            LockingFactory = new IgnoreLockFactory()
-                        }
-                    );
+                    {
+                        BTreeOrder = 4,
+                        LockingFactory = new IgnoreLockFactory()
+                    }
+                );
                 tree.EnableCount();
                 return tree;
             }
@@ -42,16 +46,16 @@ namespace CSharpTest.Net.BPlusTree.Test
 
         protected override KeyValuePair<int, string>[] GetSample()
         {
-            return new[] 
-                       {
-                           new KeyValuePair<int,string>(1, "1"),
-                           new KeyValuePair<int,string>(3, "3"),
-                           new KeyValuePair<int,string>(5, "5"),
-                           new KeyValuePair<int,string>(7, "7"),
-                           new KeyValuePair<int,string>(9, "9"),
-                           new KeyValuePair<int,string>(11, "11"),
-                           new KeyValuePair<int,string>(13, "13"),
-                       };
+            return new[]
+            {
+                new KeyValuePair<int, string>(1, "1"),
+                new KeyValuePair<int, string>(3, "3"),
+                new KeyValuePair<int, string>(5, "5"),
+                new KeyValuePair<int, string>(7, "7"),
+                new KeyValuePair<int, string>(9, "9"),
+                new KeyValuePair<int, string>(11, "11"),
+                new KeyValuePair<int, string>(13, "13")
+            };
         }
     }
 }

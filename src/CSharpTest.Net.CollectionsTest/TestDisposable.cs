@@ -1,4 +1,5 @@
 ﻿#region Copyright 2010-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,102 +12,108 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
-using System.Collections.Generic;
+using CSharpTest.Net.Bases;
 using NUnit.Framework;
 
 namespace CSharpTest.Net.Library.Test
 {
-	[TestFixture]
-	public partial class TestDisposable
-	{
-		#region TestFixture SetUp/TearDown
-		[TestFixtureSetUp]
-		public virtual void Setup()
-		{
-		}
+    [TestFixture]
+    public class TestDisposable
+    {
+        [TestFixtureSetUp]
+        public virtual void Setup()
+        {
+        }
 
-		[TestFixtureTearDown]
-		public virtual void Teardown()
-		{
-		}
-		#endregion
+        [TestFixtureTearDown]
+        public virtual void Teardown()
+        {
+        }
 
-		class MyDisposable : Bases.Disposable
-		{
-			public int _disposedCount = 0;
-			protected override void Dispose(bool disposing)
-			{
-				_disposedCount++;
-			}
-			public void TestAssert() { Assert(); }
-		}
+        private class MyDisposable : Disposable
+        {
+            public int _disposedCount;
 
-		[Test]
-		public void TestDisposedOnce()
-		{
-			MyDisposable o = new MyDisposable();
-			using (o)
-			{
-				Assert.AreEqual(0, o._disposedCount);
-				o.Dispose();
-				Assert.AreEqual(1, o._disposedCount);
-				o.Dispose();
-				Assert.AreEqual(1, o._disposedCount);
-			}
-			Assert.AreEqual(1, o._disposedCount);
-		}
+            protected override void Dispose(bool disposing)
+            {
+                _disposedCount++;
+            }
 
-		[Test]
-		public void TestDisposedEvent()
-		{
-			MyDisposable o = new MyDisposable();
-			bool disposed = false;
-			o.Disposed += delegate { disposed = true; };
-			o.Dispose();
-			Assert.IsTrue(disposed, "Disposed event failed.");
-		}
+            public void TestAssert()
+            {
+                Assert();
+            }
+        }
 
-		[Test]
-		public void TestRemoveDisposedEvent()
-		{
-			MyDisposable o = new MyDisposable();
-			bool disposed = false;
-			EventHandler handler = delegate { disposed = true; };
-			o.Disposed += handler;
-			o.Disposed -= handler;
-			o.Dispose();
-			Assert.IsFalse(disposed, "Disposed fired?");
-		}
+        [Test]
+        public void TestAssertBeforeDispose()
+        {
+            MyDisposable o = new MyDisposable();
+            o.TestAssert();
+        }
 
-		[Test]
-		public void TestDisposeOnFinalize()
-		{
-			MyDisposable o = new MyDisposable();
-			bool disposed = false;
-			o.Disposed += delegate { disposed = true; };
+        [Test]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void TestAssertWhenDisposed()
+        {
+            MyDisposable o = new MyDisposable();
+            o.Dispose();
+            o.TestAssert();
+        }
 
-			o = null;
-			GC.Collect(0, GCCollectionMode.Forced);
-			GC.WaitForPendingFinalizers();
+        [Test]
+        public void TestDisposedEvent()
+        {
+            MyDisposable o = new MyDisposable();
+            bool disposed = false;
+            o.Disposed += delegate { disposed = true; };
+            o.Dispose();
+            Assert.IsTrue(disposed, "Disposed event failed.");
+        }
 
-			Assert.IsTrue(disposed, "Disposed event failed.");
-		}
+        [Test]
+        public void TestDisposedOnce()
+        {
+            MyDisposable o = new MyDisposable();
+            using (o)
+            {
+                Assert.AreEqual(0, o._disposedCount);
+                o.Dispose();
+                Assert.AreEqual(1, o._disposedCount);
+                o.Dispose();
+                Assert.AreEqual(1, o._disposedCount);
+            }
+            Assert.AreEqual(1, o._disposedCount);
+        }
 
-		[Test]
-		public void TestAssertBeforeDispose()
-		{
-			MyDisposable o = new MyDisposable();
-			o.TestAssert();
-		}
+        [Test]
+        public void TestDisposeOnFinalize()
+        {
+            MyDisposable o = new MyDisposable();
+            bool disposed = false;
+            o.Disposed += delegate { disposed = true; };
 
-		[Test, ExpectedException(typeof(ObjectDisposedException))]
-		public void TestAssertWhenDisposed()
-		{
-			MyDisposable o = new MyDisposable();
-			o.Dispose();
-			o.TestAssert();
-		}
-	}
+            o = null;
+            GC.Collect(0, GCCollectionMode.Forced);
+            GC.WaitForPendingFinalizers();
+
+            Assert.IsTrue(disposed, "Disposed event failed.");
+        }
+
+        [Test]
+        public void TestRemoveDisposedEvent()
+        {
+            MyDisposable o = new MyDisposable();
+            bool disposed = false;
+            EventHandler handler = delegate { disposed = true; };
+            o.Disposed += handler;
+            o.Disposed -= handler;
+            o.Dispose();
+            Assert.IsFalse(disposed, "Disposed fired?");
+        }
+    }
 }

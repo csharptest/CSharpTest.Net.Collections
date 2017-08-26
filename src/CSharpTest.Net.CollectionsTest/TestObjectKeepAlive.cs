@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,8 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
+using System.Threading;
 using CSharpTest.Net.Utils;
 using NUnit.Framework;
 
@@ -21,8 +25,9 @@ namespace CSharpTest.Net.Library.Test
     [TestFixture]
     public class TestObjectKeepAlive
     {
-        static bool _destroyed;
-        class MyObject
+        private static bool _destroyed;
+
+        private class MyObject
         {
             ~MyObject()
             {
@@ -36,7 +41,7 @@ namespace CSharpTest.Net.Library.Test
             WeakReference r;
             ObjectKeepAlive keep = new ObjectKeepAlive(25, 50, TimeSpan.FromSeconds(1));
 
-            if(true)
+            if (true)
             {
                 object target = new MyObject();
                 r = new WeakReference(target);
@@ -96,7 +101,7 @@ namespace CSharpTest.Net.Library.Test
             Assert.IsTrue(r.IsAlive);
             Assert.IsFalse(_destroyed);
 
-            System.Threading.Thread.Sleep(1);
+            Thread.Sleep(1);
 
             GC.GetTotalMemory(true);
             GC.WaitForPendingFinalizers();
@@ -140,8 +145,8 @@ namespace CSharpTest.Net.Library.Test
             Assert.IsFalse(_destroyed);
 
             long start = DateTime.UtcNow.Ticks;
-            while ((start + timeout.Ticks) > DateTime.UtcNow.Ticks)
-                System.Threading.Thread.SpinWait(100);
+            while (start + timeout.Ticks > DateTime.UtcNow.Ticks)
+                Thread.SpinWait(100);
 
             //Time has elapsed, yet it nothing is added, and Tick() is not called, it remains in memory
             GC.GetTotalMemory(true);
@@ -157,6 +162,7 @@ namespace CSharpTest.Net.Library.Test
             Assert.IsFalse(r.IsAlive);
             Assert.IsTrue(_destroyed);
         }
+
         [Test]
         public void TestTruncateLarge()
         {
@@ -166,7 +172,7 @@ namespace CSharpTest.Net.Library.Test
             for (int i = 0; i < 100000; i++)
                 keep.Add(i);
 
-            System.Threading.Thread.Sleep(timeout);
+            Thread.Sleep(timeout);
 
             for (int i = 0; i < 10000; i++)
                 keep.Add(i);

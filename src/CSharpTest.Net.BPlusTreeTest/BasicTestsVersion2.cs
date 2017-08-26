@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,15 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
-using System;
+
 using System.Collections.Generic;
 using CSharpTest.Net.Collections;
 using CSharpTest.Net.Interfaces;
-using CSharpTest.Net.Serialization;
-using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
 using CSharpTest.Net.IO;
+using CSharpTest.Net.Serialization;
+using NUnit.Framework;
 
 namespace CSharpTest.Net.BPlusTree.Test
 {
@@ -36,10 +37,10 @@ namespace CSharpTest.Net.BPlusTree.Test
                     _tempFile.Dispose();
 
                 _tempFile = new TempFile();
-                var options = new BPlusTree<int, string>.OptionsV2(new PrimitiveSerializer(), new PrimitiveSerializer())
+                BPlusTree<int, string>.OptionsV2 options = new BPlusTree<int, string>.OptionsV2(new PrimitiveSerializer(), new PrimitiveSerializer())
                 {
                     CreateFile = CreatePolicy.Always,
-                    FileName = _tempFile.TempPath,
+                    FileName = _tempFile.TempPath
                 }.CalcBTreeOrder(4, 10);
 
                 Assert.AreEqual(FileVersion.Version2, options.FileVersion);
@@ -48,23 +49,9 @@ namespace CSharpTest.Net.BPlusTree.Test
         }
 
         [Test]
-        public void TestLogOptions()
-        {
-            var options = (BPlusTree<int, string>.OptionsV2)Options;
-
-            Assert.AreEqual(ExistingLogAction.Default, options.ExistingLogAction);
-            options.ExistingLogAction = ExistingLogAction.Ignore;
-            Assert.AreEqual(ExistingLogAction.Ignore, options.ExistingLogAction);
-
-            Assert.AreEqual(-1, options.TransactionLogLimit);
-            options.TransactionLogLimit = int.MaxValue;
-            Assert.AreEqual(int.MaxValue, options.TransactionLogLimit);
-        }
-
-        [Test]
         public void TestAutoCommit()
         {
-            var options = (BPlusTree<int, string>.OptionsV2)Options;
+            BPlusTree<int, string>.OptionsV2 options = (BPlusTree<int, string>.OptionsV2) Options;
             options.TransactionLogLimit = 30;
 
             using (BPlusTree<int, string> tree = Create(options))
@@ -124,9 +111,23 @@ namespace CSharpTest.Net.BPlusTree.Test
                 Assert.AreEqual("abc", tree[1]);
                 Assert.IsFalse(tree.ContainsKey(2));
             }
+        }
 
+        [Test]
+        public void TestLogOptions()
+        {
+            BPlusTree<int, string>.OptionsV2 options = (BPlusTree<int, string>.OptionsV2) Options;
+
+            Assert.AreEqual(ExistingLogAction.Default, options.ExistingLogAction);
+            options.ExistingLogAction = ExistingLogAction.Ignore;
+            Assert.AreEqual(ExistingLogAction.Ignore, options.ExistingLogAction);
+
+            Assert.AreEqual(-1, options.TransactionLogLimit);
+            options.TransactionLogLimit = int.MaxValue;
+            Assert.AreEqual(int.MaxValue, options.TransactionLogLimit);
         }
     }
+
     [TestFixture]
     public class BasicTestsVersion2NoCache : BasicTests
     {
@@ -140,12 +141,12 @@ namespace CSharpTest.Net.BPlusTree.Test
                     _tempFile.Dispose();
 
                 _tempFile = new TempFile();
-                var options = new BPlusTree<int, string>.OptionsV2(new PrimitiveSerializer(), new PrimitiveSerializer())
+                BPlusTree<int, string>.OptionsV2 options = new BPlusTree<int, string>.OptionsV2(new PrimitiveSerializer(), new PrimitiveSerializer())
                 {
                     CreateFile = CreatePolicy.Always,
                     CachePolicy = CachePolicy.None,
                     FileName = _tempFile.TempPath,
-                    StoragePerformance = StoragePerformance.Fastest,
+                    StoragePerformance = StoragePerformance.Fastest
                 }.CalcBTreeOrder(4, 10);
 
                 Assert.AreEqual(FileVersion.Version2, options.FileVersion);
@@ -153,8 +154,10 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
     }
+
     [TestFixture]
-    public class DictionaryTestsVersion2 : TestDictionary<BPlusTree<int, string>, TestSimpleDictionary.BTreeFactory, int, string>
+    public class
+        DictionaryTestsVersion2 : TestDictionary<BPlusTree<int, string>, TestSimpleDictionary.BTreeFactory, int, string>
     {
         public class BTreeFactory : IFactory<BPlusTree<int, string>>
         {
@@ -169,10 +172,10 @@ namespace CSharpTest.Net.BPlusTree.Test
                 BPlusTree<int, string> tree = new BPlusTree<int, string>(
                     new BPlusTree<int, string>.OptionsV2(PrimitiveSerializer.Instance, PrimitiveSerializer.Instance)
                     {
-                            CreateFile = CreatePolicy.Always,
-                            FileName = _tempFile.TempPath,
-                        }.CalcBTreeOrder(4, 10)
-                    );
+                        CreateFile = CreatePolicy.Always,
+                        FileName = _tempFile.TempPath
+                    }.CalcBTreeOrder(4, 10)
+                );
                 tree.EnableCount();
                 return tree;
             }

@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,9 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
-using System.IO;
+using System.Diagnostics;
 using System.Threading;
 using CSharpTest.Net.Collections;
 using CSharpTest.Net.Synchronization;
@@ -34,12 +37,15 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 l.ReleaseWrite();
 
                 using (new ThreadedReader(l))
+                {
                     Assert.IsFalse(l.TryWrite(0));
+                }
 
                 Assert.IsTrue(l.TryWrite(0));
                 l.ReleaseWrite();
             }
         }
+
         [Test]
         public void TestWriterBlocksReader()
         {
@@ -49,12 +55,15 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 l.ReleaseRead();
 
                 using (new ThreadedWriter(l))
+                {
                     Assert.IsFalse(l.TryRead(0));
+                }
 
                 Assert.IsTrue(l.TryRead(0));
                 l.ReleaseRead();
             }
         }
+
         [Test]
         public void TestWriterBlocksWriter()
         {
@@ -64,23 +73,29 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 l.ReleaseWrite();
 
                 using (new ThreadedWriter(l))
+                {
                     Assert.IsFalse(l.TryWrite(0));
+                }
 
                 Assert.IsTrue(l.TryWrite(0));
                 l.ReleaseWrite();
             }
         }
+
         [Test]
         public virtual void TestReaderAllowsReader()
         {
             using (ILockStrategy l = LockFactory.Create())
             {
                 using (new ThreadedReader(l))
+                {
                     Assert.IsTrue(l.TryRead(0));
+                }
 
                 l.ReleaseRead();
             }
         }
+
         [Test]
         public virtual void TestWriteToReadRecursion()
         {
@@ -89,9 +104,11 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 using (l.Write())
                 using (l.Read())
                 using (l.Read())
-                { }
+                {
+                }
             }
         }
+
         [Test]
         public virtual void TestWriteToWriteRecursion()
         {
@@ -107,9 +124,11 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 using (l.Write())
                 using (l.Write())
                 using (l.Read())
-                { }
+                {
+                }
             }
         }
+
         [Test]
         public void FullContentionTest()
         {
@@ -119,29 +138,27 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             int errors = 0;
             using (WorkQueue worker = new WorkQueue(10))
             {
-                worker.OnError += delegate(object o, ErrorEventArgs e) { errors++; };
+                worker.OnError += delegate { errors++; };
                 for (int job = 0; job < 10; job++)
-                {
                     worker.Enqueue(
-                        delegate()
+                        delegate
+                        {
+                            Random r = new Random();
+                            while (!stop.WaitOne(0, false))
                             {
-                                Random r = new Random();
-                                while (!stop.WaitOne(0, false))
+                                Interlocked.Increment(ref iterations[0]);
+                                for (int i = 0; i < 100; i++)
                                 {
-                                    Interlocked.Increment(ref iterations[0]);
-                                    for (int i = 0; i < 100; i++)
-                                    {
-                                        int val;
-                                        int tmp = r.Next(100);
-                                        if (i%5 == 0)
-                                            data[tmp] = tmp;
-                                        else if (data.TryGetValue(tmp, out val))
-                                            Assert.AreEqual(tmp, val);
-                                    }
+                                    int val;
+                                    int tmp = r.Next(100);
+                                    if (i % 5 == 0)
+                                        data[tmp] = tmp;
+                                    else if (data.TryGetValue(tmp, out val))
+                                        Assert.AreEqual(tmp, val);
                                 }
                             }
-                        );
-                }
+                        }
+                    );
 
                 Thread.Sleep(100);
                 stop.Set();
@@ -149,29 +166,40 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
 
             Assert.AreEqual(0, errors);
-            System.Diagnostics.Trace.TraceInformation("Iterations completed: {0} * 100", iterations[0]);
+            Trace.TraceInformation("Iterations completed: {0} * 100", iterations[0]);
         }
-        [Test, ExpectedException(typeof(TimeoutException))]
+
+        [Test]
+        [ExpectedException(typeof(TimeoutException))]
         public void TestThreadedReadTimeout()
         {
             using (ILockStrategy l = LockFactory.Create())
             {
                 using (new ThreadedWriter(l))
                 using (l.Read(0))
-                { }
+                {
+                }
             }
         }
-        [Test, ExpectedException]
+
+        [Test]
+        [ExpectedException]
         public void TestExcessiveReleaseWrite()
         {
             using (ILockStrategy l = LockFactory.Create())
+            {
                 l.ReleaseWrite();
+            }
         }
-        [Test, ExpectedException]
+
+        [Test]
+        [ExpectedException]
         public void TestExcessiveReleaseRead()
         {
             using (ILockStrategy l = LockFactory.Create())
+            {
                 l.ReleaseRead();
+            }
         }
     }
 }

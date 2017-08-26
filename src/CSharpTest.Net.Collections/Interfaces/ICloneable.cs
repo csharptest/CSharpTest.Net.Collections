@@ -1,4 +1,5 @@
 ﻿#region Copyright 2010-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,20 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
-using System.Collections.Generic;
 
 namespace CSharpTest.Net.Interfaces
 {
     /// <summary>
-    /// Provides a strongly typed shallow copy of the current object
+    ///     Provides a strongly typed shallow copy of the current object
     /// </summary>
     public interface ICloneable<T> : ICloneable
         where T : ICloneable<T>
     {
         /// <summary>
-        /// Returns a shallow clone of this object.
+        ///     Returns a shallow clone of this object.
         /// </summary>
         new T Clone();
     }

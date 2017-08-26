@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,21 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
+using System.IO;
 using CSharpTest.Net.Serialization;
 
 namespace CSharpTest.Net.BPlusTree.Test.SampleTypes
 {
-    class KeyInfoSerializer : ISerializer<KeyInfo>
+    internal class KeyInfoSerializer : ISerializer<KeyInfo>
     {
-        public KeyInfo ReadFrom(System.IO.Stream stream)
+        public KeyInfo ReadFrom(Stream stream)
         {
             return new KeyInfo(
                 PrimitiveSerializer.Guid.ReadFrom(stream),
                 VariantNumberSerializer.Int32.ReadFrom(stream)
-                );
+            );
         }
-        public void WriteTo(KeyInfo value, System.IO.Stream stream)
+
+        public void WriteTo(KeyInfo value, Stream stream)
         {
             PrimitiveSerializer.Guid.WriteTo(value.UID, stream);
             VariantNumberSerializer.Int32.WriteTo(value.Version, stream);

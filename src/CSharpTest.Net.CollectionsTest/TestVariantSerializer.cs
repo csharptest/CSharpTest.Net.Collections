@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 using System.IO;
 using CSharpTest.Net.Serialization;
@@ -27,7 +30,7 @@ namespace CSharpTest.Net.Library.Test
 
         private void ReadWrite<T>(T value)
         {
-            ISerializer<T> ser = (ISerializer<T>)_serializer;
+            ISerializer<T> ser = (ISerializer<T>) _serializer;
             using (MemoryStream ms = new MemoryStream())
             {
                 ser.WriteTo(value, ms);
@@ -52,21 +55,21 @@ namespace CSharpTest.Net.Library.Test
         }
 
         [Test]
-        public void TestSerializeUInt()
-        {
-            ReadWrite(uint.MinValue);
-            ReadWrite(uint.MaxValue);
-            for (uint i = 1; i != 0; i *= 2)
-                ReadWrite(i);
-        }
-
-        [Test]
         public void TestSerializeLong()
         {
             ReadWrite(-1L);
             ReadWrite(long.MinValue);
             ReadWrite(long.MaxValue);
             for (long i = 1; i != 0; i *= 2)
+                ReadWrite(i);
+        }
+
+        [Test]
+        public void TestSerializeUInt()
+        {
+            ReadWrite(uint.MinValue);
+            ReadWrite(uint.MaxValue);
+            for (uint i = 1; i != 0; i *= 2)
                 ReadWrite(i);
         }
 
@@ -78,6 +81,5 @@ namespace CSharpTest.Net.Library.Test
             for (ulong i = 1; i != 0; i *= 2)
                 ReadWrite(i);
         }
-
     }
 }

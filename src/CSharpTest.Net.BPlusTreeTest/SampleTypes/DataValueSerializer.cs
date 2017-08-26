@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,30 +12,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
+using System.IO;
 using CSharpTest.Net.Crypto;
 using CSharpTest.Net.Serialization;
 using NUnit.Framework;
 
 namespace CSharpTest.Net.BPlusTree.Test.SampleTypes
 {
-    class DataValueSerializer : ISerializer<DataValue>
+    internal class DataValueSerializer : ISerializer<DataValue>
     {
-        readonly KeyInfoSerializer _keySerializer = new KeyInfoSerializer();
+        private readonly KeyInfoSerializer _keySerializer = new KeyInfoSerializer();
 
-        public DataValue ReadFrom(System.IO.Stream stream)
+        public DataValue ReadFrom(Stream stream)
         {
             DataValue value = new DataValue(
                 _keySerializer.ReadFrom(stream),
                 PrimitiveSerializer.Bytes.ReadFrom(stream)
-                );
+            );
 
             Hash cmpHash = Hash.FromString(PrimitiveSerializer.String.ReadFrom(stream));
             Assert.AreEqual(value.Hash, cmpHash);
             return value;
         }
 
-        public void WriteTo(DataValue value, System.IO.Stream stream)
+        public void WriteTo(DataValue value, Stream stream)
         {
             _keySerializer.WriteTo(value.Key, stream);
             PrimitiveSerializer.Bytes.WriteTo(value.Bytes, stream);

@@ -1,4 +1,5 @@
 #region Copyright 2009-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -27,4 +30,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: ObfuscateAssembly(false)]
-[assembly: ComVisibleAttribute(false)]
+[assembly: ComVisible(false)]

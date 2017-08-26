@@ -1,4 +1,5 @@
 ﻿#region Copyright 2010-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,58 +12,78 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using CSharpTest.Net.Bases;
-using NUnit.Framework;
-using System.Collections.Generic;
 using CSharpTest.Net.Collections;
-using System.Collections;
+using NUnit.Framework;
 
 #pragma warning disable 1591
 
 namespace CSharpTest.Net.Library.Test
 {
-	[TestFixture]
-	[Category("TestSetList")]
-	public partial class TestSetList
-	{
-		[Test, Explicit]
-		public void BenchmarkTest()
-		{
-			this.TestBasics();
-			this.TestICollection();
-			this.TestIList();
-			this.TestIntersectUnion();
-			this.TestSubsets();
+    [TestFixture]
+    [Category("TestSetList")]
+    public class TestSetList
+    {
+        private class MyValue : Comparable<MyValue>
+        {
+            public readonly int Value;
 
-			long temp = 0;
-			int repeat = 10;
-			for (int i = 0; i < repeat; i++)
-			{
-				Stopwatch sw = new Stopwatch();
-				sw.Start();
+            public MyValue(int value)
+            {
+                Value = value;
+            }
 
-				for (int i2 = 0; i2 < 10000; i2++)
-				{
-					this.TestBasics();
-					this.TestICollection();
-					this.TestIList();
-					this.TestIntersectUnion();
-					this.TestSubsets();
-				}
+            protected override int HashCode => Value.GetHashCode();
 
-				sw.Stop();
-				Console.Error.WriteLine("Benchmark: {0}", sw.ElapsedMilliseconds);
-				temp += sw.ElapsedMilliseconds;
-			}
+            public override int CompareTo(MyValue other)
+            {
+                return Value.CompareTo(other.Value);
+            }
+        }
 
-			Console.Error.WriteLine("Average over {0}: {1}", repeat, temp / repeat);
-		}
+        [Test]
+        [Explicit]
+        public void BenchmarkTest()
+        {
+            TestBasics();
+            TestICollection();
+            TestIList();
+            TestIntersectUnion();
+            TestSubsets();
+
+            long temp = 0;
+            int repeat = 10;
+            for (int i = 0; i < repeat; i++)
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+
+                for (int i2 = 0; i2 < 10000; i2++)
+                {
+                    TestBasics();
+                    TestICollection();
+                    TestIList();
+                    TestIntersectUnion();
+                    TestSubsets();
+                }
+
+                sw.Stop();
+                Console.Error.WriteLine("Benchmark: {0}", sw.ElapsedMilliseconds);
+                temp += sw.ElapsedMilliseconds;
+            }
+
+            Console.Error.WriteLine("Average over {0}: {1}", repeat, temp / repeat);
+        }
 
 
-		[Test]
+        [Test]
         public void TestBasics()
         {
             SetList<int> list = new SetList<int>();
@@ -79,7 +100,7 @@ namespace CSharpTest.Net.Library.Test
             Assert.AreEqual(513, list.Count);
 
             list.Clear();
-            list.AddRange(new int[] { 5, 10, 20 });
+            list.AddRange(new[] {5, 10, 20});
             list.AddRange(new int[] { });
 
             Assert.AreEqual(3, list.Count);
@@ -96,7 +117,7 @@ namespace CSharpTest.Net.Library.Test
             list.Add(10, out pos);
             Assert.AreEqual(1, pos);
             Assert.AreEqual(2, list.Count);
-            
+
             int[] items = new int[2];
             list.CopyTo(items, 0);
             Assert.AreEqual(5, items[0]);
@@ -114,57 +135,45 @@ namespace CSharpTest.Net.Library.Test
             Assert.AreEqual(10, tmp[1]);
         }
 
-		class MyValue : Comparable<MyValue>
-		{
-			public MyValue(int value) { Value = value; }
-			public readonly int Value;
-			public override int CompareTo(MyValue other) { return Value.CompareTo(other.Value); }
-			protected override int HashCode { get { return Value.GetHashCode(); } }
-		}
+        [Test]
+        public void TestCTors()
+        {
+            SetList<string> list = new SetList<string>((IEnumerable<string>) new[] {"a", "B"});
+            Assert.AreEqual("a,B", string.Join(",", list.ToArray()));
 
-		[Test]
-		public void TestReplaceOne()
-		{
-			MyValue one = new MyValue(1);
-			MyValue two = new MyValue(2);
-			SetList<MyValue> set = new SetList<MyValue>();
-			set.Add(one);
-			set.Add(two);
+            list = new SetList<string>(2);
+            Assert.AreEqual("", string.Join(",", list.ToArray()));
+            list.Add("a");
+            list.Add("B");
+            Assert.AreEqual("a,B", string.Join(",", list.ToArray()));
 
-			Assert.IsTrue(Object.ReferenceEquals(one, set[0]));
-			Assert.IsTrue(set.Replace(new MyValue(1)));
-			Assert.IsFalse(Object.ReferenceEquals(one, set[0]));
+            list = new SetList<string>(2, StringComparer.Ordinal);
+            Assert.AreEqual("", string.Join(",", list.ToArray()));
+            list.Add("a");
+            list.Add("B");
+            Assert.AreEqual("B,a", string.Join(",", list.ToArray()));
 
-			Assert.AreEqual(2, set.Count);
-			Assert.IsFalse(set.Replace(new MyValue(3))); //not replaced, then added
-			Assert.AreEqual(3, set.Count);
-		}
+            list = new SetList<string>(2, StringComparer.OrdinalIgnoreCase);
+            list.Add("a");
+            list.Add("B");
+            Assert.AreEqual("a,B", string.Join(",", list.ToArray()));
 
-		[Test]
-		public void TestReplaceAll()
-		{
-			MyValue one = new MyValue(1);
-			MyValue two = new MyValue(2);
-			SetList<MyValue> set = new SetList<MyValue>();
-			set.Add(one);
-			set.Add(two);
+            list = new SetList<string>(new[] {"B", "a"}, StringComparer.Ordinal);
+            Assert.AreEqual("B,a", string.Join(",", list.ToArray()));
 
-			Assert.AreEqual(2, set.Count);
-			Assert.IsTrue(Object.ReferenceEquals(one, set[0]));
-			Assert.IsTrue(set.ReplaceAll(new MyValue[] { new MyValue(1), new MyValue(3) }));
-			Assert.IsFalse(Object.ReferenceEquals(one, set[0]));
-			Assert.AreEqual(3, set.Count);
-		}
+            list = new SetList<string>((IEnumerable<string>) new[] {"B", "a"}, StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual("a,B", string.Join(",", list.ToArray()));
+        }
 
         [Test]
         public void TestICollection()
         {
             SetList<int> list = new SetList<int>();
-            list.AddRange(new int[] { 5, 10, 20 });
+            list.AddRange(new[] {5, 10, 20});
 
             ICollection coll = list;
             Assert.IsFalse(coll.IsSynchronized);
-            Assert.IsTrue(Object.ReferenceEquals(coll, coll.SyncRoot));
+            Assert.IsTrue(ReferenceEquals(coll, coll.SyncRoot));
 
             int[] copy = new int[3];
             coll.CopyTo(copy, 0);
@@ -179,26 +188,6 @@ namespace CSharpTest.Net.Library.Test
             Assert.AreEqual(5, tmp[0]);
             Assert.AreEqual(10, tmp[1]);
             Assert.AreEqual(20, tmp[2]);
-        }
-
-        [Test]
-        public void TestIntersectUnion()
-        {
-            SetList<int> lista = new SetList<int>(new int[] { 5, 10, 20 });
-            SetList<int> listb = new SetList<int>(new int[] { 2, 4, 6, 8, 10 });
-
-            SetList<int> union = lista.UnionWith(listb);
-            Assert.AreEqual(7, union.Count);
-            foreach (int i in union)
-                Assert.IsTrue(lista.Contains(i) || listb.Contains(i));
-
-            Assert.AreEqual(0, union.IndexOf(2));
-            Assert.AreEqual(6, union.IndexOf(20));
-
-            SetList<int> inter = lista.IntersectWith(listb);
-            Assert.AreEqual(1, inter.Count);
-            foreach (int i in inter)
-                Assert.AreEqual(10, i);
         }
 
         [Test]
@@ -222,7 +211,7 @@ namespace CSharpTest.Net.Library.Test
             Assert.AreEqual(0, list.IndexOf("B"));
             Assert.AreEqual(1, list.IndexOf("a"));
 
-            list = new SetList<string>((IEnumerable<string>)list, StringComparer.OrdinalIgnoreCase);
+            list = new SetList<string>((IEnumerable<string>) list, StringComparer.OrdinalIgnoreCase);
             Assert.AreEqual(2, list.Count);
             Assert.AreEqual("a", list[0]);
             Assert.AreEqual("B", list[1]);
@@ -240,7 +229,7 @@ namespace CSharpTest.Net.Library.Test
             Assert.IsFalse(list.Contains("b"));
             Assert.IsFalse(list.Contains("B"));
 
-            list = (IList)((ICloneable)list).Clone();
+            list = (IList) ((ICloneable) list).Clone();
             Assert.AreEqual(typeof(SetList<string>), list.GetType());
             Assert.IsTrue(list.Contains("a"));
             Assert.IsFalse(list.Contains("b"));
@@ -248,23 +237,77 @@ namespace CSharpTest.Net.Library.Test
         }
 
         [Test]
+        public void TestIntersectUnion()
+        {
+            SetList<int> lista = new SetList<int>(new[] {5, 10, 20});
+            SetList<int> listb = new SetList<int>(new[] {2, 4, 6, 8, 10});
+
+            SetList<int> union = lista.UnionWith(listb);
+            Assert.AreEqual(7, union.Count);
+            foreach (int i in union)
+                Assert.IsTrue(lista.Contains(i) || listb.Contains(i));
+
+            Assert.AreEqual(0, union.IndexOf(2));
+            Assert.AreEqual(6, union.IndexOf(20));
+
+            SetList<int> inter = lista.IntersectWith(listb);
+            Assert.AreEqual(1, inter.Count);
+            foreach (int i in inter)
+                Assert.AreEqual(10, i);
+        }
+
+        [Test]
+        public void TestReplaceAll()
+        {
+            MyValue one = new MyValue(1);
+            MyValue two = new MyValue(2);
+            SetList<MyValue> set = new SetList<MyValue>();
+            set.Add(one);
+            set.Add(two);
+
+            Assert.AreEqual(2, set.Count);
+            Assert.IsTrue(ReferenceEquals(one, set[0]));
+            Assert.IsTrue(set.ReplaceAll(new[] {new MyValue(1), new MyValue(3)}));
+            Assert.IsFalse(ReferenceEquals(one, set[0]));
+            Assert.AreEqual(3, set.Count);
+        }
+
+        [Test]
+        public void TestReplaceOne()
+        {
+            MyValue one = new MyValue(1);
+            MyValue two = new MyValue(2);
+            SetList<MyValue> set = new SetList<MyValue>();
+            set.Add(one);
+            set.Add(two);
+
+            Assert.IsTrue(ReferenceEquals(one, set[0]));
+            Assert.IsTrue(set.Replace(new MyValue(1)));
+            Assert.IsFalse(ReferenceEquals(one, set[0]));
+
+            Assert.AreEqual(2, set.Count);
+            Assert.IsFalse(set.Replace(new MyValue(3))); //not replaced, then added
+            Assert.AreEqual(3, set.Count);
+        }
+
+        [Test]
         public void TestSubsets()
         {
-            SetList<int> lista = new SetList<int>(new int[] { 5, 10, 20 });
-            SetList<int> listb = new SetList<int>(new int[] { 2, 4, 6, 8, 10 });
+            SetList<int> lista = new SetList<int>(new[] {5, 10, 20});
+            SetList<int> listb = new SetList<int>(new[] {2, 4, 6, 8, 10});
 
-            SetList<int>subt = lista.SubtractSet(listb);
+            SetList<int> subt = lista.SubtractSet(listb);
             Assert.IsFalse(subt.IsEqualTo(lista));
             Assert.IsTrue(subt.Contains(5));
             Assert.IsFalse(subt.Contains(10));
-            Assert.IsTrue(subt.IsEqualTo(new SetList<int>(new int[] { 5, 20 })));
+            Assert.IsTrue(subt.IsEqualTo(new SetList<int>(new[] {5, 20})));
 
             Assert.IsTrue(subt.IsSubsetOf(lista));
             Assert.IsFalse(subt.IsSupersetOf(lista));
 
             Assert.IsTrue(lista.IsSupersetOf(subt));
             Assert.IsFalse(lista.IsSubsetOf(subt));
-            
+
             SetList<int> copy = lista.Clone();
             copy.RemoveAll(listb);
             Assert.IsFalse(copy.IsEqualTo(lista));
@@ -274,47 +317,33 @@ namespace CSharpTest.Net.Library.Test
             Assert.IsFalse(copy.IsEqualTo(lista));
 
             SetList<int> xor = lista.ExclusiveOrWith(listb);
-            Assert.IsTrue(xor.IsEqualTo(new SetList<int>(new int[] { 2, 4, 6, 8, 5, 20 })));
+            Assert.IsTrue(xor.IsEqualTo(new SetList<int>(new[] {2, 4, 6, 8, 5, 20})));
 
             SetList<int> comp = lista.ComplementOf(listb);
-            Assert.IsTrue(comp.IsEqualTo(new SetList<int>(new int[] { 2, 4, 6, 8 })));
+            Assert.IsTrue(comp.IsEqualTo(new SetList<int>(new[] {2, 4, 6, 8})));
         }
-
-        [Test]
-        public void TestCTors()
-        {
-            SetList<string> list = new SetList<string>((IEnumerable<string>)new string[] { "a", "B" });
-            Assert.AreEqual("a,B", String.Join(",", list.ToArray())); 
-            
-            list = new SetList<string>(2);
-            Assert.AreEqual("", String.Join(",", list.ToArray()));
-            list.Add("a");
-            list.Add("B");
-            Assert.AreEqual("a,B", String.Join(",", list.ToArray()));
-
-            list = new SetList<string>(2, StringComparer.Ordinal);
-            Assert.AreEqual("", String.Join(",", list.ToArray()));
-            list.Add("a");
-            list.Add("B");
-            Assert.AreEqual("B,a", String.Join(",", list.ToArray()));
-
-            list = new SetList<string>(2, StringComparer.OrdinalIgnoreCase);
-            list.Add("a");
-            list.Add("B");
-            Assert.AreEqual("a,B", String.Join(",", list.ToArray()));
-
-            list = new SetList<string>(new string[] { "B", "a" }, StringComparer.Ordinal);
-            Assert.AreEqual("B,a", String.Join(",", list.ToArray()));
-
-            list = new SetList<string>((IEnumerable<string>)new string[] { "B", "a" }, StringComparer.OrdinalIgnoreCase);
-            Assert.AreEqual("a,B", String.Join(",", list.ToArray()));
-        }
-	}
+    }
 
     [TestFixture]
     [Category("TestSetList")]
-    public partial class TestSetListNegative
+    public class TestSetListNegative
     {
+        [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        public void TestBadArgumentTypeForAdd()
+        {
+            IList list = new SetList<string>();
+            list.Add(5);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        public void TestBadArgumentTypeForRemove()
+        {
+            IList list = new SetList<string>();
+            list.Remove(5);
+        }
+
         [Test]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void TestBadCapacity()
@@ -324,17 +353,17 @@ namespace CSharpTest.Net.Library.Test
 
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void TestBadEnumerable()
+        public void TestBadComparer()
         {
-            IEnumerable<string> novalue = null;
+            IComparer<string> novalue = null;
             IList list = new SetList<string>(novalue);
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void TestBadComparer()
+        public void TestBadEnumerable()
         {
-            IComparer<string> novalue = null;
+            IEnumerable<string> novalue = null;
             IList list = new SetList<string>(novalue);
         }
 
@@ -372,22 +401,6 @@ namespace CSharpTest.Net.Library.Test
             list.Add("");
             Assert.AreEqual("", list[0]);
             list[0] = "error";
-        }
-
-        [Test]
-        [ExpectedException(typeof(ArgumentException))]
-        public void TestBadArgumentTypeForAdd()
-        {
-            IList list = new SetList<string>();
-            list.Add(5);
-        }
-
-        [Test]
-        [ExpectedException(typeof(ArgumentException))]
-        public void TestBadArgumentTypeForRemove()
-        {
-            IList list = new SetList<string>();
-            list.Remove(5);
         }
     }
 }

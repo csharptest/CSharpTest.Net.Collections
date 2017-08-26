@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,14 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 using System.IO;
 
 namespace CSharpTest.Net.Serialization
 {
     /// <summary>
-    /// Provides simple implementations of ISerializer&lt;T> for the primitive .Net types.
+    ///     Provides simple implementations of ISerializer&lt;T> for the primitive .Net types.
     /// </summary>
     public class PrimitiveSerializer :
         ISerializer<string>,
@@ -42,46 +45,67 @@ namespace CSharpTest.Net.Serialization
         ISerializer<UIntPtr>
     {
         #region Static singleton accessors
+
         /// <summary> Gets a singleton of the PrimitiveSerializer </summary>
         public static readonly PrimitiveSerializer Instance = new PrimitiveSerializer();
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<string> String = LimitedSerializer.Unlimited;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<bool> Boolean = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<byte> Byte = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<sbyte> SByte = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<byte[]> Bytes = LimitedSerializer.Unlimited;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<char> Char = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<DateTime> DateTime = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<TimeSpan> TimeSpan = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<short> Int16 = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<ushort> UInt16 = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<int> Int32 = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<uint> UInt32 = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<long> Int64 = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<ulong> UInt64 = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<double> Double = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<float> Float = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<Guid> Guid = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<IntPtr> IntPtr = Instance;
+
         /// <summary> Gets a typed version of the PrimitiveSerializer </summary>
         public static readonly ISerializer<UIntPtr> UIntPtr = Instance;
+
         #endregion
 
         #region ISerializer<string> Members
@@ -97,6 +121,7 @@ namespace CSharpTest.Net.Serialization
         }
 
         #endregion
+
         #region ISerializer<bool> Members
 
         void ISerializer<bool>.WriteTo(bool value, Stream stream)
@@ -114,6 +139,7 @@ namespace CSharpTest.Net.Serialization
         }
 
         #endregion
+
         #region ISerializer<byte> Members
 
         void ISerializer<byte>.WriteTo(byte value, Stream stream)
@@ -125,37 +151,41 @@ namespace CSharpTest.Net.Serialization
         {
             int result = stream.ReadByte();
             Check.Assert<InvalidDataException>(result != -1);
-            return unchecked((byte)result);
+            return unchecked((byte) result);
         }
 
         #endregion
+
         #region ISerializer<sbyte> Members
 
         void ISerializer<sbyte>.WriteTo(sbyte value, Stream stream)
         {
-            stream.WriteByte(unchecked((byte)value));
+            stream.WriteByte(unchecked((byte) value));
         }
 
         sbyte ISerializer<sbyte>.ReadFrom(Stream stream)
         {
             int result = stream.ReadByte();
             Check.Assert<InvalidDataException>(result != -1);
-            return unchecked((sbyte)result);
+            return unchecked((sbyte) result);
         }
 
         #endregion
+
         #region ISerializer<byte[]> Members
 
         void ISerializer<byte[]>.WriteTo(byte[] value, Stream stream)
         {
             Bytes.WriteTo(value, stream);
         }
+
         byte[] ISerializer<byte[]>.ReadFrom(Stream stream)
         {
             return Bytes.ReadFrom(stream);
         }
 
         #endregion
+
         #region ISerializer<char> Members
 
         void ISerializer<char>.WriteTo(char value, Stream stream)
@@ -165,57 +195,61 @@ namespace CSharpTest.Net.Serialization
 
         char ISerializer<char>.ReadFrom(Stream stream)
         {
-            return unchecked((char)VariantNumberSerializer.Int32.ReadFrom(stream));
+            return unchecked((char) VariantNumberSerializer.Int32.ReadFrom(stream));
         }
 
         #endregion
+
         #region ISerializer<DateTime> Members
 
         void ISerializer<DateTime>.WriteTo(DateTime value, Stream stream)
         {
-            ((ISerializer<long>)this).WriteTo(value.ToBinary(), stream);
+            ((ISerializer<long>) this).WriteTo(value.ToBinary(), stream);
         }
 
         DateTime ISerializer<DateTime>.ReadFrom(Stream stream)
         {
-            return System.DateTime.FromBinary(((ISerializer<long>)this).ReadFrom(stream));
+            return System.DateTime.FromBinary(((ISerializer<long>) this).ReadFrom(stream));
         }
 
         #endregion
+
         #region ISerializer<TimeSpan> Members
 
         void ISerializer<TimeSpan>.WriteTo(TimeSpan value, Stream stream)
         {
-            ((ISerializer<long>)this).WriteTo(value.Ticks, stream);
+            ((ISerializer<long>) this).WriteTo(value.Ticks, stream);
         }
 
         TimeSpan ISerializer<TimeSpan>.ReadFrom(Stream stream)
         {
-            return new TimeSpan(((ISerializer<long>)this).ReadFrom(stream));
+            return new TimeSpan(((ISerializer<long>) this).ReadFrom(stream));
         }
 
         #endregion
+
         #region ISerializer<short> Members
 
         void ISerializer<short>.WriteTo(short value, Stream stream)
         {
-            ((ISerializer<ushort>)this).WriteTo(unchecked((ushort)value), stream);
+            ((ISerializer<ushort>) this).WriteTo(unchecked((ushort) value), stream);
         }
 
         short ISerializer<short>.ReadFrom(Stream stream)
         {
-            return unchecked((short)((ISerializer<ushort>)this).ReadFrom(stream));
+            return unchecked((short) ((ISerializer<ushort>) this).ReadFrom(stream));
         }
 
         #endregion
+
         #region ISerializer<ushort> Members
 
         void ISerializer<ushort>.WriteTo(ushort value, Stream stream)
         {
             unchecked
             {
-                stream.WriteByte((byte)(value >> 8));
-                stream.WriteByte((byte)value);
+                stream.WriteByte((byte) (value >> 8));
+                stream.WriteByte((byte) value);
             }
         }
 
@@ -226,34 +260,36 @@ namespace CSharpTest.Net.Serialization
                 int b1 = stream.ReadByte();
                 int b2 = stream.ReadByte();
                 Check.Assert<InvalidDataException>(b2 != -1);
-                return (ushort)((b1 << 8) | b2);
+                return (ushort) ((b1 << 8) | b2);
             }
         }
 
         #endregion
+
         #region ISerializer<int> Members
 
         void ISerializer<int>.WriteTo(int value, Stream stream)
         {
-            ((ISerializer<uint>)this).WriteTo(unchecked((uint)value), stream);
+            ((ISerializer<uint>) this).WriteTo(unchecked((uint) value), stream);
         }
 
         int ISerializer<int>.ReadFrom(Stream stream)
         {
-            return unchecked((int)((ISerializer<uint>)this).ReadFrom(stream));
+            return unchecked((int) ((ISerializer<uint>) this).ReadFrom(stream));
         }
 
         #endregion
+
         #region ISerializer<uint> Members
 
         void ISerializer<uint>.WriteTo(uint value, Stream stream)
         {
             unchecked
             {
-                stream.WriteByte((byte)(value >> 24));
-                stream.WriteByte((byte)(value >> 16));
-                stream.WriteByte((byte)(value >> 8));
-                stream.WriteByte((byte)value);
+                stream.WriteByte((byte) (value >> 24));
+                stream.WriteByte((byte) (value >> 16));
+                stream.WriteByte((byte) (value >> 8));
+                stream.WriteByte((byte) value);
             }
         }
 
@@ -267,43 +303,43 @@ namespace CSharpTest.Net.Serialization
                 int b4 = stream.ReadByte();
 
                 Check.Assert<InvalidDataException>(b4 != -1);
-                return (
-                    (((uint)b1) << 24) |
-                    (((uint)b2) << 16) |
-                    (((uint)b3) << 8) |
-                    (((uint)b4) << 0)
-                    );
+                return ((uint) b1 << 24) |
+                       ((uint) b2 << 16) |
+                       ((uint) b3 << 8) |
+                       ((uint) b4 << 0);
             }
         }
 
         #endregion
+
         #region ISerializer<long> Members
 
         void ISerializer<long>.WriteTo(long value, Stream stream)
         {
-            ((ISerializer<ulong>)this).WriteTo(unchecked((ulong)value), stream);
+            ((ISerializer<ulong>) this).WriteTo(unchecked((ulong) value), stream);
         }
 
         long ISerializer<long>.ReadFrom(Stream stream)
         {
-            return unchecked((long)((ISerializer<ulong>)this).ReadFrom(stream));
+            return unchecked((long) ((ISerializer<ulong>) this).ReadFrom(stream));
         }
 
         #endregion
+
         #region ISerializer<ulong> Members
 
         void ISerializer<ulong>.WriteTo(ulong value, Stream stream)
         {
             unchecked
             {
-                stream.WriteByte((byte)(value >> 56));
-                stream.WriteByte((byte)(value >> 48));
-                stream.WriteByte((byte)(value >> 40));
-                stream.WriteByte((byte)(value >> 32));
-                stream.WriteByte((byte)(value >> 24));
-                stream.WriteByte((byte)(value >> 16));
-                stream.WriteByte((byte)(value >> 8));
-                stream.WriteByte((byte)value);
+                stream.WriteByte((byte) (value >> 56));
+                stream.WriteByte((byte) (value >> 48));
+                stream.WriteByte((byte) (value >> 40));
+                stream.WriteByte((byte) (value >> 32));
+                stream.WriteByte((byte) (value >> 24));
+                stream.WriteByte((byte) (value >> 16));
+                stream.WriteByte((byte) (value >> 8));
+                stream.WriteByte((byte) value);
             }
         }
 
@@ -320,46 +356,47 @@ namespace CSharpTest.Net.Serialization
                 int b7 = stream.ReadByte();
                 int b8 = stream.ReadByte();
                 Check.Assert<InvalidDataException>(b8 != -1);
-                return (
-                    (((ulong)b1) << 56) |
-                    (((ulong)b2) << 48) |
-                    (((ulong)b3) << 40) |
-                    (((ulong)b4) << 32) |
-                    (((ulong)b5) << 24) |
-                    (((ulong)b6) << 16) |
-                    (((ulong)b7) << 8) |
-                    (((ulong)b8) << 0)
-                    );
+                return ((ulong) b1 << 56) |
+                       ((ulong) b2 << 48) |
+                       ((ulong) b3 << 40) |
+                       ((ulong) b4 << 32) |
+                       ((ulong) b5 << 24) |
+                       ((ulong) b6 << 16) |
+                       ((ulong) b7 << 8) |
+                       ((ulong) b8 << 0);
             }
         }
 
         #endregion
+
         #region ISerializer<double> Members
 
         void ISerializer<double>.WriteTo(double value, Stream stream)
         {
-            ((ISerializer<long>)this).WriteTo(BitConverter.DoubleToInt64Bits(value), stream);
+            ((ISerializer<long>) this).WriteTo(BitConverter.DoubleToInt64Bits(value), stream);
         }
 
         double ISerializer<double>.ReadFrom(Stream stream)
         {
-            return BitConverter.Int64BitsToDouble(((ISerializer<long>)this).ReadFrom(stream));
+            return BitConverter.Int64BitsToDouble(((ISerializer<long>) this).ReadFrom(stream));
         }
 
         #endregion
+
         #region ISerializer<float> Members
 
         void ISerializer<float>.WriteTo(float value, Stream stream)
         {
-            ((ISerializer<long>)this).WriteTo(BitConverter.DoubleToInt64Bits(value), stream);
+            ((ISerializer<long>) this).WriteTo(BitConverter.DoubleToInt64Bits(value), stream);
         }
 
         float ISerializer<float>.ReadFrom(Stream stream)
         {
-            return unchecked((float)BitConverter.Int64BitsToDouble(((ISerializer<long>)this).ReadFrom(stream)));
+            return (float) BitConverter.Int64BitsToDouble(((ISerializer<long>) this).ReadFrom(stream));
         }
 
         #endregion
+
         #region ISerializer<Guid> Members
 
         void ISerializer<Guid>.WriteTo(Guid value, Stream stream)
@@ -380,29 +417,31 @@ namespace CSharpTest.Net.Serialization
         }
 
         #endregion
+
         #region ISerializer<IntPtr> Members
 
         void ISerializer<IntPtr>.WriteTo(IntPtr value, Stream stream)
         {
-            ((ISerializer<long>)this).WriteTo(value.ToInt64(), stream);
+            ((ISerializer<long>) this).WriteTo(value.ToInt64(), stream);
         }
 
         IntPtr ISerializer<IntPtr>.ReadFrom(Stream stream)
         {
-            return new IntPtr(((ISerializer<long>)this).ReadFrom(stream));
+            return new IntPtr(((ISerializer<long>) this).ReadFrom(stream));
         }
 
         #endregion
+
         #region ISerializer<UIntPtr> Members
 
         void ISerializer<UIntPtr>.WriteTo(UIntPtr value, Stream stream)
         {
-            ((ISerializer<ulong>)this).WriteTo(value.ToUInt64(), stream);
+            ((ISerializer<ulong>) this).WriteTo(value.ToUInt64(), stream);
         }
 
         UIntPtr ISerializer<UIntPtr>.ReadFrom(Stream stream)
         {
-            return new UIntPtr(((ISerializer<ulong>)this).ReadFrom(stream));
+            return new UIntPtr(((ISerializer<ulong>) this).ReadFrom(stream));
         }
 
         #endregion

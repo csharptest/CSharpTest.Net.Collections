@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,29 +12,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace CSharpTest.Net.Collections
 {
     partial class BPlusTree<TKey, TValue>
     {
-        class Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>
+        private class Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>
         {
-            readonly BPlusTree<TKey, TValue> _tree;
-            readonly Element[] _currentSet;
+            private readonly Element[] _currentSet;
+            private readonly Predicate<KeyValuePair<TKey, TValue>> _fnContinue;
 
-            TKey _nextKey;
-            bool _hasMore;
+            private readonly bool _hasStart;
+            private readonly TKey _startKey;
+            private readonly BPlusTree<TKey, TValue> _tree;
 
-            int _currentLimit;
-            int _currentOffset;
-            bool _enumComplete;
+            private int _currentLimit;
+            private int _currentOffset;
+            private bool _enumComplete;
+            private bool _hasMore;
 
-            readonly bool _hasStart;
-            readonly TKey _startKey;
-            readonly Predicate<KeyValuePair<TKey, TValue>> _fnContinue;
+            private TKey _nextKey;
 
             public Enumerator(BPlusTree<TKey, TValue> tree)
             {
@@ -53,10 +57,24 @@ namespace CSharpTest.Net.Collections
                 Reset();
             }
 
-            public Enumerator(BPlusTree<TKey, TValue> tree, TKey startKey, Predicate<KeyValuePair<TKey, TValue>> fnContinue)
+            public Enumerator(BPlusTree<TKey, TValue> tree, TKey startKey,
+                Predicate<KeyValuePair<TKey, TValue>> fnContinue)
                 : this(tree, startKey)
             {
                 _fnContinue = fnContinue;
+            }
+
+            public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+            {
+                if (_enumComplete)
+                    Reset();
+                return this;
+            }
+
+            [Obsolete]
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
 
             public void Reset()
@@ -80,22 +98,13 @@ namespace CSharpTest.Net.Collections
                 }
             }
 
-            private void FillFromNode(Node node)
-            {
-                if (!node.IsLeaf)
-                    throw new InvalidOperationException();
-
-                _currentOffset = -1;
-                node.CopyTo(_currentSet, out _currentLimit);
-            }
-
             public bool MoveNext()
             {
                 if (_enumComplete)
                     return false;
                 if (++_currentOffset < _currentLimit)
                 {
-                    if(_fnContinue == null || _fnContinue(Current))
+                    if (_fnContinue == null || _fnContinue(Current))
                         return true;
 
                     Array.Clear(_currentSet, 0, _currentSet.Length);
@@ -127,7 +136,7 @@ namespace CSharpTest.Net.Collections
                     if (_currentOffset >= _currentLimit)
                         return MoveNext();
 
-                    if(_fnContinue == null || _fnContinue(Current))
+                    if (_fnContinue == null || _fnContinue(Current))
                         return true;
                 }
 
@@ -138,15 +147,22 @@ namespace CSharpTest.Net.Collections
                 return false;
             }
 
-            public KeyValuePair<TKey, TValue> Current
-            {
-                get { return _currentSet[_currentOffset].ToKeyValuePair(); }
-            }
+            public KeyValuePair<TKey, TValue> Current => _currentSet[_currentOffset].ToKeyValuePair();
 
-            object System.Collections.IEnumerator.Current { get { return Current; } }
+            object IEnumerator.Current => Current;
 
             public void Dispose()
-            { }
+            {
+            }
+
+            private void FillFromNode(Node node)
+            {
+                if (!node.IsLeaf)
+                    throw new InvalidOperationException();
+
+                _currentOffset = -1;
+                node.CopyTo(_currentSet, out _currentLimit);
+            }
 
             private NodePin SeekFirst(NodePin thisLock, out TKey nextKey, out bool hasMore)
             {
@@ -185,7 +201,8 @@ namespace CSharpTest.Net.Collections
                 throw new InvalidOperationException();
             }
 
-            private bool SeekNext(NodePin thisLock, TKey key, out NodePin pin, out int offset, out TKey nextKey, out bool hasMore)
+            private bool SeekNext(NodePin thisLock, TKey key, out NodePin pin, out int offset, out TKey nextKey,
+                out bool hasMore)
             {
                 pin = null;
                 offset = -1;
@@ -223,7 +240,6 @@ namespace CSharpTest.Net.Collections
                         current = next;
                         next = null;
                     }
-
                 }
                 finally
                 {
@@ -231,17 +247,6 @@ namespace CSharpTest.Net.Collections
                     if (next != null) next.Dispose();
                 }
             }
-
-            public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-            {
-                if (_enumComplete)
-                    Reset();
-                return this;
-            }
-
-            [Obsolete]
-            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-            { return GetEnumerator(); }
         }
     }
 }

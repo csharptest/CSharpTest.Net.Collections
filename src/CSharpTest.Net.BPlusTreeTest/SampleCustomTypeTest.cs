@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,12 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using CSharpTest.Net.BPlusTree.Test.SampleTypes;
 using CSharpTest.Net.Collections;
-using CSharpTest.Net.Crypto;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.IO;
 using NUnit.Framework;
@@ -24,10 +26,11 @@ using NUnit.Framework;
 namespace CSharpTest.Net.BPlusTree.Test
 {
     [TestFixture]
-    public class SampleCustomTypeTest : TestDictionary<BPlusTree<KeyInfo, DataValue>, SampleCustomTypeTest.BTreeFactory, KeyInfo, DataValue>
+    public class SampleCustomTypeTest : TestDictionary<BPlusTree<KeyInfo, DataValue>, SampleCustomTypeTest.BTreeFactory,
+        KeyInfo, DataValue>
     {
         protected TempFile TempFile;
-        #region TestFixture SetUp/TearDown
+
         [TestFixtureSetUp]
         public virtual void Setup()
         {
@@ -39,19 +42,19 @@ namespace CSharpTest.Net.BPlusTree.Test
         {
             TempFile.Dispose();
         }
-        #endregion
 
         public class BTreeFactory : IFactory<BPlusTree<KeyInfo, DataValue>>
         {
             public BPlusTree<KeyInfo, DataValue> Create()
             {
                 BPlusTree<KeyInfo, DataValue>.Options options =
-                    new BPlusTree<KeyInfo, DataValue>.Options(new KeyInfoSerializer(), new DataValueSerializer(), new KeyInfoComparer())
+                    new BPlusTree<KeyInfo, DataValue>.Options(new KeyInfoSerializer(), new DataValueSerializer(),
+                        new KeyInfoComparer())
                     {
                         MinimumChildNodes = 16,
                         MaximumChildNodes = 24,
                         MinimumValueNodes = 4,
-                        MaximumValueNodes = 12,
+                        MaximumValueNodes = 12
                     };
 
                 BPlusTree<KeyInfo, DataValue> tree = new BPlusTree<KeyInfo, DataValue>(options);
@@ -71,7 +74,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             {
                 KeyInfo k1 = new KeyInfo();
                 rand.NextBytes(data);
-                all.Add(new KeyValuePair<KeyInfo,DataValue>(k1, new DataValue(k1, data)));
+                all.Add(new KeyValuePair<KeyInfo, DataValue>(k1, new DataValue(k1, data)));
             }
             return all.ToArray();
         }
@@ -80,10 +83,11 @@ namespace CSharpTest.Net.BPlusTree.Test
         public void TestCommonConfiguration()
         {
             BPlusTree<KeyInfo, DataValue>.Options options =
-                new BPlusTree<KeyInfo, DataValue>.Options(new KeyInfoSerializer(), new DataValueSerializer(), new KeyInfoComparer());
-            options.CalcBTreeOrder(32, 300);//we can simply just guess close
+                new BPlusTree<KeyInfo, DataValue>.Options(new KeyInfoSerializer(), new DataValueSerializer(),
+                    new KeyInfoComparer());
+            options.CalcBTreeOrder(32, 300); //we can simply just guess close
             options.FileName = TempFile.TempPath;
-            options.CreateFile = CreatePolicy.Always;//obviously this is just for testing
+            options.CreateFile = CreatePolicy.Always; //obviously this is just for testing
             Assert.AreEqual(FileVersion.Version1, options.FileVersion);
 
             Random rand = new Random();

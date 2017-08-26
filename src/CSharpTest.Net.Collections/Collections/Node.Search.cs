@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,66 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
-using System;
+
 using System.Collections.Generic;
 
 namespace CSharpTest.Net.Collections
 {
     partial class BPlusTree<TKey, TValue>
     {
-        private struct UpdateInfo : IUpdateValue<TKey, TValue>
-        {
-            private bool _updated;
-            private TValue _oldValue, _newValue;
-            private KeyValueUpdate<TKey, TValue> _fnUpdate;
-            public UpdateInfo(KeyValueUpdate<TKey, TValue> fnUpdate) : this()
-            {
-                _fnUpdate = fnUpdate;
-            }
-            public UpdateInfo(TValue newValue) : this()
-            {
-                _newValue = newValue;
-            }
-            public bool UpdateValue(TKey key, ref TValue value)
-            {
-                _updated = true;
-                _oldValue = value;
-                if (_fnUpdate != null)
-                    value = _fnUpdate(key, value);
-                else
-                    value = _newValue;
-                return !EqualityComparer<TValue>.Default.Equals(value, _oldValue);
-            }
-            public bool Updated { get { return _updated; } }
-        }
-        private struct UpdateIfValue : IUpdateValue<TKey, TValue>
-        {
-            private bool _updated;
-            private TValue _comparisonValue, _newValue;
-            public UpdateIfValue(TValue newValue, TValue comparisonValue)
-                : this()
-            {
-                _newValue = newValue;
-                _comparisonValue = comparisonValue;
-            }
-
-            public bool UpdateValue(TKey key, ref TValue value)
-            {
-                if(EqualityComparer<TValue>.Default.Equals(value, _comparisonValue))
-                {
-                    _updated = true;
-                    if(!EqualityComparer<TValue>.Default.Equals(value, _newValue))
-                    {
-                        value = _newValue;
-                        return true;
-                    }
-                }
-                return false;
-            }
-            public bool Updated { get { return _updated; } }
-        }
-
         private bool Seek(NodePin thisLock, TKey key, out NodePin pin, out int offset)
         {
             NodePin myPin = thisLock, nextPin = null;
@@ -101,7 +51,7 @@ namespace CSharpTest.Net.Collections
             finally
             {
                 if (myPin != null) myPin.Dispose();
-                if (nextPin != null) nextPin.Dispose(); 
+                if (nextPin != null) nextPin.Dispose();
             }
 
             pin = null;
@@ -164,7 +114,6 @@ namespace CSharpTest.Net.Collections
             NodePin pin;
             int offset;
             if (SeekToEdge(thisLock, first, out pin, out offset))
-            {
                 using (pin)
                 {
                     item = new KeyValuePair<TKey, TValue>(
@@ -172,7 +121,6 @@ namespace CSharpTest.Net.Collections
                         pin.Ptr[offset].Payload);
                     return true;
                 }
-            }
             item = default(KeyValuePair<TKey, TValue>);
             return false;
         }
@@ -186,7 +134,6 @@ namespace CSharpTest.Net.Collections
                 {
                     TValue newValue = pin.Ptr[offset].Payload;
                     if (value.UpdateValue(key, ref newValue))
-                    {
                         using (NodeTransaction trans = _storage.BeginTransaction())
                         {
                             trans.BeginUpdate(pin);
@@ -195,7 +142,6 @@ namespace CSharpTest.Net.Collections
                             trans.Commit();
                             return true;
                         }
-                    }
                 }
             return false;
         }
@@ -207,11 +153,70 @@ namespace CSharpTest.Net.Collections
 
             int count = 0;
             for (int i = 0; i < thisLock.Ptr.Count; i++)
-            {
                 using (NodePin child = _storage.Lock(thisLock, thisLock.Ptr[i].ChildNode))
+                {
                     count += CountValues(child);
-            }
+                }
             return count;
+        }
+
+        private struct UpdateInfo : IUpdateValue<TKey, TValue>
+        {
+            private TValue _oldValue;
+            private readonly TValue _newValue;
+            private readonly KeyValueUpdate<TKey, TValue> _fnUpdate;
+
+            public UpdateInfo(KeyValueUpdate<TKey, TValue> fnUpdate) : this()
+            {
+                _fnUpdate = fnUpdate;
+            }
+
+            public UpdateInfo(TValue newValue) : this()
+            {
+                _newValue = newValue;
+            }
+
+            public bool UpdateValue(TKey key, ref TValue value)
+            {
+                Updated = true;
+                _oldValue = value;
+                if (_fnUpdate != null)
+                    value = _fnUpdate(key, value);
+                else
+                    value = _newValue;
+                return !EqualityComparer<TValue>.Default.Equals(value, _oldValue);
+            }
+
+            public bool Updated { get; private set; }
+        }
+
+        private struct UpdateIfValue : IUpdateValue<TKey, TValue>
+        {
+            private readonly TValue _comparisonValue;
+            private readonly TValue _newValue;
+
+            public UpdateIfValue(TValue newValue, TValue comparisonValue)
+                : this()
+            {
+                _newValue = newValue;
+                _comparisonValue = comparisonValue;
+            }
+
+            public bool UpdateValue(TKey key, ref TValue value)
+            {
+                if (EqualityComparer<TValue>.Default.Equals(value, _comparisonValue))
+                {
+                    Updated = true;
+                    if (!EqualityComparer<TValue>.Default.Equals(value, _newValue))
+                    {
+                        value = _newValue;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public bool Updated { get; private set; }
         }
     }
 }

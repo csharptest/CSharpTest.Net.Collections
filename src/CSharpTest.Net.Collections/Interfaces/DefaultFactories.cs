@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,18 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 
 namespace CSharpTest.Net.Interfaces
 {
     /// <summary>
-    /// A static singleton and factory that uses a globally common instance.
+    ///     A static singleton and factory that uses a globally common instance.
     /// </summary>
     public static class Singleton<T> where T : new()
     {
         /// <summary>
-        /// Returns the singleton instance of T
+        ///     Returns the singleton instance of T
         /// </summary>
         public static T Instance
         {
@@ -34,8 +37,16 @@ namespace CSharpTest.Net.Interfaces
             }
         }
 
+        /// <summary>
+        ///     Returns a factory that returns the singleton instance
+        /// </summary>
+        public static IFactory<T> Factory => FactoryImpl._instance;
+
         private class Lazy
         {
+            public static readonly T _instance;
+            public static readonly Exception _error;
+
             static Lazy()
             {
                 try
@@ -48,26 +59,26 @@ namespace CSharpTest.Net.Interfaces
                     _error = error;
                 }
             }
-
-            public static readonly T _instance;
-            public static readonly Exception _error;
         }
-
-        /// <summary>
-        /// Returns a factory that returns the singleton instance
-        /// </summary>
-        public static IFactory<T> Factory { get { return FactoryImpl._instance; } }
 
         private class FactoryImpl : IFactory<T>
         {
-            T IFactory<T>.Create() { return Instance; }
-            static FactoryImpl() { _instance = new FactoryImpl(); }
             public static readonly FactoryImpl _instance;
+
+            static FactoryImpl()
+            {
+                _instance = new FactoryImpl();
+            }
+
+            T IFactory<T>.Create()
+            {
+                return Instance;
+            }
         }
     }
 
     /// <summary>
-    /// A factory that creates a new instance of an object each time Create() is called.
+    ///     A factory that creates a new instance of an object each time Create() is called.
     /// </summary>
     public class NewFactory<T> : IFactory<T>
         where T : new()
@@ -80,16 +91,16 @@ namespace CSharpTest.Net.Interfaces
     }
 
     /// <summary>
-    /// A delegate that takes no arguemnts and returns a single value
+    ///     A delegate that takes no arguemnts and returns a single value
     /// </summary>
     public delegate T FactoryMethod<T>();
 
     /// <summary>
-    /// A factory that creates a new instance of an object each time Create() is called.
+    ///     A factory that creates a new instance of an object each time Create() is called.
     /// </summary>
     public class DelegateFactory<T> : IFactory<T>
     {
-        private FactoryMethod<T> _method;
+        private readonly FactoryMethod<T> _method;
 
         /// <summary> A factory that delegates instance creation </summary>
         public DelegateFactory(FactoryMethod<T> method)
@@ -105,7 +116,7 @@ namespace CSharpTest.Net.Interfaces
     }
 
     /// <summary>
-    /// A factory that always returns the same instance of an object each time Create() is called.
+    ///     A factory that always returns the same instance of an object each time Create() is called.
     /// </summary>
     public class InstanceFactory<T> : IFactory<T>
     {

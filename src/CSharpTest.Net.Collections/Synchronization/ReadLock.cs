@@ -1,4 +1,5 @@
 ﻿#region Copyright 2010-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,53 +12,54 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 
 namespace CSharpTest.Net.Synchronization
 {
     /// <summary>
-    /// Allows a read lock to be disposed or elevated to a write lock
+    ///     Allows a read lock to be disposed or elevated to a write lock
     /// </summary>
     public struct ReadLock : IDisposable
     {
         /// <summary> Acquires the lock within the timeout or throws TimeoutException </summary>
-        /// <exception cref="System.TimeoutException"/>
+        /// <exception cref="System.TimeoutException" />
         public static ReadLock Acquire(ILockStrategy lck, int timeout)
         {
             if (!lck.TryRead(timeout)) throw new TimeoutException();
             return new ReadLock(lck, true);
         }
 
-        bool _hasLock;
-        readonly ILockStrategy _lock;
+        private readonly ILockStrategy _lock;
 
         /// <summary> Tracks an existing read lock on a resource </summary>
         public ReadLock(ILockStrategy lck, bool locked)
         {
             _lock = lck;
-            _hasLock = locked;
+            HasReadLock = locked;
         }
 
         /// <summary> Acquires a read lock on the resource </summary>
         public ReadLock(ILockStrategy lck, int timeout)
         {
             _lock = lck;
-            _hasLock = lck.TryRead(timeout);
+            HasReadLock = lck.TryRead(timeout);
         }
 
         /// <summary> Unlocks the resource </summary>
         [Obsolete("Do not call directly, use a using(...) statement only.", true)]
         public void Dispose()
         {
-            if (_hasLock)
+            if (HasReadLock)
                 _lock.ReleaseRead();
-            _hasLock = false;
+            HasReadLock = false;
         }
 
         /// <summary>
-        /// Returns true if read access is locked
+        ///     Returns true if read access is locked
         /// </summary>
-        public bool HasReadLock { get { return _hasLock; } }
+        public bool HasReadLock { get; private set; }
     }
 }

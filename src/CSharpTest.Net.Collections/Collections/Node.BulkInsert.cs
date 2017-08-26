@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,121 +12,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using CSharpTest.Net.Interfaces;
 using System.IO;
+using System.Threading;
 using CSharpTest.Net.Serialization;
-using CSharpTest.Net.Synchronization;
 
 namespace CSharpTest.Net.Collections
 {
     /// <summary>
-    /// Options for bulk insertion
+    ///     Options for bulk insertion
     /// </summary>
     public class BulkInsertOptions
     {
-        private bool _inputIsSorted;
-        private bool _commitOnCompletion;
-        private bool _replaceContents;
-        private DuplicateHandling _duplicateHandling;
-
         /// <summary> Constructs with defaults: false/RaisesException </summary>
         public BulkInsertOptions()
         {
-            _replaceContents = false;
-            _commitOnCompletion = true;
-            _inputIsSorted = false;
-            _duplicateHandling = DuplicateHandling.RaisesException;
+            ReplaceContents = false;
+            CommitOnCompletion = true;
+            InputIsSorted = false;
+            DuplicateHandling = DuplicateHandling.RaisesException;
         }
 
         /// <summary> Gets or sets a value that controls input presorting </summary>
-        public bool InputIsSorted
-        {
-            get { return _inputIsSorted; }
-            set { _inputIsSorted = value; }
-        }
+        public bool InputIsSorted { get; set; }
 
         /// <summary> Gets or sets the handling for duplicate key collisions </summary>
-        public DuplicateHandling DuplicateHandling
-        {
-            get { return _duplicateHandling; }
-            set { _duplicateHandling = value; }
-        }
+        public DuplicateHandling DuplicateHandling { get; set; }
 
         /// <summary> When true (default) BulkInsert will call CommitChanges() on successfull completion </summary>
-        public bool CommitOnCompletion
-        {
-            get { return _commitOnCompletion; }
-            set { _commitOnCompletion = value; }
-        }
+        public bool CommitOnCompletion { get; set; }
 
         /// <summary> When false merges the data with the existing contents, set to true to replace all content </summary>
-        public bool ReplaceContents
-        {
-            get { return _replaceContents; }
-            set { _replaceContents = value; }
-        }
+        public bool ReplaceContents { get; set; }
     }
 
     partial class BPlusTree<TKey, TValue>
     {
-        private class AddRangeInfo : IDisposable
-        {
-            public readonly bool AllowUpdate;
-            private bool _continue;
-            private readonly IEnumerator<KeyValuePair<TKey, TValue>> _values;
-
-            public AddRangeInfo(bool allowUpdate, IEnumerable<KeyValuePair<TKey, TValue>> values)
-            {
-                AllowUpdate = allowUpdate;
-                _values = values.GetEnumerator();
-                MoveNext();
-            }
-
-            public void Dispose()
-            {
-                _continue = false;
-                _values.Dispose();
-            }
-
-            public KeyValuePair<TKey, TValue> Current { get { return _values.Current; } }
-
-            public void MoveNext()
-            {
-                _continue = _values.MoveNext();
-            }
-
-            public bool IsComplete { get { return _continue == false; } }
-        }
-        private struct KeyRange
-        {
-            public KeyRange(IComparer<TKey> keyComparer)
-                : this()
-            {
-                _keyComparer = keyComparer;
-            }
-            private readonly IComparer<TKey> _keyComparer;
-            private bool _hasMinKey, _hasMaxKey;
-            private TKey _minKey, _maxKey;
-            public void SetMinKey(TKey key) { _hasMinKey = true; _minKey = key; }
-            public void SetMaxKey(TKey key) { _hasMaxKey = true; _maxKey = key; }
-            public bool IsKeyInRange(TKey key)
-            {
-                if (_hasMinKey && _keyComparer.Compare(key, _minKey) < 0) return false;
-                if (_hasMaxKey && _keyComparer.Compare(key, _maxKey) >= 0) return false;
-                return true;
-            }
-        }
-
         private int AddRange(NodePin thisLock, ref KeyRange range, AddRangeInfo value, NodePin parent, int parentIx)
         {
             int counter = 0;
             Node me = thisLock.Ptr;
             if (me.Count == me.Size && parent != null)
-            {
                 using (NodeTransaction trans = _storage.BeginTransaction())
                 {
                     TKey splitAt;
@@ -166,7 +97,6 @@ namespace CSharpTest.Net.Collections
                         return AddRange(thisLock, ref range, value, parent, parentIx);
                     }
                 }
-            }
 
             if (parent != null)
                 parent.Dispose();
@@ -217,34 +147,40 @@ namespace CSharpTest.Net.Collections
                     ordinal = me.Count - 1;
 
                 if (ordinal > 0) range.SetMinKey(me[ordinal - 1].Key);
-                if (ordinal < (me.Count - 1)) range.SetMaxKey(me[ordinal + 1].Key);
+                if (ordinal < me.Count - 1) range.SetMaxKey(me[ordinal + 1].Key);
 
                 using (NodePin child = _storage.Lock(thisLock, me[ordinal].ChildNode))
+                {
                     counter += AddRange(child, ref range, value, thisLock, ordinal);
+                }
             }
             return counter;
         }
-        
+
         /// <summary>
-        /// Rewrite the entire BTree as a transaction to include the provided items.  This method is Thread safe.
-        /// If the input is already sorted, use BulkInsertOptions overload to specify InputIsSorted = true.
+        ///     Rewrite the entire BTree as a transaction to include the provided items.  This method is Thread safe.
+        ///     If the input is already sorted, use BulkInsertOptions overload to specify InputIsSorted = true.
         /// </summary>
         public int BulkInsert(IEnumerable<KeyValuePair<TKey, TValue>> items)
-        { return BulkInsert(items, new BulkInsertOptions()); }
+        {
+            return BulkInsert(items, new BulkInsertOptions());
+        }
+
         /// <summary>
-        /// Rewrite the entire BTree as a transaction to include the provided items.  This method is Thread safe.
-        /// If the input is already sorted, use BulkInsertOptions overload to specify InputIsSorted = true.
+        ///     Rewrite the entire BTree as a transaction to include the provided items.  This method is Thread safe.
+        ///     If the input is already sorted, use BulkInsertOptions overload to specify InputIsSorted = true.
         /// </summary>
         public int BulkInsert(IEnumerable<KeyValuePair<TKey, TValue>> items, BulkInsertOptions bulkOptions)
         {
             NodePin oldRoot = null;
             if (bulkOptions.InputIsSorted == false)
             {
-                KeyValueSerializer<TKey, TValue> kvserializer = new KeyValueSerializer<TKey, TValue>(_options.KeySerializer, _options.ValueSerializer);
+                KeyValueSerializer<TKey, TValue> kvserializer =
+                    new KeyValueSerializer<TKey, TValue>(_options.KeySerializer, _options.ValueSerializer);
                 items = new OrderedKeyValuePairs<TKey, TValue>(_options.KeyComparer, items, kvserializer)
-                    {
-                        DuplicateHandling = bulkOptions.DuplicateHandling
-                    };
+                {
+                    DuplicateHandling = bulkOptions.DuplicateHandling
+                };
             }
 
             List<IStorageHandle> handles = new List<IStorageHandle>();
@@ -260,19 +196,14 @@ namespace CSharpTest.Net.Collections
                     oldRoot = _storage.Lock(root.Pin, oldRootHandle);
 
                     if (oldRoot.Ptr.Count == 0 || bulkOptions.ReplaceContents)
-                    {
-                        // Currently empty, so just enforce duplicate keys...
                         items = OrderedKeyValuePairs<TKey, TValue>
                             .WithDuplicateHandling(items,
-                                                   new KeyValueComparer<TKey, TValue>(_options.KeyComparer),
-                                                   bulkOptions.DuplicateHandling);
-                    }
-                    else 
-                    {
-                        // Merging with existing data and enforce duplicate keys...
+                                new KeyValueComparer<TKey, TValue>(_options.KeyComparer),
+                                bulkOptions.DuplicateHandling);
+                    else
                         items = OrderedKeyValuePairs<TKey, TValue>
-                            .Merge(_options.KeyComparer, bulkOptions.DuplicateHandling, EnumerateNodeContents(oldRoot), items);
-                    }
+                            .Merge(_options.KeyComparer, bulkOptions.DuplicateHandling, EnumerateNodeContents(oldRoot),
+                                items);
 
                     Node newtree = BulkWrite(handles, ref counter, items);
                     if (newtree == null) // null when enumeration was empty
@@ -294,10 +225,7 @@ namespace CSharpTest.Net.Collections
                 oldRoot = null;
 
                 if (bulkOptions.CommitOnCompletion)
-                {
-                    //Since transaction logs do not deal with bulk-insert, we need to commit our current state
                     Commit();
-                }
                 return counter;
             }
             catch
@@ -305,21 +233,28 @@ namespace CSharpTest.Net.Collections
                 if (oldRoot != null)
                     oldRoot.Dispose();
 
-                foreach(IStorageHandle sh in handles)
-                {
-                    try { _storage.Storage.Destroy(sh); }
-                    catch (ThreadAbortException) { throw; }
-                    catch { continue; }
-                }
+                foreach (IStorageHandle sh in handles)
+                    try
+                    {
+                        _storage.Storage.Destroy(sh);
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        throw;
+                    }
+                    catch
+                    {
+                    }
                 throw;
             }
         }
 
-        private Node BulkWrite(ICollection<IStorageHandle> handles, ref int counter, IEnumerable<KeyValuePair<TKey, TValue>> itemsEnum)
+        private Node BulkWrite(ICollection<IStorageHandle> handles, ref int counter,
+            IEnumerable<KeyValuePair<TKey, TValue>> itemsEnum)
         {
             List<Node> working = new List<Node>();
             Node leafNode = null;
-            
+
             using (IEnumerator<KeyValuePair<TKey, TValue>> items = itemsEnum.GetEnumerator())
             {
                 bool more = items.MoveNext();
@@ -350,9 +285,7 @@ namespace CSharpTest.Net.Collections
                 return null;
 
             if (leafNode.Count < _options.MinimumValueNodes)
-            {
                 working.Add(leafNode.CloneForWrite(LockType.Insert));
-            }
 
             // Reballance of right-edge
             for (int i = 1; i < working.Count; i++)
@@ -366,7 +299,7 @@ namespace CSharpTest.Net.Collections
                     int prev = parent.Count - 2;
                     Node prevNode;
                     bool success = _storage.Storage.TryGetNode(parent[prev].ChildNode.StoreHandle,
-                                                               out prevNode, _storage.NodeSerializer);
+                        out prevNode, _storage.NodeSerializer);
                     AssertionFailedException.Assert(success);
                     prevNode = prevNode.CloneForWrite(LockType.Insert);
                     if (!isleaf)
@@ -382,7 +315,9 @@ namespace CSharpTest.Net.Collections
                             parent.ReplaceKey(parent.Count - 1, item.Key);
                         }
                         else
+                        {
                             me.Insert(0, item);
+                        }
                         prevNode.Remove(prevNode.Count - 1, item, _keyComparer);
                     }
 
@@ -400,9 +335,10 @@ namespace CSharpTest.Net.Collections
             return working[0];
         }
 
-        private void InsertWorkingNode(ICollection<IStorageHandle> handles, List<Node> working, int index, Element child)
+        private void InsertWorkingNode(ICollection<IStorageHandle> handles, List<Node> working, int index,
+            Element child)
         {
-            if(index < 0)
+            if (index < 0)
             {
                 working.Insert(0, new Node(_storage.Storage.Create(), _options.MaximumChildNodes));
                 handles.Add(working[0].StorageHandle);
@@ -422,21 +358,22 @@ namespace CSharpTest.Net.Collections
                 handles.Add(parent.StorageHandle);
 
                 int count = working.Count;
-                InsertWorkingNode(handles, working, index - 1, new Element(child.Key, new NodeHandle(parent.StorageHandle)));
+                InsertWorkingNode(handles, working, index - 1,
+                    new Element(child.Key, new NodeHandle(parent.StorageHandle)));
                 if (count < working.Count)
                     index++;
                 working[index] = parent;
             }
 
-            if(parent.Count == 0)
+            if (parent.Count == 0)
                 parent.Insert(parent.Count, new Element(default(TKey), child.ChildNode));
             else
                 parent.Insert(parent.Count, child);
         }
 
         /// <summary>
-        /// Exclusive access, deep-locking enumeration for bulk-insert, essentially this enumerates
-        /// while at the same time it chases existing writers out of the tree.
+        ///     Exclusive access, deep-locking enumeration for bulk-insert, essentially this enumerates
+        ///     while at the same time it chases existing writers out of the tree.
         /// </summary>
         private IEnumerable<KeyValuePair<TKey, TValue>> EnumerateNodeContents(NodePin root)
         {
@@ -465,17 +402,13 @@ namespace CSharpTest.Net.Collections
 
                     NodePin child = _storage.Lock(cur.Key, cur.Key.Ptr[cur.Value].ChildNode);
                     if (child.Ptr.IsLeaf)
-                    {
                         using (child)
                         {
                             for (int ix = 0; ix < child.Ptr.Count; ix++)
                                 yield return child.Ptr[ix].ToKeyValuePair();
                         }
-                    }
                     else
-                    {
                         todo.Push(new KeyValuePair<NodePin, int>(child, 0));
-                    }
                 }
             }
             finally
@@ -490,14 +423,12 @@ namespace CSharpTest.Net.Collections
             List<NodeHandle> children = new List<NodeHandle>();
 
             if (!pin.Ptr.IsLeaf)
-            {
                 for (int i = 0; i < pin.Ptr.Count; i++)
                     children.Add(pin.Ptr[i].ChildNode);
-            }
 
             try
             {
-                using (var trans = _storage.BeginTransaction())
+                using (NodeTransaction trans = _storage.BeginTransaction())
                 {
                     trans.Destroy(pin);
                     trans.Commit();
@@ -506,15 +437,72 @@ namespace CSharpTest.Net.Collections
             finally
             {
                 if (children.Count > 0)
-                {
                     foreach (NodeHandle h in children)
-                    {
                         using (NodePin ch = _storage.Lock(pin, h))
                         {
                             DeleteTree(ch);
                         }
-                    }
-                }
+            }
+        }
+
+        private class AddRangeInfo : IDisposable
+        {
+            private readonly IEnumerator<KeyValuePair<TKey, TValue>> _values;
+            public readonly bool AllowUpdate;
+            private bool _continue;
+
+            public AddRangeInfo(bool allowUpdate, IEnumerable<KeyValuePair<TKey, TValue>> values)
+            {
+                AllowUpdate = allowUpdate;
+                _values = values.GetEnumerator();
+                MoveNext();
+            }
+
+            public KeyValuePair<TKey, TValue> Current => _values.Current;
+
+            public bool IsComplete => _continue == false;
+
+            public void Dispose()
+            {
+                _continue = false;
+                _values.Dispose();
+            }
+
+            public void MoveNext()
+            {
+                _continue = _values.MoveNext();
+            }
+        }
+
+        private struct KeyRange
+        {
+            public KeyRange(IComparer<TKey> keyComparer)
+                : this()
+            {
+                _keyComparer = keyComparer;
+            }
+
+            private readonly IComparer<TKey> _keyComparer;
+            private bool _hasMinKey, _hasMaxKey;
+            private TKey _minKey, _maxKey;
+
+            public void SetMinKey(TKey key)
+            {
+                _hasMinKey = true;
+                _minKey = key;
+            }
+
+            public void SetMaxKey(TKey key)
+            {
+                _hasMaxKey = true;
+                _maxKey = key;
+            }
+
+            public bool IsKeyInRange(TKey key)
+            {
+                if (_hasMinKey && _keyComparer.Compare(key, _minKey) < 0) return false;
+                if (_hasMaxKey && _keyComparer.Compare(key, _maxKey) >= 0) return false;
+                return true;
             }
         }
     }

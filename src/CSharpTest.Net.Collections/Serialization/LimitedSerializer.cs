@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,45 +12,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
-using System;
+
 using System.IO;
 
 namespace CSharpTest.Net.Serialization
 {
     /// <summary>
-    /// Reads the same variant prefixed string and byte[] but with a hard-limit on size
+    ///     Reads the same variant prefixed string and byte[] but with a hard-limit on size
     /// </summary>
     public class LimitedSerializer : ISerializer<byte[]>, ISerializer<string>
     {
-        private readonly int _maxLength;
-
-        /// <summary>
-        /// Constructs a limited length-prefix data reader/writer
-        /// </summary>
-        public LimitedSerializer(int maxLength)
-        {
-            _maxLength = maxLength;
-        }
-
         /// <summary> Reads up to 1024 length-prefixed byte array </summary>
         public static readonly ISerializer<byte[]> Bytes1024 = new LimitedSerializer(1024);
+
         /// <summary> Reads up to 2048 length-prefixed byte array </summary>
         public static readonly ISerializer<byte[]> Bytes2048 = new LimitedSerializer(2048);
+
         /// <summary> Reads up to 4092 length-prefixed byte array </summary>
         public static readonly ISerializer<byte[]> Bytes4092 = new LimitedSerializer(4092);
+
         /// <summary> Reads up to 8196 length-prefixed byte array </summary>
         public static readonly ISerializer<byte[]> Bytes8196 = new LimitedSerializer(8196);
 
         /// <summary> Reads up to 256 length-prefixed string </summary>
         public static readonly ISerializer<string> String256 = new LimitedSerializer(256);
+
         /// <summary> Reads up to 512 length-prefixed string </summary>
         public static readonly ISerializer<string> String512 = new LimitedSerializer(512);
+
         /// <summary> Reads up to 1024 length-prefixed string </summary>
         public static readonly ISerializer<string> String1024 = new LimitedSerializer(1024);
 
         /// <summary> This is the only class with read/write prefixed data </summary>
         internal static readonly LimitedSerializer Unlimited = new LimitedSerializer(int.MaxValue);
+
+        private readonly int _maxLength;
+
+        /// <summary>
+        ///     Constructs a limited length-prefix data reader/writer
+        /// </summary>
+        public LimitedSerializer(int maxLength)
+        {
+            _maxLength = maxLength;
+        }
 
         #region ISerializer<string> Members
 
@@ -80,12 +87,13 @@ namespace CSharpTest.Net.Serialization
                 Check.Assert<InvalidDataException>(sz >= 0 && sz <= _maxLength);
                 char[] chars = new char[sz];
                 for (int i = 0; i < sz; i++)
-                    chars[i] = (char)VariantNumberSerializer.Int32.ReadFrom(stream);
-                return new String(chars);
+                    chars[i] = (char) VariantNumberSerializer.Int32.ReadFrom(stream);
+                return new string(chars);
             }
         }
 
         #endregion
+
         #region ISerializer<byte[]> Members
 
         void ISerializer<byte[]>.WriteTo(byte[] value, Stream stream)
@@ -102,6 +110,7 @@ namespace CSharpTest.Net.Serialization
                     stream.WriteByte(b);
             }
         }
+
         byte[] ISerializer<byte[]>.ReadFrom(Stream stream)
         {
             int sz = VariantNumberSerializer.Int32.ReadFrom(stream);

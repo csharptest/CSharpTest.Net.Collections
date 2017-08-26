@@ -1,4 +1,5 @@
 ﻿#region Copyright 2010-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,9 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using Action = System.Threading.ThreadStart;
@@ -21,55 +25,63 @@ using Action = System.Threading.ThreadStart;
 namespace CSharpTest.Net.Threading
 {
     /// <summary>
-    /// An extremely basic WorkQueue using a fixed number of threads to execute Action() or Action&lt;T> delegates
+    ///     An extremely basic WorkQueue using a fixed number of threads to execute Action() or Action&lt;T> delegates
     /// </summary>
-    [System.Diagnostics.DebuggerNonUserCode]
+    [DebuggerNonUserCode]
     public class WorkQueue : WorkQueue<Action>
     {
         /// <summary>
-        /// Constructs the Work Queue with the specified number of threads.
+        ///     Constructs the Work Queue with the specified number of threads.
         /// </summary>
         public WorkQueue(int nThreads) : base(DoAction, nThreads)
-        { }
+        {
+        }
 
-        private static void DoAction(Action process) { process(); }
+        private static void DoAction(Action process)
+        {
+            process();
+        }
 
         /// <summary> Enqueues a task with a parameter of type T </summary>
         public void Enqueue<T>(Action<T> process, T instance)
-        { Enqueue(new WorkItem<T>(process, instance).Exec); }
+        {
+            Enqueue(new WorkItem<T>(process, instance).Exec);
+        }
 
-        [System.Diagnostics.DebuggerNonUserCode]
+        [DebuggerNonUserCode]
         private class WorkItem<T>
         {
-            readonly Action<T> _process;
-            readonly T _instance;
+            private readonly T _instance;
+            private readonly Action<T> _process;
+
             public WorkItem(Action<T> process, T instance)
             {
                 _process = process;
                 _instance = instance;
             }
-            public void Exec() { _process(_instance); }
+
+            public void Exec()
+            {
+                _process(_instance);
+            }
         }
     }
 
     /// <summary>
-    /// An extremely basic WorkQueue using a fixed number of threads to execute Action&lt;T> 
-    /// over the enqueued instances of type T, aggregates an instance of WorkQueue()
+    ///     An extremely basic WorkQueue using a fixed number of threads to execute Action&lt;T>
+    ///     over the enqueued instances of type T, aggregates an instance of WorkQueue()
     /// </summary>
     public class WorkQueue<T> : IWorkQueue<T>
     {
-        readonly Action<T> _process;
-        readonly Queue<T> _queue;
-        readonly ManualResetEvent _quit;
-        readonly ManualResetEvent _ready;
-        readonly Thread[] _workers;
-        bool _disposed, _completePending;
-
-        /// <summary> Raised when a task fails to handle an error </summary>
-        public event ErrorEventHandler OnError;
+        private readonly Action<T> _process;
+        private readonly Queue<T> _queue;
+        private readonly ManualResetEvent _quit;
+        private readonly ManualResetEvent _ready;
+        private readonly Thread[] _workers;
+        private bool _disposed, _completePending;
 
         /// <summary>
-        /// Constructs the Work Queue with the specified number of threads.
+        ///     Constructs the Work Queue with the specified number of threads.
         /// </summary>
         public WorkQueue(Action<T> process, int nThreads)
         {
@@ -85,21 +97,26 @@ namespace CSharpTest.Net.Threading
                 _workers[i] = new Thread(Run);
                 _workers[i].SetApartmentState(ApartmentState.MTA);
                 _workers[i].IsBackground = true;
-                _workers[i].Name = String.Format("WorkQueue[{0}]", i);
+                _workers[i].Name = string.Format("WorkQueue[{0}]", i);
                 _workers[i].Start();
             }
             _completePending = false;
         }
+
+        /// <summary> Raised when a task fails to handle an error </summary>
+        public event ErrorEventHandler OnError;
+
         /// <summary>Immediatly stops processing tasks and exits all worker threads</summary>
         void IDisposable.Dispose()
         {
             Complete(false, 100);
         }
+
         /// <summary>
-        /// Waits for all executing tasks to complete and then exists all threads, If completePending
-        /// is false no more tasks will begin, if true threads will continue to pick up tasks and
-        /// run until the queue is empty.  The timeout period is used to join each thread in turn, 
-        /// if the timeout expires that thread will be aborted.
+        ///     Waits for all executing tasks to complete and then exists all threads, If completePending
+        ///     is false no more tasks will begin, if true threads will continue to pick up tasks and
+        ///     run until the queue is empty.  The timeout period is used to join each thread in turn,
+        ///     if the timeout expires that thread will be aborted.
         /// </summary>
         /// <param name="completePending">True to complete enqueued activities</param>
         /// <param name="timeout">The timeout to wait for a thread before Abort() is called</param>
@@ -113,7 +130,6 @@ namespace CSharpTest.Net.Threading
                 _completePending = completePending;
                 _quit.Set();
                 foreach (Thread t in _workers)
-                {
                     if (!t.Join(timeout))
                     {
                         completed = false;
@@ -121,7 +137,6 @@ namespace CSharpTest.Net.Threading
                         if (!t.Join(10000))
                             shutdownFailed = true;
                     }
-                }
 
                 if (shutdownFailed)
                     throw new ApplicationException("WorkQueue shutdown failed, unable to join worker threads.");
@@ -132,9 +147,12 @@ namespace CSharpTest.Net.Threading
                 {
                     _disposed = true;
                     if (!completePending)
+                    {
                         _queue.Clear();
+                    }
                     else
-                    {   // usually a sign that other threads are still enqueuing messages
+                    {
+                        // usually a sign that other threads are still enqueuing messages
                         if (_queue.Count > 0)
                             Run();
                         Check.IsEqual(0, _queue.Count);
@@ -159,7 +177,7 @@ namespace CSharpTest.Net.Threading
 
         private void Run()
         {
-            WaitHandle[] wait = new WaitHandle[] { _quit, _ready };
+            WaitHandle[] wait = {_quit, _ready};
 
             while (WaitHandle.WaitAny(wait) == 1 || _completePending)
             {
@@ -167,7 +185,9 @@ namespace CSharpTest.Net.Threading
                 lock (_queue)
                 {
                     if (_queue.Count > 0)
+                    {
                         item = _queue.Dequeue();
+                    }
                     else
                     {
                         if (_quit.WaitOne(0, false))
@@ -178,8 +198,14 @@ namespace CSharpTest.Net.Threading
                     }
                 }
 
-                try { _process(item); }
-                catch (ThreadAbortException) { return; }
+                try
+                {
+                    _process(item);
+                }
+                catch (ThreadAbortException)
+                {
+                    return;
+                }
                 catch (Exception e)
                 {
                     ErrorEventHandler h = OnError;

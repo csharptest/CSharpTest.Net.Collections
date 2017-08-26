@@ -1,4 +1,5 @@
 ﻿#region Copyright 2012-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,25 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
-using CSharpTest.Net.Crypto;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using NUnit.Framework;
 
 namespace CSharpTest.Net.BPlusTree.Test
 {
     [StructLayout(LayoutKind.Sequential)]
-    struct TestInfo
+    internal struct TestInfo
     {
         public TestInfo(Guid guid)
             : this()
         {
             MyKey = guid;
         }
+
         public readonly Guid MyKey;
         public int SetNumber;
         public long CreateOrder;
@@ -38,37 +42,47 @@ namespace CSharpTest.Net.BPlusTree.Test
         public byte[] RandomBytes;
 
         public static IEnumerable<KeyValuePair<Guid, TestInfo>> Create(int count)
-        { return CreateSet(1, count, null); }
+        {
+            return CreateSet(1, count, null);
+        }
+
         public static IEnumerable<KeyValuePair<Guid, TestInfo>> Create(int count, IDictionary<Guid, TestInfo> values)
-        { return CreateSet(1, count, values); }
-        
-        
+        {
+            return CreateSet(1, count, values);
+        }
+
+
         public static IEnumerable<KeyValuePair<Guid, TestInfo>>[] CreateSets(int sets, int items)
-        { return CreateSets(sets, items, null); }
-        public static IEnumerable<KeyValuePair<Guid, TestInfo>>[] CreateSets(int sets, int items, IDictionary<Guid, TestInfo> values)
+        {
+            return CreateSets(sets, items, null);
+        }
+
+        public static IEnumerable<KeyValuePair<Guid, TestInfo>>[] CreateSets(int sets, int items,
+            IDictionary<Guid, TestInfo> values)
         {
             IEnumerable<KeyValuePair<Guid, TestInfo>>[] result = new IEnumerable<KeyValuePair<Guid, TestInfo>>[sets];
             for (int i = 1; i <= sets; i++)
-                result[i-1] = CreateSet(i, items, values);
+                result[i - 1] = CreateSet(i, items, values);
             return result;
         }
 
-        private static IEnumerable<KeyValuePair<Guid, TestInfo>> CreateSet(int set, int count, IDictionary<Guid, TestInfo> values)
+        private static IEnumerable<KeyValuePair<Guid, TestInfo>> CreateSet(int set, int count,
+            IDictionary<Guid, TestInfo> values)
         {
             for (int i = 1; i <= count; i++)
             {
                 TestInfo ti = new TestInfo(Guid.NewGuid())
-                                  {
-                                      SetNumber = set,
-                                      CreateOrder = i,
-                                      ReadCount = 0,
-                                      UpdateCount = 0
-                                  };
-                if (values != null)
                 {
+                    SetNumber = set,
+                    CreateOrder = i,
+                    ReadCount = 0,
+                    UpdateCount = 0
+                };
+                if (values != null)
                     lock (values)
+                    {
                         values.Add(ti.MyKey, ti);
-                }
+                    }
                 yield return new KeyValuePair<Guid, TestInfo>(ti.MyKey, ti);
             }
         }
@@ -76,7 +90,7 @@ namespace CSharpTest.Net.BPlusTree.Test
         public static void AssertEquals(IDictionary<Guid, TestInfo> x, IEnumerable<KeyValuePair<Guid, TestInfo>> y)
         {
             Dictionary<Guid, TestInfo> copy = new Dictionary<Guid, TestInfo>(x);
-            foreach(KeyValuePair<Guid, TestInfo> item in y)
+            foreach (KeyValuePair<Guid, TestInfo> item in y)
             {
                 TestInfo value;
                 Assert.IsTrue(x.TryGetValue(item.Key, out value));
@@ -91,9 +105,9 @@ namespace CSharpTest.Net.BPlusTree.Test
         }
     }
 
-    struct TestInfoSerializer : ISerializer<TestInfo>
+    internal struct TestInfoSerializer : ISerializer<TestInfo>
     {
-        TestInfo ISerializer<TestInfo>.ReadFrom(System.IO.Stream stream)
+        TestInfo ISerializer<TestInfo>.ReadFrom(Stream stream)
         {
             return new TestInfo(PrimitiveSerializer.Guid.ReadFrom(stream))
             {
@@ -105,7 +119,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             };
         }
 
-        void ISerializer<TestInfo>.WriteTo(TestInfo value, System.IO.Stream stream)
+        void ISerializer<TestInfo>.WriteTo(TestInfo value, Stream stream)
         {
             PrimitiveSerializer.Guid.WriteTo(value.MyKey, stream);
             PrimitiveSerializer.Int32.WriteTo(value.SetNumber, stream);

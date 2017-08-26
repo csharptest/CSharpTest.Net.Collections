@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using CSharpTest.Net.Interfaces;
@@ -19,7 +22,9 @@ using NUnit.Framework;
 
 namespace CSharpTest.Net.BPlusTree.Test
 {
-    public abstract class TestDictionary<TDictionary, TFactory, TKey, TValue> : TestCollection<TDictionary, TFactory, KeyValuePair<TKey, TValue>>
+    public abstract class
+        TestDictionary<TDictionary, TFactory, TKey, TValue> : TestCollection<TDictionary, TFactory,
+            KeyValuePair<TKey, TValue>>
         where TDictionary : IDictionary<TKey, TValue>, IDisposable
         where TFactory : IFactory<TDictionary>, new()
     {
@@ -61,7 +66,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                 }
 
                 List<TKey> cmp = new List<TKey>(test.Keys);
-                
+
                 Assert.AreEqual(keys.Count, cmp.Count);
                 for (int i = 0; i < keys.Count; i++)
                     Assert.IsTrue(test.ContainsKey(keys[i]));

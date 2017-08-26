@@ -1,4 +1,5 @@
 ﻿#region Copyright 2012-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
-using System;
+
 using System.Collections.Generic;
 using CSharpTest.Net.Collections;
 using CSharpTest.Net.IO;
@@ -22,18 +24,22 @@ using NUnit.Framework;
 namespace CSharpTest.Net.BPlusTree.Test
 {
     /// <summary>
-    /// Demonstrates a few possible ways to use a BPlusTree across process boundaries by having a single-writer and multiple
-    /// readers.  Calling Commit() on the writer can be dangerous to the readers, thus a cross-process thread synchronization
-    /// primitive must be used to ensure that readers are aware of Commit() calls, and, in the case of read-only, not actively
-    /// reading the tree in it's previous state.  The writer guarantees that the file is consistent at any given moment in 
-    /// time; however, since the reader traverses the data over time it is not possible to guarantee a consistent read.  I do
-    /// not have any intentions of further support for this capability, it's generally just a bad idea ;)  Instead, IIWY I 
-    /// would look to use RPC to talk to the process controlling the writes.
+    ///     Demonstrates a few possible ways to use a BPlusTree across process boundaries by having a single-writer and
+    ///     multiple
+    ///     readers.  Calling Commit() on the writer can be dangerous to the readers, thus a cross-process thread
+    ///     synchronization
+    ///     primitive must be used to ensure that readers are aware of Commit() calls, and, in the case of read-only, not
+    ///     actively
+    ///     reading the tree in it's previous state.  The writer guarantees that the file is consistent at any given moment in
+    ///     time; however, since the reader traverses the data over time it is not possible to guarantee a consistent read.  I
+    ///     do
+    ///     not have any intentions of further support for this capability, it's generally just a bad idea ;)  Instead, IIWY I
+    ///     would look to use RPC to talk to the process controlling the writes.
     /// </summary>
     [TestFixture]
-    public partial class TestMultiInstance
+    public class TestMultiInstance
     {
-        IEnumerable<KeyValuePair<int, string>> MakeValues(int start, int count)
+        private IEnumerable<KeyValuePair<int, string>> MakeValues(int start, int count)
         {
             for (int ix = start; count > 0; count--, ix++)
                 yield return new KeyValuePair<int, string>(ix, ix.ToString());
@@ -44,21 +50,21 @@ namespace CSharpTest.Net.BPlusTree.Test
         [Test]
         public void TestReadOnlyCopy()
         {
-            using (var tempFile = new TempFile())
+            using (TempFile tempFile = new TempFile())
             {
-                var options = new BPlusTree<int, string>.OptionsV2(new PrimitiveSerializer(), new PrimitiveSerializer())
-                                  {
-                                      CreateFile = CreatePolicy.Always,
-                                      FileName = tempFile.TempPath,
-                                  }.CalcBTreeOrder(4, 10);
+                BPlusTree<int, string>.OptionsV2 options = new BPlusTree<int, string>.OptionsV2(new PrimitiveSerializer(), new PrimitiveSerializer())
+                {
+                    CreateFile = CreatePolicy.Always,
+                    FileName = tempFile.TempPath
+                }.CalcBTreeOrder(4, 10);
 
-                var readcopy = options.Clone();
+                BPlusTree<int, string>.OptionsV2 readcopy = options.Clone();
                 readcopy.CreateFile = CreatePolicy.Never;
                 readcopy.ReadOnly = true;
 
-                using (var tree = new BPlusTree<int, string>(options))
+                using (BPlusTree<int, string> tree = new BPlusTree<int, string>(options))
                 {
-                    using (var copy = new BPlusTree<int, string>(readcopy))
+                    using (BPlusTree<int, string> copy = new BPlusTree<int, string>(readcopy))
                     {
                         copy.EnableCount();
                         Assert.AreEqual(0, copy.Count);
@@ -67,7 +73,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     //insert some data...
                     tree.AddRange(MakeValues(0, 100));
 
-                    using (var copy = new BPlusTree<int, string>(readcopy))
+                    using (BPlusTree<int, string> copy = new BPlusTree<int, string>(readcopy))
                     {
                         copy.EnableCount();
                         Assert.AreEqual(0, copy.Count);
@@ -79,7 +85,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                         tree.Remove(i);
                     tree.AddRange(MakeValues(1000, 1000));
 
-                    using (var copy = new BPlusTree<int, string>(readcopy))
+                    using (BPlusTree<int, string> copy = new BPlusTree<int, string>(readcopy))
                     {
                         copy.EnableCount();
                         Assert.AreEqual(100, copy.Count);
@@ -88,7 +94,6 @@ namespace CSharpTest.Net.BPlusTree.Test
                     }
 
                     tree.Commit();
-
                 }
             }
         }
@@ -99,25 +104,26 @@ namespace CSharpTest.Net.BPlusTree.Test
         [Test]
         public void TestSyncFromLogging()
         {
-            using (var tempFile = new TempFile())
-            using (var logfile = new TempFile())
-            using (var tempCopy = new TempFile())
+            using (TempFile tempFile = new TempFile())
+            using (TempFile logfile = new TempFile())
+            using (TempFile tempCopy = new TempFile())
             {
-                var options = new BPlusTree<int, string>.OptionsV2(new PrimitiveSerializer(), new PrimitiveSerializer())
+                BPlusTree<int, string>.OptionsV2 options = new BPlusTree<int, string>.OptionsV2(new PrimitiveSerializer(), new PrimitiveSerializer())
                 {
                     CreateFile = CreatePolicy.Always,
                     FileName = tempFile.TempPath,
-                    TransactionLogFileName = logfile.TempPath,
+                    TransactionLogFileName = logfile.TempPath
                 }.CalcBTreeOrder(4, 10);
 
-                var readcopy = options.Clone();
+                BPlusTree<int, string>.OptionsV2 readcopy = options.Clone();
                 readcopy.FileName = tempCopy.TempPath;
                 readcopy.StoragePerformance = StoragePerformance.Fastest;
 
-                using (var tree = new BPlusTree<int, string>(options))
-                using (var copy = new BPlusTree<int, string>(readcopy))
-                using (var tlog = new TransactionLog<int, string>(
-                    new TransactionLogOptions<int, string>(logfile.TempPath, PrimitiveSerializer.Int32, PrimitiveSerializer.String) { ReadOnly = true }))
+                using (BPlusTree<int, string> tree = new BPlusTree<int, string>(options))
+                using (BPlusTree<int, string> copy = new BPlusTree<int, string>(readcopy))
+                using (TransactionLog<int, string> tlog = new TransactionLog<int, string>(
+                    new TransactionLogOptions<int, string>(logfile.TempPath, PrimitiveSerializer.Int32,
+                        PrimitiveSerializer.String) {ReadOnly = true}))
                 {
                     tree.Add(0, "0");
                     tree.Commit();
@@ -127,8 +133,8 @@ namespace CSharpTest.Net.BPlusTree.Test
                     //start by copying the data from tree's file into the copy instance:
                     copy.BulkInsert(
                         BPlusTree<int, string>.EnumerateFile(options),
-                        new BulkInsertOptions { InputIsSorted = true, CommitOnCompletion = false, ReplaceContents = true }
-                        );
+                        new BulkInsertOptions {InputIsSorted = true, CommitOnCompletion = false, ReplaceContents = true}
+                    );
 
                     Assert.AreEqual(1, copy.Count);
                     Assert.AreEqual("0", copy[0]);

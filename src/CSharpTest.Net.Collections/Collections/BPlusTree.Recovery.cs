@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,11 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using CSharpTest.Net.IO;
+using CSharpTest.Net.Storage;
 using CSharpTest.Net.Synchronization;
 
 namespace CSharpTest.Net.Collections
@@ -23,9 +27,9 @@ namespace CSharpTest.Net.Collections
     partial class BPlusTree<TKey, TValue>
     {
         /// <summary>
-        /// Directly enumerates the contents of BPlusTree from disk in read-only mode.
+        ///     Directly enumerates the contents of BPlusTree from disk in read-only mode.
         /// </summary>
-        /// <param name="options"> The options normally used to create the <see cref="BPlusTree{TKey, TValue}"/> instance </param>
+        /// <param name="options"> The options normally used to create the <see cref="BPlusTree{TKey, TValue}" /> instance </param>
         /// <returns> Yields the Key/Value pairs found in the file </returns>
         public static IEnumerable<KeyValuePair<TKey, TValue>> EnumerateFile(BPlusTreeOptions<TKey, TValue> options)
         {
@@ -61,37 +65,35 @@ namespace CSharpTest.Net.Collections
                         throw new InvalidDataException();
 
                     if (child.IsLeaf)
-                    {
                         for (int ix = 0; ix < child.Count; ix++)
                             yield return child[ix].ToKeyValuePair();
-                    }
                     else
-                    {
                         todo.Push(new KeyValuePair<Node, int>(child, 0));
-                    }
                 }
             }
         }
 
         /// <summary>
-        /// Recovers as much file content as possible into a newly created <see cref="BPlusTree{TKey, TValue}"/>, if the operation returns
-        /// a non-zero result it was successful and the file has been replaced with a new database containing
-        /// the recovered data.  The original file remains in-tact but was renamed with a '.deleted' extension.
+        ///     Recovers as much file content as possible into a newly created <see cref="BPlusTree{TKey, TValue}" />, if the
+        ///     operation returns
+        ///     a non-zero result it was successful and the file has been replaced with a new database containing
+        ///     the recovered data.  The original file remains in-tact but was renamed with a '.deleted' extension.
         /// </summary>
-        /// <remarks> 
-        /// If an exception occurs during the parsing of the file and one or more records were recovered, they will
-        /// be stored in a file by the same name with an added extension of '.recovered'.  This recovered file can be
-        /// opened as a normal <see cref="BPlusTree{TKey, TValue}"/> to view it's contents.  During the restore it is possible that
-        /// a single Key was found multiple times, in this case the first occurrence found will be used.
+        /// <remarks>
+        ///     If an exception occurs during the parsing of the file and one or more records were recovered, they will
+        ///     be stored in a file by the same name with an added extension of '.recovered'.  This recovered file can be
+        ///     opened as a normal <see cref="BPlusTree{TKey, TValue}" /> to view it's contents.  During the restore it is possible
+        ///     that
+        ///     a single Key was found multiple times, in this case the first occurrence found will be used.
         /// </remarks>
-        /// <param name="options"> The options normally used to create the <see cref="BPlusTree{TKey, TValue}"/> instance </param>
+        /// <param name="options"> The options normally used to create the <see cref="BPlusTree{TKey, TValue}" /> instance </param>
         /// <returns>Returns 0 on failure, or the number of records successfully retrieved from the original file </returns>
         public static int RecoverFile(Options options)
         {
             int recoveredCount = 0;
             string filename = options.FileName;
 
-            if (String.IsNullOrEmpty(filename))
+            if (string.IsNullOrEmpty(filename))
                 throw new InvalidConfigurationValueException("FileName", "The FileName property was not specified.");
             if (!File.Exists(filename))
                 throw new InvalidConfigurationValueException("FileName", "The FileName specified does not exist.");
@@ -109,7 +111,7 @@ namespace CSharpTest.Net.Collections
                 tmpoptions.CreateFile = CreatePolicy.Always;
                 tmpoptions.FileName = tmpfilename;
                 tmpoptions.LockingFactory = new LockFactory<IgnoreLocking>();
-                
+
                 using (BPlusTree<TKey, TValue> tmpFile = new BPlusTree<TKey, TValue>(tmpoptions))
                 {
                     BulkInsertOptions bulkOptions = new BulkInsertOptions();
@@ -132,7 +134,10 @@ namespace CSharpTest.Net.Collections
                     backupName = filename + ".deleted" + ix++;
 
                 File.Move(filename, backupName);
-                try { File.Move(tmpfilename, filename); }
+                try
+                {
+                    File.Move(tmpfilename, filename);
+                }
                 catch
                 {
                     File.Move(backupName, filename);
@@ -144,26 +149,28 @@ namespace CSharpTest.Net.Collections
         }
 
         /// <summary>
-        /// Performs a low-level scan of the storage file to yield all Key/Value pairs it was able to read from the file.
+        ///     Performs a low-level scan of the storage file to yield all Key/Value pairs it was able to read from the file.
         /// </summary>
-        /// <param name="options"> The options normally used to create the <see cref="BPlusTree{TKey, TValue}"/> instance </param>
-        /// <param name="sharing"> <see cref="FileShare"/> options used to open the file </param>
+        /// <param name="options"> The options normally used to create the <see cref="BPlusTree{TKey, TValue}" /> instance </param>
+        /// <param name="sharing"> <see cref="FileShare" /> options used to open the file </param>
         /// <returns> Yields the Key/Value pairs found in the file </returns>
         public static IEnumerable<KeyValuePair<TKey, TValue>> RecoveryScan(Options options, FileShare sharing)
         {
             options = options.Clone();
             options.CreateFile = CreatePolicy.Never;
             string filename = options.FileName;
-            if (String.IsNullOrEmpty(filename))
+            if (string.IsNullOrEmpty(filename))
                 throw new InvalidConfigurationValueException("FileName", "The FileName property was not specified.");
             if (!File.Exists(filename))
                 throw new InvalidConfigurationValueException("FileName", "The FileName specified does not exist.");
             if (options.StorageType != StorageType.Disk)
                 throw new InvalidConfigurationValueException("StorageType", "The storage type is not set to 'Disk'.");
 
-            using (FragmentedFile file = new FragmentedFile(filename, options.FileBlockSize, 1, 1, FileAccess.Read, sharing, FileOptions.None))
+            using (FragmentedFile file = new FragmentedFile(filename, options.FileBlockSize, 1, 1, FileAccess.Read, sharing,
+                FileOptions.None))
             {
-                NodeSerializer nodeReader = new NodeSerializer(options, new NodeHandleSerializer(new Storage.BTreeFileStore.HandleSerializer()));
+                NodeSerializer nodeReader = new NodeSerializer(options,
+                    new NodeHandleSerializer(new BTreeFileStore.HandleSerializer()));
 
                 foreach (KeyValuePair<long, Stream> block in file.ForeachBlock(true, false, IngoreDataInvalid))
                 {
@@ -174,7 +181,9 @@ namespace CSharpTest.Net.Collections
                             found.Add(entry);
                     }
                     catch
-                    { /* Serialization error: Ignore and continue */ }
+                    {
+                        /* Serialization error: Ignore and continue */
+                    }
 
                     foreach (KeyValuePair<TKey, TValue> entry in found)
                         yield return entry;
@@ -183,6 +192,8 @@ namespace CSharpTest.Net.Collections
         }
 
         private static bool IngoreDataInvalid(Exception input)
-        { return input is InvalidDataException; }
+        {
+            return input is InvalidDataException;
+        }
     }
 }
