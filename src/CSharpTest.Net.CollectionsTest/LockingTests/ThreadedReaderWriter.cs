@@ -17,10 +17,11 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test.LockingTests
+namespace CSharpTest.Net.Collections.Test.LockingTests
 {
     public class ThreadedReader : ThreadedWriter
     {
@@ -37,9 +38,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
 
     public class ThreadedWriter : IDisposable
     {
-        private readonly IAsyncResult _async;
         private readonly ManualResetEvent _complete;
-        private readonly ThreadStart _delegate;
         protected readonly ILockStrategy _lck;
         private readonly ManualResetEvent _started;
         private bool _locked;
@@ -50,14 +49,13 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             _complete = new ManualResetEvent(false);
 
             _lck = lck;
-            _delegate = HoldLock;
-            _async = _delegate.BeginInvoke(null, null);
+
+            Task.Run(() => HoldLock());
+
             if (!_started.WaitOne(1000))
-            {
-                _delegate.EndInvoke(_async);
-                Assert.Fail("Unable to acquire lock");
-            }
-            Assert.IsTrue(_locked);
+                Assert.True(false, "Unable to acquire lock");
+
+            Assert.True(_locked);
         }
 
         public void Dispose()
@@ -66,7 +64,6 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             {
                 _locked = false;
                 _complete.Set();
-                _delegate.EndInvoke(_async);
             }
         }
 

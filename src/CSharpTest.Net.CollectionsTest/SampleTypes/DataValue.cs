@@ -15,9 +15,9 @@
 
 #endregion
 
-using CSharpTest.Net.Crypto;
+using CSharpTest.Net.Collections.Test.Crypto;
 
-namespace CSharpTest.Net.BPlusTree.Test.SampleTypes
+namespace CSharpTest.Net.Collections.Test.SampleTypes
 {
     public class DataValue
     {

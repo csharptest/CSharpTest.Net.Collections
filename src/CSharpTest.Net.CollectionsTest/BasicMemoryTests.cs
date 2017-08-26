@@ -15,12 +15,9 @@
 
 #endregion
 
-using CSharpTest.Net.Collections;
-using NUnit.Framework;
-
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class BasicMemoryTests : BasicTests
     {
         protected override BPlusTree<int, string> Create(BPlusTreeOptions<int, string> options)

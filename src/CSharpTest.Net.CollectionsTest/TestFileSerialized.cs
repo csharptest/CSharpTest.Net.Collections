@@ -19,31 +19,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using CSharpTest.Net.Collections;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
-    public class BasicFileTests : BasicTests
+    
+    public class BasicFileTests : BasicTests, IDisposable
     {
-        [SetUp]
-        public void Setup()
-        {
-            TempFile = new TempFile();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            TempFile.Dispose();
-        }
-
-        private TempFile TempFile;
+        private TempFile TempFile = new TempFile();
 
         protected override BPlusTreeOptions<int, string> Options =>
             new BPlusTree<int, string>.Options(new PrimitiveSerializer(), new PrimitiveSerializer())
@@ -55,13 +42,13 @@ namespace CSharpTest.Net.BPlusTree.Test
                 FileName = TempFile.TempPath
             };
 
-        [Test]
+        [Fact]
         public void TestDeleteAfterGarbageCollection()
         {
             ThreadStart fn = delegate
             {
                 BPlusTree<int, string> tree = new BPlusTree<int, string>(Options);
-                Assert.IsTrue(tree.TryAdd(1, "hi"));
+                Assert.True(tree.TryAdd(1, "hi"));
                 tree = null;
             };
 
@@ -76,24 +63,24 @@ namespace CSharpTest.Net.BPlusTree.Test
             TempFile.Delete();
         }
 
-        [Test]
+        [Fact]
         public void TestDeleteUnderlyingFile()
         {
             try
             {
                 using (BPlusTree<int, string> tree = new BPlusTree<int, string>(Options))
                 {
-                    Assert.IsTrue(tree.TryAdd(1, "hi"));
+                    Assert.True(tree.TryAdd(1, "hi"));
                     TempFile.Delete();
                 }
-                Assert.Fail();
+                Assert.True(false);
             }
             catch (IOException)
             {
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRecoverCorruptedFile()
         {
             BPlusTree<int, string>.Options options = (BPlusTree<int, string>.Options) Options;
@@ -106,7 +93,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             using (BPlusTree<int, string> tree = new BPlusTree<int, string>(options))
             {
                 for (int i = 0; i < 100; i++)
-                    Assert.IsTrue(tree.TryAdd(i, i.ToString()));
+                    Assert.True(tree.TryAdd(i, i.ToString()));
             }
 
             using (Stream io = TempFile.Open())
@@ -130,9 +117,9 @@ namespace CSharpTest.Net.BPlusTree.Test
                 using (BPlusTree<int, string> tree = new BPlusTree<int, string>(options))
                 {
                     foreach (KeyValuePair<int, string> kv in tree)
-                        Assert.AreEqual(kv.Key.ToString(), kv.Value);
+                        Assert.Equal(kv.Key.ToString(), kv.Value);
                 }
-                Assert.Fail("Expected InvalidDataException");
+                Assert.True(false,"Expected InvalidDataException");
             }
             catch (InvalidDataException)
             {
@@ -147,18 +134,23 @@ namespace CSharpTest.Net.BPlusTree.Test
                 else
                     duplicates.Add(kv.Key);
 
-                Assert.AreEqual(kv.Key.ToString(), kv.Value);
+                Assert.Equal(kv.Key.ToString(), kv.Value);
             }
-            Assert.AreNotEqual(0, found.Count);
+            Assert.NotEqual(0, found.Count);
 
             //The following may change...
-            Assert.AreEqual(99, found.Count);
-            Assert.IsFalse(found.ContainsKey(3), "should be missing #3");
-            Assert.AreEqual(0, duplicates.Count);
+            Assert.Equal(99, found.Count);
+            Assert.False(found.ContainsKey(3), "should be missing #3");
+            Assert.Equal(0, duplicates.Count);
+        }
+
+        public void Dispose()
+        {
+            TempFile.Dispose();
         }
     }
 
-    [TestFixture]
+    
     public class
         TestFileSerialized : TestDictionary<BPlusTree<int, string>, TestSimpleDictionary.BTreeFactory, int, string>
     {

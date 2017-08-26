@@ -22,15 +22,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using CSharpTest.Net.Collections;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class BasicTests
     {
         protected Random Random = new Random();
@@ -152,12 +151,12 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                     foreach (int k in keysAdded)
                     {
-                        Assert.IsTrue(data.Remove(k));
+                        Assert.True(data.Remove(k));
                         data.Add(k, k.ToString());
-                        Assert.IsTrue(data.Remove(k));
+                        Assert.True(data.Remove(k));
                         string test;
-                        Assert.IsFalse(data.TryGetValue(k, out test));
-                        Assert.IsNull(test);
+                        Assert.False(data.TryGetValue(k, out test));
+                        Assert.Null(test);
                     }
                 }
             }
@@ -207,21 +206,21 @@ namespace CSharpTest.Net.BPlusTree.Test
             Stopwatch time = new Stopwatch();
             time.Start();
 
-            Assert.AreEqual(keys.Count, data.Count);
+            Assert.Equal(keys.Count, data.Count);
 
             int count = 0;
             string test;
             foreach (int key in keys.Keys)
             {
                 count++;
-                Assert.IsTrue(data.TryGetValue(key, out test));
-                Assert.IsTrue(test == key.ToString());
+                Assert.True(data.TryGetValue(key, out test));
+                Assert.True(test == key.ToString());
             }
 
             Trace.TraceInformation("Seek {0} in {1}", count, time.ElapsedMilliseconds);
         }
 
-        [Test]
+        [Fact]
         public void ExplicitRangeAddRemove()
         {
             string test;
@@ -241,57 +240,57 @@ namespace CSharpTest.Net.BPlusTree.Test
                 {
                     if (!data.TryGetValue(i, out test))
                         throw new Exception();
-                    Assert.AreEqual("v" + i, test);
+                    Assert.Equal("v" + i, test);
                 }
 
                 data.Remove(1);
                 data.Remove(3);
                 IEnumerator<KeyValuePair<int, string>> e = data.GetEnumerator();
-                Assert.IsTrue(e.MoveNext());
-                Assert.AreEqual(0, e.Current.Key);
+                Assert.True(e.MoveNext());
+                Assert.Equal(0, e.Current.Key);
                 data.Add(1, "v1");
-                Assert.IsTrue(e.MoveNext());
+                Assert.True(e.MoveNext());
                 data.Add(3, "v3");
-                Assert.IsTrue(e.MoveNext());
+                Assert.True(e.MoveNext());
                 data.Remove(8);
-                Assert.IsTrue(e.MoveNext());
+                Assert.True(e.MoveNext());
                 e.Dispose();
                 data.Add(8, "v8");
 
                 i = 0;
                 foreach (KeyValuePair<int, string> pair in data)
-                    Assert.AreEqual(pair.Key, i++);
+                    Assert.Equal(pair.Key, i++);
 
                 for (i = 0; i <= 16; i++)
-                    Assert.IsTrue(data.Remove(i) && data.TryAdd(i, "v" + i));
+                    Assert.True(data.Remove(i) && data.TryAdd(i, "v" + i));
 
                 for (i = 6; i <= 12; i++)
-                    Assert.IsTrue(data.Remove(i));
+                    Assert.True(data.Remove(i));
 
                 for (i = 6; i <= 12; i++)
                 {
-                    Assert.IsFalse(data.TryGetValue(i, out test));
-                    Assert.IsNull(test);
+                    Assert.False(data.TryGetValue(i, out test));
+                    Assert.Null(test);
                 }
 
                 for (i = 0; i <= 5; i++)
                 {
-                    Assert.IsTrue(data.TryGetValue(i, out test));
-                    Assert.AreEqual("v" + i, test);
+                    Assert.True(data.TryGetValue(i, out test));
+                    Assert.Equal("v" + i, test);
                 }
 
                 for (i = 13; i <= 16; i++)
                 {
-                    Assert.IsTrue(data.TryGetValue(i, out test));
-                    Assert.AreEqual("v" + i, test);
+                    Assert.True(data.TryGetValue(i, out test));
+                    Assert.Equal("v" + i, test);
                 }
 
                 for (i = 0; i <= 16; i++)
-                    Assert.AreEqual(i < 6 || i > 12, data.Remove(i));
+                    Assert.Equal(i < 6 || i > 12, data.Remove(i));
             }
         }
 
-        [Test]
+        [Fact]
         public void RandomSequenceTest()
         {
             int iterations = 5;
@@ -318,17 +317,17 @@ namespace CSharpTest.Net.BPlusTree.Test
                         }
                     }
 
-                    Assert.AreEqual(numbers.Count, data.Count);
+                    Assert.Equal(numbers.Count, data.Count);
 
                     foreach (int number in numbers)
-                        Assert.IsTrue(data.Remove(number));
+                        Assert.True(data.Remove(number));
 
-                    Assert.AreEqual(0, data.Count);
+                    Assert.Equal(0, data.Count);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestAtomicAdd()
         {
             using (BPlusTree<int, string> data = Create(Options))
@@ -336,17 +335,17 @@ namespace CSharpTest.Net.BPlusTree.Test
                 data.EnableCount();
                 int[] counter = {-1};
                 for (int i = 0; i < 100; i++)
-                    Assert.IsTrue(data.TryAdd(i, k => (++counter[0]).ToString()));
-                Assert.AreEqual(100, data.Count);
-                Assert.AreEqual(100, counter[0] + 1);
+                    Assert.True(data.TryAdd(i, k => (++counter[0]).ToString()));
+                Assert.Equal(100, data.Count);
+                Assert.Equal(100, counter[0] + 1);
 
                 //Inserts of existing keys will not call method
-                Assert.IsFalse(data.TryAdd(50, k => { throw new InvalidOperationException(); }));
-                Assert.AreEqual(100, data.Count);
+                Assert.False(data.TryAdd(50, k => { throw new InvalidOperationException(); }));
+                Assert.Equal(100, data.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestAtomicAddOrUpdate()
         {
             using (BPlusTree<int, string> data = Create(Options))
@@ -359,22 +358,22 @@ namespace CSharpTest.Net.BPlusTree.Test
                         (k, v) => { throw new InvalidOperationException(); });
 
                 for (int i = 0; i < 100; i++)
-                    Assert.AreEqual((i & 1) == 1, data.TryRemove(i, (k, v) => (int.Parse(v) & 1) == 1));
+                    Assert.Equal((i & 1) == 1, data.TryRemove(i, (k, v) => (int.Parse(v) & 1) == 1));
 
                 for (int i = 0; i < 100; i++)
                     data.AddOrUpdate(i, k => (++counter[0]).ToString(), (k, v) => (++counter[0]).ToString());
 
-                Assert.AreEqual(100, data.Count);
-                Assert.AreEqual(200, counter[0] + 1);
+                Assert.Equal(100, data.Count);
+                Assert.Equal(200, counter[0] + 1);
 
                 for (int i = 0; i < 100; i++)
-                    Assert.IsTrue(data.TryRemove(i, (k, v) => int.Parse(v) - 100 == i));
+                    Assert.True(data.TryRemove(i, (k, v) => int.Parse(v) - 100 == i));
 
-                Assert.AreEqual(0, data.Count);
+                Assert.Equal(0, data.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestAtomicInterfaces()
         {
             using (BPlusTree<int, string> data = Create(Options))
@@ -383,35 +382,35 @@ namespace CSharpTest.Net.BPlusTree.Test
                 data[1] = "a";
 
                 AddUpdateValue update = new AddUpdateValue();
-                Assert.IsFalse(data.AddOrUpdate(1, ref update));
-                Assert.AreEqual("a", update.OldValue);
-                Assert.IsFalse(data.AddOrUpdate(2, ref update));
-                Assert.IsNull(update.OldValue);
-                Assert.IsFalse(data.TryRemove(1, ref update));
-                Assert.AreEqual("a", update.OldValue);
+                Assert.False(data.AddOrUpdate(1, ref update));
+                Assert.Equal("a", update.OldValue);
+                Assert.False(data.AddOrUpdate(2, ref update));
+                Assert.Null(update.OldValue);
+                Assert.False(data.TryRemove(1, ref update));
+                Assert.Equal("a", update.OldValue);
 
-                Assert.AreEqual(1, data.Count);
-                Assert.AreEqual("a", data[1]);
+                Assert.Equal(1, data.Count);
+                Assert.Equal("a", data[1]);
 
                 update.Value = "b";
-                Assert.IsTrue(data.AddOrUpdate(1, ref update));
-                Assert.AreEqual("a", update.OldValue);
-                Assert.IsTrue(data.AddOrUpdate(2, ref update));
-                Assert.IsNull(update.OldValue);
+                Assert.True(data.AddOrUpdate(1, ref update));
+                Assert.Equal("a", update.OldValue);
+                Assert.True(data.AddOrUpdate(2, ref update));
+                Assert.Null(update.OldValue);
 
-                Assert.AreEqual(2, data.Count);
-                Assert.AreEqual("b", data[1]);
-                Assert.AreEqual("b", data[2]);
+                Assert.Equal(2, data.Count);
+                Assert.Equal("b", data[1]);
+                Assert.Equal("b", data[2]);
 
-                Assert.IsTrue(data.TryRemove(1, ref update));
-                Assert.AreEqual("b", update.OldValue);
-                Assert.IsTrue(data.TryRemove(2, ref update));
-                Assert.AreEqual("b", update.OldValue);
-                Assert.AreEqual(0, data.Count);
+                Assert.True(data.TryRemove(1, ref update));
+                Assert.Equal("b", update.OldValue);
+                Assert.True(data.TryRemove(2, ref update));
+                Assert.Equal("b", update.OldValue);
+                Assert.Equal(0, data.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBulkInsert()
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -425,13 +424,13 @@ namespace CSharpTest.Net.BPlusTree.Test
                     Insert(data, CreateRandom(1000, 3000), bulk, false);
 
                     data.EnableCount();
-                    Assert.AreEqual(1000, data.Count);
+                    Assert.Equal(1000, data.Count);
 
                     Insert(data, CreateCount(data.Last().Key + 1, 1, 1000), bulk, true);
-                    Assert.AreEqual(2000, data.Count);
+                    Assert.Equal(2000, data.Count);
 
                     Insert(data, CreateCount(data.Last().Key + 10001, -1, 1000), bulk, false);
-                    Assert.AreEqual(3000, data.Count);
+                    Assert.Equal(3000, data.Count);
 
                     int lastKey = data.Last().Key;
                     data.AddRange(CreateCount(1, 2, lastKey / 2), true);
@@ -441,7 +440,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             Trace.WriteLine("Inserted in " + sw.Elapsed);
         }
 
-        [Test]
+        [Fact]
         public void TestConditionalRemove()
         {
             using (BPlusTree<int, string> data = Create(Options))
@@ -450,38 +449,38 @@ namespace CSharpTest.Net.BPlusTree.Test
                 for (int i = 0; i < 100; i++)
                     data.Add(i, i.ToString());
                 for (int i = 0; i < 100; i++)
-                    Assert.AreEqual((i & 1) == 1, data.TryRemove(i, (k, v) => (int.Parse(v) & 1) == 1));
-                Assert.AreEqual(50, data.Count);
+                    Assert.Equal((i & 1) == 1, data.TryRemove(i, (k, v) => (int.Parse(v) & 1) == 1));
+                Assert.Equal(50, data.Count);
                 for (int i = 0; i < 100; i++)
-                    Assert.AreEqual(i % 10 == 0, data.TryRemove(i, (k, v) => int.Parse(v) % 10 == 0));
-                Assert.AreEqual(40, data.Count);
+                    Assert.Equal(i % 10 == 0, data.TryRemove(i, (k, v) => int.Parse(v) % 10 == 0));
+                Assert.Equal(40, data.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCounts()
         {
             using (BPlusTree<int, string> data = Create(Options))
             {
-                Assert.AreEqual(int.MinValue, data.Count);
+                Assert.Equal(int.MinValue, data.Count);
                 data.EnableCount();
 
-                Assert.AreEqual(0, data.Count);
-                Assert.IsTrue(data.TryAdd(1, "test"));
-                Assert.AreEqual(1, data.Count);
-                Assert.IsTrue(data.TryAdd(2, "test"));
-                Assert.AreEqual(2, data.Count);
+                Assert.Equal(0, data.Count);
+                Assert.True(data.TryAdd(1, "test"));
+                Assert.Equal(1, data.Count);
+                Assert.True(data.TryAdd(2, "test"));
+                Assert.Equal(2, data.Count);
 
-                Assert.IsFalse(data.TryAdd(2, "test"));
-                Assert.AreEqual(2, data.Count);
-                Assert.IsTrue(data.Remove(1));
-                Assert.AreEqual(1, data.Count);
-                Assert.IsTrue(data.Remove(2));
-                Assert.AreEqual(0, data.Count);
+                Assert.False(data.TryAdd(2, "test"));
+                Assert.Equal(2, data.Count);
+                Assert.True(data.Remove(1));
+                Assert.Equal(1, data.Count);
+                Assert.True(data.Remove(2));
+                Assert.Equal(0, data.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestEnumerateFrom()
         {
             using (BPlusTree<int, string> data = Create(Options))
@@ -489,8 +488,8 @@ namespace CSharpTest.Net.BPlusTree.Test
                 for (int i = 0; i < 100; i++)
                     data.Add(i, i.ToString());
 
-                Assert.AreEqual(50, new List<KeyValuePair<int, string>>(data.EnumerateFrom(50)).Count);
-                Assert.AreEqual(25, new List<KeyValuePair<int, string>>(data.EnumerateFrom(75)).Count);
+                Assert.Equal(50, new List<KeyValuePair<int, string>>(data.EnumerateFrom(50)).Count);
+                Assert.Equal(25, new List<KeyValuePair<int, string>>(data.EnumerateFrom(75)).Count);
 
                 for (int i = 0; i < 100; i++)
                 {
@@ -500,12 +499,12 @@ namespace CSharpTest.Net.BPlusTree.Test
                         first = kv.Key;
                         break;
                     }
-                    Assert.AreEqual(i, first);
+                    Assert.Equal(i, first);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestEnumeration()
         {
             BPlusTreeOptions<int, string> options = Options;
@@ -522,33 +521,33 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 using (IEnumerator<KeyValuePair<int, string>> enu = data.GetEnumerator())
                 {
-                    Assert.IsTrue(enu.MoveNext());
-                    Assert.AreEqual(0, enu.Current.Key);
+                    Assert.True(enu.MoveNext());
+                    Assert.Equal(0, enu.Current.Key);
 
                     for (int id = 2; id < 10; id++)
-                        Assert.IsTrue(data.Remove(id));
+                        Assert.True(data.Remove(id));
                     for (int id = 6; id < 11; id++)
                         data.Add(id, id.ToString());
 
-                    Assert.IsTrue(enu.MoveNext());
-                    Assert.AreEqual(1, enu.Current.Key);
-                    Assert.IsTrue(enu.MoveNext());
-                    Assert.AreEqual(6, enu.Current.Key);
-                    Assert.IsTrue(enu.MoveNext());
-                    Assert.AreEqual(7, enu.Current.Key);
-                    Assert.IsTrue(data.Remove(8));
-                    Assert.IsTrue(data.Remove(9));
-                    Assert.IsTrue(data.Remove(10));
+                    Assert.True(enu.MoveNext());
+                    Assert.Equal(1, enu.Current.Key);
+                    Assert.True(enu.MoveNext());
+                    Assert.Equal(6, enu.Current.Key);
+                    Assert.True(enu.MoveNext());
+                    Assert.Equal(7, enu.Current.Key);
+                    Assert.True(data.Remove(8));
+                    Assert.True(data.Remove(9));
+                    Assert.True(data.Remove(10));
                     data.Add(11, 11.ToString());
-                    Assert.IsTrue(enu.MoveNext());
-                    Assert.AreEqual(11, enu.Current.Key);
-                    Assert.IsTrue(false == enu.MoveNext());
+                    Assert.True(enu.MoveNext());
+                    Assert.Equal(11, enu.Current.Key);
+                    Assert.True(false == enu.MoveNext());
                 }
                 data.Clear();
             }
         }
 
-        [Test]
+        [Fact]
         public void TestFirstAndLast()
         {
             using (BPlusTree<int, string> data = Create(Options))
@@ -559,32 +558,32 @@ namespace CSharpTest.Net.BPlusTree.Test
                 data.Add(4, "d");
                 data.Add(5, "e");
 
-                Assert.AreEqual(1, data.First().Key);
-                Assert.AreEqual("a", data.First().Value);
+                Assert.Equal(1, data.First().Key);
+                Assert.Equal("a", data.First().Value);
                 data.Remove(1);
-                Assert.AreEqual(2, data.First().Key);
-                Assert.AreEqual("b", data.First().Value);
+                Assert.Equal(2, data.First().Key);
+                Assert.Equal("b", data.First().Value);
 
-                Assert.AreEqual(5, data.Last().Key);
-                Assert.AreEqual("e", data.Last().Value);
+                Assert.Equal(5, data.Last().Key);
+                Assert.Equal("e", data.Last().Value);
                 data.Remove(5);
-                Assert.AreEqual(4, data.Last().Key);
-                Assert.AreEqual("d", data.Last().Value);
+                Assert.Equal(4, data.Last().Key);
+                Assert.Equal("d", data.Last().Value);
 
                 data.Remove(4);
                 data.Remove(3);
 
                 KeyValuePair<int, string> kv;
-                Assert.IsTrue(data.TryGetLast(out kv));
-                Assert.IsTrue(data.TryGetFirst(out kv));
+                Assert.True(data.TryGetLast(out kv));
+                Assert.True(data.TryGetFirst(out kv));
                 data.Remove(2);
-                Assert.IsFalse(data.TryGetLast(out kv));
-                Assert.IsFalse(data.TryGetFirst(out kv));
+                Assert.False(data.TryGetLast(out kv));
+                Assert.False(data.TryGetFirst(out kv));
 
                 try
                 {
                     data.First();
-                    Assert.Fail("Should raise InvalidOperationException");
+                    Assert.True(false,"Should raise InvalidOperationException");
                 }
                 catch (InvalidOperationException)
                 {
@@ -592,7 +591,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                 try
                 {
                     data.Last();
-                    Assert.Fail("Should raise InvalidOperationException");
+                    Assert.True(false, "Should raise InvalidOperationException");
                 }
                 catch (InvalidOperationException)
                 {
@@ -600,20 +599,20 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestGetOrAdd()
         {
             using (BPlusTree<int, string> data = Create(Options))
             {
-                Assert.AreEqual("a", data.GetOrAdd(1, "a"));
-                Assert.AreEqual("a", data.GetOrAdd(1, "b"));
+                Assert.Equal("a", data.GetOrAdd(1, "a"));
+                Assert.Equal("a", data.GetOrAdd(1, "b"));
 
-                Assert.AreEqual("b", data.GetOrAdd(2, k => "b"));
-                Assert.AreEqual("b", data.GetOrAdd(2, k => "c"));
+                Assert.Equal("b", data.GetOrAdd(2, k => "b"));
+                Assert.Equal("b", data.GetOrAdd(2, k => "c"));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestInserts()
         {
             using (BPlusTree<int, string> data = Create(Options))
@@ -629,34 +628,34 @@ namespace CSharpTest.Net.BPlusTree.Test
                 foreach (int[] arry in TestArrays)
                 {
                     data.Clear();
-                    Assert.AreEqual(0, data.Count);
+                    Assert.Equal(0, data.Count);
 
                     int count = 0;
                     foreach (int id in arry)
                     {
                         data.Add(id, id.ToString());
-                        Assert.AreEqual(++count, data.Count);
+                        Assert.Equal(++count, data.Count);
                     }
 
-                    Assert.AreEqual(arry.Length, data.Count);
+                    Assert.Equal(arry.Length, data.Count);
                     data.UnloadCache();
 
                     foreach (int id in arry)
                     {
-                        Assert.AreEqual(id.ToString(), data[id]);
+                        Assert.Equal(id.ToString(), data[id]);
                         data[id] = string.Empty;
-                        Assert.AreEqual(string.Empty, data[id]);
+                        Assert.Equal(string.Empty, data[id]);
 
-                        Assert.IsTrue(data.Remove(id));
-                        Assert.AreEqual(--count, data.Count);
+                        Assert.True(data.Remove(id));
+                        Assert.Equal(--count, data.Count);
                     }
 
-                    Assert.AreEqual(0, data.Count);
+                    Assert.Equal(0, data.Count);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestKeyValueCollections()
         {
             List<KeyValuePair<int, string>> sample = new List<KeyValuePair<int, string>>();
@@ -667,70 +666,70 @@ namespace CSharpTest.Net.BPlusTree.Test
             {
                 data.AddRange(sample);
                 //Key collection
-                Assert.AreEqual(data.Count, data.Keys.Count);
-                Assert.IsTrue(data.Keys.IsReadOnly);
+                Assert.Equal(data.Count, data.Keys.Count);
+                Assert.True(data.Keys.IsReadOnly);
                 for (int i = 0; i < sample.Count && i < 5; i++)
-                    Assert.IsTrue(data.Keys.Contains(sample[i].Key));
+                    Assert.True(data.Keys.Contains(sample[i].Key));
 
                 IEnumerator<int> ek = data.Keys.GetEnumerator();
-                Assert.IsTrue(ek.MoveNext());
+                Assert.True(ek.MoveNext());
                 int firstkey = ek.Current;
-                Assert.IsTrue(ek.MoveNext());
-                Assert.AreNotEqual(firstkey, ek.Current);
+                Assert.True(ek.MoveNext());
+                Assert.NotEqual(firstkey, ek.Current);
                 ek.Reset();
-                Assert.IsTrue(ek.MoveNext());
-                Assert.AreEqual(firstkey, ek.Current);
-                Assert.AreEqual(firstkey, ((IEnumerator) ek).Current);
+                Assert.True(ek.MoveNext());
+                Assert.Equal(firstkey, ek.Current);
+                Assert.Equal(firstkey, ((IEnumerator) ek).Current);
 
                 //Value collection
-                Assert.AreEqual(data.Count, data.Values.Count);
-                Assert.IsTrue(data.Values.IsReadOnly);
+                Assert.Equal(data.Count, data.Values.Count);
+                Assert.True(data.Values.IsReadOnly);
                 for (int i = 0; i < sample.Count && i < 5; i++)
-                    Assert.IsTrue(data.Values.Contains(sample[i].Value));
+                    Assert.True(data.Values.Contains(sample[i].Value));
 
                 IEnumerator<string> ev = data.Values.GetEnumerator();
-                Assert.IsTrue(ev.MoveNext());
+                Assert.True(ev.MoveNext());
                 string firstvalue = ev.Current;
-                Assert.IsTrue(ev.MoveNext());
-                Assert.AreNotEqual(firstvalue, ev.Current);
+                Assert.True(ev.MoveNext());
+                Assert.NotEqual(firstvalue, ev.Current);
                 ev.Reset();
-                Assert.IsTrue(ev.MoveNext());
-                Assert.AreEqual(firstvalue, ((IEnumerator) ev).Current);
+                Assert.True(ev.MoveNext());
+                Assert.Equal(firstvalue, ((IEnumerator) ev).Current);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestNewAddOrUpdate()
         {
             using (BPlusTree<int, string> data = Create(Options))
             {
-                Assert.AreEqual("a", data.AddOrUpdate(1, "a", (k, v) => k.ToString()));
-                Assert.AreEqual("1", data.AddOrUpdate(1, "a", (k, v) => k.ToString()));
+                Assert.Equal("a", data.AddOrUpdate(1, "a", (k, v) => k.ToString()));
+                Assert.Equal("1", data.AddOrUpdate(1, "a", (k, v) => k.ToString()));
 
-                Assert.AreEqual("b", data.AddOrUpdate(2, k => "b", (k, v) => k.ToString()));
-                Assert.AreEqual("2", data.AddOrUpdate(2, k => "b", (k, v) => k.ToString()));
+                Assert.Equal("b", data.AddOrUpdate(2, k => "b", (k, v) => k.ToString()));
+                Assert.Equal("2", data.AddOrUpdate(2, k => "b", (k, v) => k.ToString()));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRandomAddRemoveOrder16()
         {
             TestRandomAddRemove(1, 16, 1000);
         }
 
-        [Test]
+        [Fact]
         public void TestRandomAddRemoveOrder4()
         {
             TestRandomAddRemove(1, 4, 1000);
         }
 
-        [Test]
+        [Fact]
         public void TestRandomAddRemoveOrder64()
         {
             TestRandomAddRemove(1, 64, 1000);
         }
 
-        [Test]
+        [Fact]
         public void TestRangeEnumerate()
         {
             using (BPlusTree<int, string> data = Create(Options))
@@ -740,40 +739,40 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 int ix = 0;
                 foreach (KeyValuePair<int, string> kv in data.EnumerateRange(-500, 5000))
-                    Assert.AreEqual(ix++, kv.Key);
-                Assert.AreEqual(100, ix);
+                    Assert.Equal(ix++, kv.Key);
+                Assert.Equal(100, ix);
 
                 foreach (KeyValuePair<int, int> range in new Dictionary<int, int> {{6, 25}, {7, 25}, {8, 25}, {9, 25}, {22, 25}, {28, 28}})
                 {
                     ix = range.Key;
                     foreach (KeyValuePair<int, string> kv in data.EnumerateRange(ix, range.Value))
-                        Assert.AreEqual(ix++, kv.Key);
-                    Assert.AreEqual(range.Value, ix - 1);
+                        Assert.Equal(ix++, kv.Key);
+                    Assert.Equal(range.Value, ix - 1);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestTryRoutines()
         {
             using (BPlusTree<int, string> data = Create(Options))
             {
-                Assert.IsTrue(data.TryAdd(1, "a"));
-                Assert.IsFalse(data.TryAdd(1, "a"));
+                Assert.True(data.TryAdd(1, "a"));
+                Assert.False(data.TryAdd(1, "a"));
 
-                Assert.IsTrue(data.TryUpdate(1, "a"));
-                Assert.IsTrue(data.TryUpdate(1, "c"));
-                Assert.IsTrue(data.TryUpdate(1, "d", "c"));
-                Assert.IsFalse(data.TryUpdate(1, "f", "c"));
-                Assert.AreEqual("d", data[1]);
-                Assert.IsTrue(data.TryUpdate(1, "a", data[1]));
-                Assert.AreEqual("a", data[1]);
-                Assert.IsFalse(data.TryUpdate(2, "b"));
+                Assert.True(data.TryUpdate(1, "a"));
+                Assert.True(data.TryUpdate(1, "c"));
+                Assert.True(data.TryUpdate(1, "d", "c"));
+                Assert.False(data.TryUpdate(1, "f", "c"));
+                Assert.Equal("d", data[1]);
+                Assert.True(data.TryUpdate(1, "a", data[1]));
+                Assert.Equal("a", data[1]);
+                Assert.False(data.TryUpdate(2, "b"));
 
                 string val;
-                Assert.IsTrue(data.TryRemove(1, out val) && val == "a");
-                Assert.IsFalse(data.TryRemove(2, out val));
-                Assert.AreNotEqual(val, "a");
+                Assert.True(data.TryRemove(1, out val) && val == "a");
+                Assert.False(data.TryRemove(2, out val));
+                Assert.NotEqual(val, "a");
             }
         }
     }

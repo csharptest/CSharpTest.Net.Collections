@@ -18,14 +18,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using CSharpTest.Net.Collections;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+
     public class TestTransactionLog
     {
         private TransactionLogOptions<int, string> Options(TempFile file)
@@ -38,7 +37,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             };
         }
 
-        [Test]
+        [Fact]
         public void TestAddOperation()
         {
             using (TempFile tmp = new TempFile())
@@ -51,20 +50,19 @@ namespace CSharpTest.Net.BPlusTree.Test
                 Dictionary<int, string> test = new Dictionary<int, string>();
                 log.ReplayLog(test);
 
-                Assert.AreEqual(1, test.Count);
-                Assert.IsTrue(test.ContainsKey(1));
-                Assert.AreEqual("test", test[1]);
+                Assert.Equal(1, test.Count);
+                Assert.True(test.ContainsKey(1));
+                Assert.Equal("test", test[1]);
             }
         }
 
-        [Test]
-        [Explicit]
+        [Fact]
+        [Trait("Category", "Benchmark")]
         public void TestBenchmarkWriteSpeed()
         {
             //Write 2,147,483,776 bytes in: 00:02:09.7934237 (in chunks of 128 bytes)
             //Write 4,295,032,832 bytes in: 00:00:18.4990581 (in chunks of 65536 bytes)
             //Logged 2,398,000,000 bytes in: 00:00:36.7621027
-
 
             string newpath = Path.Combine(@"C:\Temp\LogTest\", Guid.NewGuid() + ".tmp");
             using (TempFile tmp = TempFile.Attach(newpath))
@@ -114,7 +112,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCommitEmptyAndReplay()
         {
             using (TempFile tmp = new TempFile())
@@ -129,11 +127,11 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 Dictionary<int, string> test = new Dictionary<int, string>();
                 log.ReplayLog(test);
-                Assert.AreEqual(1, test.Count);
+                Assert.Equal(1, test.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestLargeWriteAndReplay()
         {
             using (TempFile tmp = new TempFile())
@@ -147,13 +145,13 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 Dictionary<int, string> test = new Dictionary<int, string>();
                 log.ReplayLog(test);
-                Assert.AreEqual(20, test.Count);
+                Assert.Equal(20, test.Count);
                 for (int i = 0; i < 20; i++)
-                    Assert.AreEqual(testdata, test[i]);
+                    Assert.Equal(testdata, test[i]);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestLogCorruption()
         {
             using (TempFile tmp = new TempFile())
@@ -166,7 +164,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     Dictionary<int, string> test = new Dictionary<int, string>();
                     long offset = 0;
                     log.ReplayLog(test, ref offset);
-                    Assert.AreEqual(1, test.Count);
+                    Assert.Equal(1, test.Count);
                 }
                 byte[] bytes = tmp.ReadAllBytes();
 
@@ -194,21 +192,21 @@ namespace CSharpTest.Net.BPlusTree.Test
                 for (int corruptionIx = 0; corruptionIx < bytes.Length; corruptionIx++)
                     foreach (Func<KeyValuePair<int, byte[]>, byte[]> testcase in TestVariants)
                     {
-                        byte[] corrupt = testcase(new KeyValuePair<int, byte[]>(corruptionIx, (byte[]) bytes.Clone()));
+                        byte[] corrupt = testcase(new KeyValuePair<int, byte[]>(corruptionIx, (byte[])bytes.Clone()));
                         tmp.WriteAllBytes(corrupt);
 
                         using (TransactionLog<int, string> log = new TransactionLog<int, string>(Options(tmp)))
                         {
                             Dictionary<int, string> test = new Dictionary<int, string>();
                             log.ReplayLog(test);
-                            Assert.AreEqual(0, test.Count);
+                            Assert.Equal(0, test.Count);
                         }
-                        Assert.IsFalse(File.Exists(tmp.TempPath));
+                        Assert.False(File.Exists(tmp.TempPath));
                     }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestLogWithJunkAppended()
         {
             string testdata = Guid.NewGuid().ToString();
@@ -225,9 +223,9 @@ namespace CSharpTest.Net.BPlusTree.Test
                 {
                     Dictionary<int, string> test = new Dictionary<int, string>();
                     log.ReplayLog(test);
-                    Assert.AreEqual(20, test.Count);
+                    Assert.Equal(20, test.Count);
                     for (int i = 0; i < 20; i++)
-                        Assert.AreEqual(testdata, test[i]);
+                        Assert.Equal(testdata, test[i]);
                 }
 
                 long flength;
@@ -243,16 +241,16 @@ namespace CSharpTest.Net.BPlusTree.Test
                 {
                     Dictionary<int, string> test = new Dictionary<int, string>();
                     log.ReplayLog(test);
-                    Assert.AreEqual(20, test.Count);
+                    Assert.Equal(20, test.Count);
                     for (int i = 0; i < 20; i++)
-                        Assert.AreEqual(testdata, test[i]);
+                        Assert.Equal(testdata, test[i]);
                 }
                 // The file will be truncated to a valid position
-                Assert.AreEqual(flength, new FileInfo(tmp.TempPath).Length);
+                Assert.Equal(flength, new FileInfo(tmp.TempPath).Length);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestMultipleTransAndReplay()
         {
             using (TempFile tmp = new TempFile())
@@ -276,14 +274,14 @@ namespace CSharpTest.Net.BPlusTree.Test
                 {
                     Dictionary<int, string> test = new Dictionary<int, string>();
                     log.ReplayLog(test);
-                    Assert.AreEqual(3, test.Count);
+                    Assert.Equal(3, test.Count);
                     for (int i = 1; i <= 3; i++)
-                        Assert.AreEqual("test", test[i]);
+                        Assert.Equal("test", test[i]);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestMultipleWriteAndReplay()
         {
             using (TempFile tmp = new TempFile())
@@ -297,13 +295,13 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 Dictionary<int, string> test = new Dictionary<int, string>();
                 log.ReplayLog(test);
-                Assert.AreEqual(3, test.Count);
+                Assert.Equal(3, test.Count);
                 for (int i = 1; i <= 3; i++)
-                    Assert.AreEqual("test", test[i]);
+                    Assert.Equal("test", test[i]);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestPositionAndReplay()
         {
             using (TempFile tmp = new TempFile())
@@ -322,12 +320,12 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 Dictionary<int, string> test = new Dictionary<int, string>();
                 log.ReplayLog(test, ref size);
-                Assert.AreEqual(1, test.Count);
-                Assert.AreEqual("test", test[2]);
+                Assert.Equal(1, test.Count);
+                Assert.Equal("test", test[2]);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestProgressiveReplay()
         {
             using (TempFile tmp = new TempFile())
@@ -340,24 +338,24 @@ namespace CSharpTest.Net.BPlusTree.Test
                 Dictionary<int, string> test = new Dictionary<int, string>();
                 long position = 0;
                 log.ReplayLog(test, ref position);
-                Assert.AreEqual(1, test.Count);
+                Assert.Equal(1, test.Count);
                 test.Clear();
 
                 log.ReplayLog(test, ref position);
-                Assert.AreEqual(0, test.Count);
+                Assert.Equal(0, test.Count);
 
                 token = log.BeginTransaction();
                 log.AddValue(ref token, 2, "test");
                 log.CommitTransaction(ref token);
 
                 log.ReplayLog(test, ref position);
-                Assert.AreEqual(1, test.Count);
-                Assert.IsTrue(test.ContainsKey(2));
-                Assert.AreEqual("test", test[2]);
+                Assert.Equal(1, test.Count);
+                Assert.True(test.ContainsKey(2));
+                Assert.Equal("test", test[2]);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRemoveOperation()
         {
             using (TempFile tmp = new TempFile())
@@ -371,11 +369,11 @@ namespace CSharpTest.Net.BPlusTree.Test
                 test.Add(1, null);
                 log.ReplayLog(test);
 
-                Assert.AreEqual(0, test.Count);
+                Assert.Equal(0, test.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestReplayEmpty()
         {
             using (TempFile tmp = new TempFile())
@@ -383,11 +381,11 @@ namespace CSharpTest.Net.BPlusTree.Test
             {
                 Dictionary<int, string> test = new Dictionary<int, string>();
                 log.ReplayLog(test);
-                Assert.AreEqual(0, test.Count);
+                Assert.Equal(0, test.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestSingleRollbackAndReplay()
         {
             using (TempFile tmp = new TempFile())
@@ -399,11 +397,11 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 Dictionary<int, string> test = new Dictionary<int, string>();
                 log.ReplayLog(test);
-                Assert.AreEqual(0, test.Count);
+                Assert.Equal(0, test.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestTransactionLogOptions()
         {
             using (TempFile temp = new TempFile())
@@ -413,31 +411,31 @@ namespace CSharpTest.Net.BPlusTree.Test
                     PrimitiveSerializer.Int32,
                     PrimitiveSerializer.String);
                 //FileName
-                Assert.AreEqual(temp.TempPath, opt.FileName);
+                Assert.Equal(temp.TempPath, opt.FileName);
                 //Key/Value serializers
-                Assert.IsTrue(ReferenceEquals(opt.KeySerializer, PrimitiveSerializer.Int32));
-                Assert.IsTrue(ReferenceEquals(opt.ValueSerializer, PrimitiveSerializer.String));
+                Assert.True(ReferenceEquals(opt.KeySerializer, PrimitiveSerializer.Int32));
+                Assert.True(ReferenceEquals(opt.ValueSerializer, PrimitiveSerializer.String));
                 //FileOptions
-                Assert.AreEqual(FileOptions.WriteThrough, opt.FileOptions);
-                Assert.AreEqual(FileOptions.WriteThrough | FileOptions.Asynchronous,
+                Assert.Equal(FileOptions.WriteThrough, opt.FileOptions);
+                Assert.Equal(FileOptions.WriteThrough | FileOptions.Asynchronous,
                     opt.FileOptions |= FileOptions.Asynchronous);
                 //Read Only
-                Assert.AreEqual(false, opt.ReadOnly);
-                Assert.AreEqual(true, opt.ReadOnly = true);
+                Assert.Equal(false, opt.ReadOnly);
+                Assert.Equal(true, opt.ReadOnly = true);
                 //File Buffer
-                Assert.AreEqual(8, opt.FileBuffer);
-                Assert.AreEqual(0x40000, opt.FileBuffer = 0x40000);
+                Assert.Equal(8, opt.FileBuffer);
+                Assert.Equal(0x40000, opt.FileBuffer = 0x40000);
                 //Clone
-                Assert.IsFalse(ReferenceEquals(opt, opt.Clone()));
+                Assert.False(ReferenceEquals(opt, opt.Clone()));
 
                 using (TransactionLog<int, string> log = new TransactionLog<int, string>(opt))
                 {
-                    Assert.AreEqual(0, log.Size);
+                    Assert.Equal(0, log.Size);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestTruncateLog()
         {
             using (TempFile tmp = new TempFile())
@@ -450,19 +448,19 @@ namespace CSharpTest.Net.BPlusTree.Test
                 Dictionary<int, string> test = new Dictionary<int, string>();
                 log.ReplayLog(test);
 
-                Assert.AreEqual(1, test.Count);
-                Assert.IsTrue(test.ContainsKey(1));
-                Assert.AreEqual("test", test[1]);
+                Assert.Equal(1, test.Count);
+                Assert.True(test.ContainsKey(1));
+                Assert.Equal("test", test[1]);
 
                 log.TruncateLog();
                 test.Clear();
                 log.ReplayLog(test);
 
-                Assert.AreEqual(0, test.Count);
+                Assert.Equal(0, test.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestUpdateOperation()
         {
             using (TempFile tmp = new TempFile())
@@ -476,9 +474,9 @@ namespace CSharpTest.Net.BPlusTree.Test
                 test.Add(1, null);
                 log.ReplayLog(test);
 
-                Assert.AreEqual(1, test.Count);
-                Assert.IsTrue(test.ContainsKey(1));
-                Assert.AreEqual("test", test[1]);
+                Assert.Equal(1, test.Count);
+                Assert.True(test.ContainsKey(1));
+                Assert.Equal("test", test[1]);
             }
         }
     }

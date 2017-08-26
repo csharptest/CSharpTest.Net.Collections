@@ -20,9 +20,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using CSharpTest.Net.Collections.Test.Shared;
 using Action = System.Threading.ThreadStart;
 
-namespace CSharpTest.Net.Threading
+namespace CSharpTest.Net.Collections.Test.Threading
 {
     /// <summary>
     ///     An extremely basic WorkQueue using a fixed number of threads to execute Action() or Action&lt;T> delegates
@@ -66,26 +67,6 @@ namespace CSharpTest.Net.Threading
             }
         }
     }
-
-    public class ErrorEventArgs : EventArgs
-    {
-        private Exception e;
-
-        public ErrorEventArgs(Exception e)
-        {
-            this.e = e;
-        }
-
-        public Exception GetException()
-        {
-            return e;
-        }
-    }
-
-    public delegate void ErrorEventHandler(
-        object sender,
-        ErrorEventArgs e
-    );
 
     /// <summary>
     ///     An extremely basic WorkQueue using a fixed number of threads to execute Action&lt;T>

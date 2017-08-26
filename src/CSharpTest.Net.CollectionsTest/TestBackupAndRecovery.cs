@@ -20,17 +20,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using CSharpTest.Net.Collections;
+using CSharpTest.Net.Collections.Test.Reflection;
+using CSharpTest.Net.Collections.Test.Threading;
 using CSharpTest.Net.IO;
-using CSharpTest.Net.Reflection;
 using CSharpTest.Net.Serialization;
 using CSharpTest.Net.Synchronization;
-using CSharpTest.Net.Threading;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestBackupAndRecovery
     {
         private BPlusTree<Guid, TestInfo>.OptionsV2 GetOptions(TempFile temp)
@@ -68,7 +67,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             Dictionary<Guid, TestInfo> data = new Dictionary<Guid, TestInfo>();
             try
             {
-                Assert.IsNotNull(options.TransactionLog);
+                Assert.NotNull(options.TransactionLog);
                 temp.Delete();
                 tree = new BPlusTree<Guid, TestInfo>(options);
                 using (ITransactionLog<Guid, TestInfo> log = options.TransactionLog)
@@ -92,7 +91,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     using (BPlusTree<Guid, TestInfo> empty = new BPlusTree<Guid, TestInfo>(testoptions))
                     {
                         empty.EnableCount();
-                        Assert.AreEqual(0, empty.Count);
+                        Assert.Equal(0, empty.Count);
                     }
                 }
 
@@ -118,7 +117,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             try
             {
                 temp.Delete();
-                Assert.IsNotNull(options.TransactionLog);
+                Assert.NotNull(options.TransactionLog);
 
                 using (tree = new BPlusTree<Guid, TestInfo>(options))
                 {
@@ -126,10 +125,10 @@ namespace CSharpTest.Net.BPlusTree.Test
                     TestInfo.AssertEquals(data, tree);
                 }
                 tree = null;
-                Assert.IsFalse(File.Exists(options.TransactionLogFileName));
+                Assert.False(File.Exists(options.TransactionLogFileName));
 
                 // All data commits to output file
-                Assert.IsTrue(temp.Exists);
+                Assert.True(temp.Exists);
                 TestInfo.AssertEquals(data, BPlusTree<Guid, TestInfo>.EnumerateFile(options));
 
                 dataFirst = new Dictionary<Guid, TestInfo>(data);
@@ -148,7 +147,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                 tree = null;
 
                 //Still only contains original data
-                Assert.AreEqual(modified, temp.Info.LastWriteTimeUtc);
+                Assert.Equal(modified, temp.Info.LastWriteTimeUtc);
                 TestInfo.AssertEquals(dataFirst, BPlusTree<Guid, TestInfo>.EnumerateFile(options));
 
                 //Now recover...
@@ -186,8 +185,8 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
-        public void TestRecoveryOnExisting()
+        [Fact]
+        public void TestRecoveryOnExisting1()
         {
             using (TempFile temp = new TempFile())
             {
@@ -196,7 +195,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRecoveryOnExistingLargeOrder()
         {
             using (TempFile temp = new TempFile())
@@ -215,7 +214,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRecoveryOnExistingWithAsyncLog()
         {
             using (TempFile temp = new TempFile())
@@ -232,8 +231,8 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
-        public void TestRecoveryOnNew()
+        [Fact]
+        public void TestRecoveryOnNew1()
         {
             using (TempFile temp = new TempFile())
             {
@@ -243,7 +242,7 @@ namespace CSharpTest.Net.BPlusTree.Test
         }
 
 
-        [Test]
+        [Fact]
         public void TestRecoveryOnNewLargeOrder()
         {
             using (TempFile temp = new TempFile())
@@ -262,7 +261,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRecoveryOnNewWithAsyncLog()
         {
             using (TempFile temp = new TempFile())
@@ -279,7 +278,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRestoreLargeLog()
         {
             using (TempFile savelog = new TempFile())
@@ -307,12 +306,12 @@ namespace CSharpTest.Net.BPlusTree.Test
                     Insert(tree, first, 1, 100, TimeSpan.FromMinutes(1));
                     tree.Commit();
 
-                    Assert.AreEqual(100, tree.Count);
+                    Assert.Equal(100, tree.Count);
 
                     sample = new Dictionary<Guid, TestInfo>(first);
                     Insert(tree, sample, 7, 5000, TimeSpan.FromMinutes(1));
 
-                    Assert.AreEqual(35100, tree.Count);
+                    Assert.Equal(35100, tree.Count);
 
                     for (int i = 0; i < 1; i++)
                         foreach (KeyValuePair<Guid, TestInfo> rec in tree)

@@ -17,31 +17,18 @@
 
 using System;
 using System.Collections.Generic;
-using CSharpTest.Net.BPlusTree.Test.SampleTypes;
-using CSharpTest.Net.Collections;
+using CSharpTest.Net.Collections.Test.SampleTypes;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.IO;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class SampleCustomTypeTest : TestDictionary<BPlusTree<KeyInfo, DataValue>, SampleCustomTypeTest.BTreeFactory,
-        KeyInfo, DataValue>
+        KeyInfo, DataValue>, IDisposable
     {
-        protected TempFile TempFile;
-
-        [TestFixtureSetUp]
-        public virtual void Setup()
-        {
-            TempFile = new TempFile();
-        }
-
-        [TestFixtureTearDown]
-        public virtual void Teardown()
-        {
-            TempFile.Dispose();
-        }
+        protected TempFile TempFile = new TempFile();
 
         public class BTreeFactory : IFactory<BPlusTree<KeyInfo, DataValue>>
         {
@@ -79,7 +66,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             return all.ToArray();
         }
 
-        [Test]
+        [Fact]
         public void TestCommonConfiguration()
         {
             BPlusTree<KeyInfo, DataValue>.Options options =
@@ -88,7 +75,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             options.CalcBTreeOrder(32, 300); //we can simply just guess close
             options.FileName = TempFile.TempPath;
             options.CreateFile = CreatePolicy.Always; //obviously this is just for testing
-            Assert.AreEqual(FileVersion.Version1, options.FileVersion);
+            Assert.Equal(FileVersion.Version1, options.FileVersion);
 
             Random rand = new Random();
             KeyInfo k1 = new KeyInfo(), k2 = new KeyInfo();
@@ -100,23 +87,28 @@ namespace CSharpTest.Net.BPlusTree.Test
                 rand.NextBytes(data);
                 tree.Add(k1, new DataValue(k1, data));
 
-                Assert.IsTrue(tree.ContainsKey(k1));
-                Assert.IsFalse(tree.ContainsKey(k1.Next()));
-                Assert.AreEqual(data, tree[k1].Bytes);
+                Assert.True(tree.ContainsKey(k1));
+                Assert.False(tree.ContainsKey(k1.Next()));
+                Assert.Equal(data, tree[k1].Bytes);
 
                 rand.NextBytes(data);
                 tree.Add(k2, new DataValue(k2, data));
 
-                Assert.IsTrue(tree.ContainsKey(k2));
-                Assert.IsFalse(tree.ContainsKey(k2.Next()));
-                Assert.AreEqual(data, tree[k2].Bytes);
+                Assert.True(tree.ContainsKey(k2));
+                Assert.False(tree.ContainsKey(k2.Next()));
+                Assert.Equal(data, tree[k2].Bytes);
             }
             options.CreateFile = CreatePolicy.Never;
             using (BPlusTree<KeyInfo, DataValue> tree = new BPlusTree<KeyInfo, DataValue>(options))
             {
-                Assert.IsTrue(tree.ContainsKey(k1));
-                Assert.IsTrue(tree.ContainsKey(k2));
+                Assert.True(tree.ContainsKey(k1));
+                Assert.True(tree.ContainsKey(k2));
             }
+        }
+
+        public void Dispose()
+        {
+            TempFile.Dispose();
         }
     }
 }

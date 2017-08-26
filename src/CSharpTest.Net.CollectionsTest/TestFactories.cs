@@ -17,12 +17,12 @@
 
 using System;
 using CSharpTest.Net.Interfaces;
-using NUnit.Framework;
+using Xunit;
 
 #pragma warning disable 1591
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestFactories
     {
         private static int Loaded;
@@ -55,79 +55,80 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestDelegateFactory()
         {
             TestObject obj = new TestObject();
             IFactory<TestObject> factory = new DelegateFactory<TestObject>(() => obj);
-            Assert.IsTrue(ReferenceEquals(factory.Create(), factory.Create()));
+            Assert.True(ReferenceEquals(factory.Create(), factory.Create()));
 
             factory = new DelegateFactory<TestObject>(() => new TestObject());
-            Assert.IsFalse(ReferenceEquals(factory.Create(), factory.Create()));
+            Assert.False(ReferenceEquals(factory.Create(), factory.Create()));
         }
 
-        [Test]
+        [Fact]
         public void TestInstanceFactory()
         {
             TestObject obj = new TestObject();
             IFactory<TestObject> factory = new InstanceFactory<TestObject>(obj);
-            Assert.IsTrue(ReferenceEquals(obj, factory.Create()));
-            Assert.IsTrue(ReferenceEquals(factory.Create(), factory.Create()));
+            Assert.True(ReferenceEquals(obj, factory.Create()));
+            Assert.True(ReferenceEquals(factory.Create(), factory.Create()));
         }
 
-        [Test]
+        [Fact]
         public void TestNewFactory()
         {
             IFactory<TestObject> factory = new NewFactory<TestObject>();
-            Assert.IsFalse(ReferenceEquals(factory.Create(), factory.Create()));
+            Assert.False(ReferenceEquals(factory.Create(), factory.Create()));
         }
 
-        [Test]
+        [Fact]
         public void TestSingletonIsLazyFactory()
         {
-            Assert.AreEqual(0, Loaded & 2);
+            Assert.Equal(0, Loaded & 2);
             if (true)
             {
                 IFactory<TestLazy2> factory = Singleton<TestLazy2>.Factory;
-                Assert.AreEqual(0, Loaded & 2);
+                Assert.Equal(0, Loaded & 2);
                 factory.Create();
-                Assert.AreEqual(2, Loaded & 2);
+                Assert.Equal(2, Loaded & 2);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestSingletonIsLazyInstance()
         {
-            Assert.AreEqual(0, Loaded & 1);
+            Assert.Equal(0, Loaded & 1);
             if (true)
             {
                 Action<int> Load1 = x => GC.KeepAlive(Singleton<TestLazy1>.Instance);
-                Assert.AreEqual(0, Loaded & 1);
+                Assert.Equal(0, Loaded & 1);
                 Load1(0);
-                Assert.AreEqual(1, Loaded & 1);
+                Assert.Equal(1, Loaded & 1);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestSingletonThatThrows()
         {
             try
             {
                 GC.KeepAlive(Singleton<BadObject>.Instance);
-                Assert.Fail();
+                Assert.True(false);
             }
             catch (Exception ae)
             {
-                Assert.AreEqual("BadObject", ae.GetBaseException().Message);
+                string message = ae.GetBaseException().Message;
+                Assert.Equal("BadObject", message);
             }
             try
             {
                 Singleton<BadObject>.Factory.Create();
-                Assert.Fail();
+                Assert.True(false);
             }
             catch (Exception ae)
             {
-                Assert.AreEqual("BadObject", ae.GetBaseException().Message);
+                Assert.Equal("BadObject", ae.GetBaseException().Message);
             }
         }
     }

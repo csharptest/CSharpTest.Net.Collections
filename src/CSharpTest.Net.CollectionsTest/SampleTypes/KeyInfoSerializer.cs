@@ -18,7 +18,7 @@
 using System.IO;
 using CSharpTest.Net.Serialization;
 
-namespace CSharpTest.Net.BPlusTree.Test.SampleTypes
+namespace CSharpTest.Net.Collections.Test.SampleTypes
 {
     internal class KeyInfoSerializer : ISerializer<KeyInfo>
     {

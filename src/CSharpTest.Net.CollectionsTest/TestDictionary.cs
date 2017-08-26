@@ -18,9 +18,9 @@
 using System;
 using System.Collections.Generic;
 using CSharpTest.Net.Interfaces;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
     public abstract class
         TestDictionary<TDictionary, TFactory, TKey, TValue> : TestCollection<TDictionary, TFactory,
@@ -28,7 +28,7 @@ namespace CSharpTest.Net.BPlusTree.Test
         where TDictionary : IDictionary<TKey, TValue>, IDisposable
         where TFactory : IFactory<TDictionary>, new()
     {
-        [Test]
+        [Fact]
         public void TestAddRemoveByKey()
         {
             KeyValuePair<TKey, TValue>[] sample = GetSample();
@@ -39,18 +39,18 @@ namespace CSharpTest.Net.BPlusTree.Test
                     test.Add(kv.Key, kv.Value);
 
                 foreach (KeyValuePair<TKey, TValue> kv in sample)
-                    Assert.IsTrue(test.ContainsKey(kv.Key));
+                    Assert.True(test.ContainsKey(kv.Key));
 
                 TValue cmp;
                 foreach (KeyValuePair<TKey, TValue> kv in sample)
-                    Assert.IsTrue(test.TryGetValue(kv.Key, out cmp) && kv.Value.Equals(cmp));
+                    Assert.True(test.TryGetValue(kv.Key, out cmp) && kv.Value.Equals(cmp));
 
                 foreach (KeyValuePair<TKey, TValue> kv in sample)
-                    Assert.IsTrue(test.Remove(kv.Key));
+                    Assert.True(test.Remove(kv.Key));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestKeys()
         {
             KeyValuePair<TKey, TValue>[] sample = GetSample();
@@ -67,13 +67,13 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 List<TKey> cmp = new List<TKey>(test.Keys);
 
-                Assert.AreEqual(keys.Count, cmp.Count);
+                Assert.Equal(keys.Count, cmp.Count);
                 for (int i = 0; i < keys.Count; i++)
-                    Assert.IsTrue(test.ContainsKey(keys[i]));
+                    Assert.True(test.ContainsKey(keys[i]));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestValues()
         {
             KeyValuePair<TKey, TValue>[] sample = GetSample();
@@ -89,7 +89,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                 }
 
                 List<TValue> cmp = new List<TValue>(test.Values);
-                Assert.AreEqual(values.Count, cmp.Count);
+                Assert.Equal(values.Count, cmp.Count);
             }
         }
     }

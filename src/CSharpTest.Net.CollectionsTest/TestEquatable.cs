@@ -17,14 +17,14 @@
 
 using System;
 using System.Collections.Generic;
-using CSharpTest.Net.Bases;
-using NUnit.Framework;
+using CSharpTest.Net.Collections.Test.Bases;
+using Xunit;
 
 #pragma warning disable 1591
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestEquatable
     {
         public sealed class Null<T> : Comparable<Null<T>>
@@ -71,7 +71,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestEqualityOperators()
         {
             Null<int> nil = null;
@@ -79,40 +79,40 @@ namespace CSharpTest.Net.Library.Test
             Null<int> b1 = 6;
             Null<int> b2 = 6;
 
-            Assert.IsTrue(null == nil);
-            Assert.IsTrue(nil == null);
-            Assert.IsTrue(b1 == b2);
-            Assert.IsFalse(a == b1);
-            Assert.IsFalse(b1 == a);
-            Assert.IsFalse(nil == a);
-            Assert.IsFalse(a == nil);
-            Assert.IsFalse(null == a);
-            Assert.IsFalse(a == null);
+            Assert.True(null == nil);
+            Assert.True(nil == null);
+            Assert.True(b1 == b2);
+            Assert.False(a == b1);
+            Assert.False(b1 == a);
+            Assert.False(nil == a);
+            Assert.False(a == nil);
+            Assert.False(null == a);
+            Assert.False(a == null);
 
-            Assert.IsFalse(null != nil);
-            Assert.IsFalse(nil != null);
-            Assert.IsFalse(b1 != b2);
-            Assert.IsTrue(a != b1);
-            Assert.IsTrue(b1 != a);
-            Assert.IsTrue(nil != a);
-            Assert.IsTrue(a != nil);
-            Assert.IsTrue(null != a);
-            Assert.IsTrue(a != null);
+            Assert.False(null != nil);
+            Assert.False(nil != null);
+            Assert.False(b1 != b2);
+            Assert.True(a != b1);
+            Assert.True(b1 != a);
+            Assert.True(nil != a);
+            Assert.True(a != nil);
+            Assert.True(null != a);
+            Assert.True(a != null);
         }
 
-        [Test]
+        [Fact]
         public void TestEquals()
         {
             object nil = null;
             object a = new Null<int>(5);
             object b1 = 6;
 
-            Assert.IsTrue(a.Equals((Null<int>) 5));
-            Assert.IsFalse(a.Equals(nil));
-            Assert.IsFalse(a.Equals(b1));
+            Assert.True(a.Equals((Null<int>) 5));
+            Assert.False(a.Equals(nil));
+            Assert.False(a.Equals(b1));
         }
 
-        [Test]
+        [Fact]
         public void TestGreaterThanOperators()
         {
             Null<int> nil = null;
@@ -120,28 +120,28 @@ namespace CSharpTest.Net.Library.Test
             Null<int> b1 = 6;
             Null<int> b2 = 6;
 
-            Assert.IsTrue(null >= nil);
-            Assert.IsTrue(nil >= null);
-            Assert.IsTrue(b1 >= b2);
-            Assert.IsFalse(a >= b1);
-            Assert.IsTrue(b1 >= a);
-            Assert.IsFalse(nil >= a);
-            Assert.IsTrue(a >= nil);
-            Assert.IsFalse(null >= a);
-            Assert.IsTrue(a >= null);
+            Assert.True(null >= nil);
+            Assert.True(nil >= null);
+            Assert.True(b1 >= b2);
+            Assert.False(a >= b1);
+            Assert.True(b1 >= a);
+            Assert.False(nil >= a);
+            Assert.True(a >= nil);
+            Assert.False(null >= a);
+            Assert.True(a >= null);
 
-            Assert.IsFalse(null > nil);
-            Assert.IsFalse(nil > null);
-            Assert.IsFalse(b1 > b2);
-            Assert.IsFalse(a > b1);
-            Assert.IsTrue(b1 > a);
-            Assert.IsFalse(nil > a);
-            Assert.IsTrue(a > nil);
-            Assert.IsFalse(null > a);
-            Assert.IsTrue(a > null);
+            Assert.False(null > nil);
+            Assert.False(nil > null);
+            Assert.False(b1 > b2);
+            Assert.False(a > b1);
+            Assert.True(b1 > a);
+            Assert.False(nil > a);
+            Assert.True(a > nil);
+            Assert.False(null > a);
+            Assert.True(a > null);
         }
 
-        [Test]
+        [Fact]
         public void TestIComparable()
         {
             Null<int> nil = null;
@@ -149,16 +149,16 @@ namespace CSharpTest.Net.Library.Test
             IComparable a1 = new Null<int>(5);
             Null<int> b1 = 6;
 
-            Assert.IsTrue(a.CompareTo(5) == 0);
-            Assert.IsTrue(a.CompareTo(nil) > 0);
-            Assert.IsTrue(a.CompareTo(b1) < 0);
+            Assert.True(a.CompareTo(5) == 0);
+            Assert.True(a.CompareTo(nil) > 0);
+            Assert.True(a.CompareTo(b1) < 0);
 
-            Assert.IsTrue(a1.CompareTo((Null<int>) 5) == 0);
-            Assert.IsTrue(a1.CompareTo(nil) > 0);
-            Assert.IsTrue(a1.CompareTo(b1) < 0);
+            Assert.True(a1.CompareTo((Null<int>) 5) == 0);
+            Assert.True(a1.CompareTo(nil) > 0);
+            Assert.True(a1.CompareTo(b1) < 0);
         }
 
-        [Test]
+        [Fact]
         public void TestIComparer()
         {
             IComparer<Null<int>> cmp = Null<int>.Comparer;
@@ -167,18 +167,18 @@ namespace CSharpTest.Net.Library.Test
             Null<int> b1 = 6;
             Null<int> b2 = 6;
 
-            Assert.IsTrue(cmp.Compare(null, nil) == 0);
-            Assert.IsTrue(cmp.Compare(nil, null) == 0);
-            Assert.IsTrue(cmp.Compare(b1, b2) == 0);
-            Assert.IsTrue(cmp.Compare(a, b1) < 0);
-            Assert.IsTrue(cmp.Compare(b1, a) > 0);
-            Assert.IsTrue(cmp.Compare(nil, a) < 0);
-            Assert.IsTrue(cmp.Compare(a, nil) > 0);
-            Assert.IsTrue(cmp.Compare(null, a) < 0);
-            Assert.IsTrue(cmp.Compare(a, null) > 0);
+            Assert.True(cmp.Compare(null, nil) == 0);
+            Assert.True(cmp.Compare(nil, null) == 0);
+            Assert.True(cmp.Compare(b1, b2) == 0);
+            Assert.True(cmp.Compare(a, b1) < 0);
+            Assert.True(cmp.Compare(b1, a) > 0);
+            Assert.True(cmp.Compare(nil, a) < 0);
+            Assert.True(cmp.Compare(a, nil) > 0);
+            Assert.True(cmp.Compare(null, a) < 0);
+            Assert.True(cmp.Compare(a, null) > 0);
         }
 
-        [Test]
+        [Fact]
         public void TestIEqualityComparer()
         {
             IEqualityComparer<Null<int>> cmp = Null<int>.Comparer;
@@ -187,51 +187,51 @@ namespace CSharpTest.Net.Library.Test
             Null<int> b1 = 6;
             Null<int> b2 = 6;
 
-            Assert.IsTrue(cmp.Equals(null, nil));
-            Assert.IsTrue(cmp.Equals(nil, null));
-            Assert.IsTrue(cmp.Equals(b1, b2));
-            Assert.IsFalse(cmp.Equals(a, b1));
-            Assert.IsFalse(cmp.Equals(b1, a));
-            Assert.IsFalse(cmp.Equals(nil, a));
-            Assert.IsFalse(cmp.Equals(a, nil));
-            Assert.IsFalse(cmp.Equals(null, a));
-            Assert.IsFalse(cmp.Equals(a, null));
+            Assert.True(cmp.Equals(null, nil));
+            Assert.True(cmp.Equals(nil, null));
+            Assert.True(cmp.Equals(b1, b2));
+            Assert.False(cmp.Equals(a, b1));
+            Assert.False(cmp.Equals(b1, a));
+            Assert.False(cmp.Equals(nil, a));
+            Assert.False(cmp.Equals(a, nil));
+            Assert.False(cmp.Equals(null, a));
+            Assert.False(cmp.Equals(a, null));
 
-            Assert.IsTrue(Null<int>.Equals(null, nil));
-            Assert.IsTrue(Null<int>.Equals(nil, null));
-            Assert.IsTrue(Null<int>.Equals(b1, b2));
-            Assert.IsFalse(Null<int>.Equals(a, b1));
-            Assert.IsFalse(Null<int>.Equals(b1, a));
-            Assert.IsFalse(Null<int>.Equals(nil, a));
-            Assert.IsFalse(Null<int>.Equals(a, nil));
-            Assert.IsFalse(Null<int>.Equals(null, a));
-            Assert.IsFalse(Null<int>.Equals(a, null));
+            Assert.True(Null<int>.Equals(null, nil));
+            Assert.True(Null<int>.Equals(nil, null));
+            Assert.True(Null<int>.Equals(b1, b2));
+            Assert.False(Null<int>.Equals(a, b1));
+            Assert.False(Null<int>.Equals(b1, a));
+            Assert.False(Null<int>.Equals(nil, a));
+            Assert.False(Null<int>.Equals(a, nil));
+            Assert.False(Null<int>.Equals(null, a));
+            Assert.False(Null<int>.Equals(a, null));
 
-            Assert.AreNotEqual(a.GetHashCode(), b2.GetHashCode());
-            Assert.AreEqual(b1.GetHashCode(), b2.GetHashCode());
+            Assert.NotEqual(a.GetHashCode(), b2.GetHashCode());
+            Assert.Equal(b1.GetHashCode(), b2.GetHashCode());
 
-            Assert.AreEqual(cmp.GetHashCode(nil), 0);
-            Assert.AreEqual(cmp.GetHashCode(a), a.GetHashCode());
-            Assert.AreEqual(cmp.GetHashCode(b1), b2.GetHashCode());
+            Assert.Equal(cmp.GetHashCode(nil), 0);
+            Assert.Equal(cmp.GetHashCode(a), a.GetHashCode());
+            Assert.Equal(cmp.GetHashCode(b1), b2.GetHashCode());
 
-            Assert.AreEqual(Null<int>.GetHashCode(nil), 0);
-            Assert.AreEqual(Null<int>.GetHashCode(a), a.GetHashCode());
-            Assert.AreEqual(Null<int>.GetHashCode(b1), b2.GetHashCode());
+            Assert.Equal(Null<int>.GetHashCode(nil), 0);
+            Assert.Equal(Null<int>.GetHashCode(a), a.GetHashCode());
+            Assert.Equal(Null<int>.GetHashCode(b1), b2.GetHashCode());
         }
 
-        [Test]
+        [Fact]
         public void TestIEquatable()
         {
             Null<int> nil = null;
             IEquatable<Null<int>> a = new Null<int>(5);
             Null<int> b1 = 6;
 
-            Assert.IsTrue(a.Equals(5));
-            Assert.IsFalse(a.Equals(nil));
-            Assert.IsFalse(a.Equals(b1));
+            Assert.True(a.Equals(5));
+            Assert.False(a.Equals(nil));
+            Assert.False(a.Equals(b1));
         }
 
-        [Test]
+        [Fact]
         public void TestLessThanOperators()
         {
             Null<int> nil = null;
@@ -239,25 +239,25 @@ namespace CSharpTest.Net.Library.Test
             Null<int> b1 = 6;
             Null<int> b2 = 6;
 
-            Assert.IsTrue(null <= nil);
-            Assert.IsTrue(nil <= null);
-            Assert.IsTrue(b1 <= b2);
-            Assert.IsTrue(a <= b1);
-            Assert.IsFalse(b1 <= a);
-            Assert.IsTrue(nil <= a);
-            Assert.IsFalse(a <= nil);
-            Assert.IsTrue(null <= a);
-            Assert.IsFalse(a <= null);
+            Assert.True(null <= nil);
+            Assert.True(nil <= null);
+            Assert.True(b1 <= b2);
+            Assert.True(a <= b1);
+            Assert.False(b1 <= a);
+            Assert.True(nil <= a);
+            Assert.False(a <= nil);
+            Assert.True(null <= a);
+            Assert.False(a <= null);
 
-            Assert.IsFalse(null < nil);
-            Assert.IsFalse(nil < null);
-            Assert.IsFalse(b1 < b2);
-            Assert.IsTrue(a < b1);
-            Assert.IsFalse(b1 < a);
-            Assert.IsTrue(nil < a);
-            Assert.IsFalse(a < nil);
-            Assert.IsTrue(null < a);
-            Assert.IsFalse(a < null);
+            Assert.False(null < nil);
+            Assert.False(nil < null);
+            Assert.False(b1 < b2);
+            Assert.True(a < b1);
+            Assert.False(b1 < a);
+            Assert.True(nil < a);
+            Assert.False(a < nil);
+            Assert.True(null < a);
+            Assert.False(a < null);
         }
     }
 }

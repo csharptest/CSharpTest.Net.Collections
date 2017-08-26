@@ -19,9 +19,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using CSharpTest.Net.Interfaces;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
     public abstract class TestCollection<TList, TFactory, TItem>
         where TList : ICollection<TItem>, IDisposable
@@ -30,7 +30,7 @@ namespace CSharpTest.Net.BPlusTree.Test
         protected readonly TFactory Factory = new TFactory();
         protected abstract TItem[] GetSample();
 
-        [Test]
+        [Fact]
         public void TestAddRemove()
         {
             using (TList list = Factory.Create())
@@ -38,22 +38,22 @@ namespace CSharpTest.Net.BPlusTree.Test
                 TItem[] items = GetSample();
 
                 int count = 0;
-                Assert.AreEqual(count, list.Count);
+                Assert.Equal(count, list.Count);
 
                 foreach (TItem item in items)
                 {
                     list.Add(item);
-                    Assert.AreEqual(++count, list.Count);
+                    Assert.Equal(++count, list.Count);
                 }
                 foreach (TItem item in items)
                 {
-                    Assert.IsTrue(list.Remove(item));
-                    Assert.AreEqual(--count, list.Count);
+                    Assert.True(list.Remove(item));
+                    Assert.Equal(--count, list.Count);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestAddReverseRemove()
         {
             using (TList list = Factory.Create())
@@ -61,22 +61,22 @@ namespace CSharpTest.Net.BPlusTree.Test
                 TItem[] items = GetSample();
 
                 int count = 0;
-                Assert.AreEqual(count, list.Count);
+                Assert.Equal(count, list.Count);
 
                 foreach (TItem item in items)
                 {
                     list.Add(item);
-                    Assert.AreEqual(++count, list.Count);
+                    Assert.Equal(++count, list.Count);
                 }
                 for (int ix = items.Length - 1; ix >= 0; ix--)
                 {
-                    Assert.IsTrue(list.Remove(items[ix]));
-                    Assert.AreEqual(--count, list.Count);
+                    Assert.True(list.Remove(items[ix]));
+                    Assert.Equal(--count, list.Count);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestClear()
         {
             using (TList list = Factory.Create())
@@ -85,15 +85,15 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 foreach (TItem item in items)
                     list.Add(item);
-                Assert.AreEqual(items.Length, list.Count);
+                Assert.Equal(items.Length, list.Count);
 
-                Assert.AreNotEqual(0, list.Count);
+                Assert.NotEqual(0, list.Count);
                 list.Clear();
-                Assert.AreEqual(0, list.Count);
+                Assert.Equal(0, list.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestContains()
         {
             using (TList list = Factory.Create())
@@ -102,14 +102,14 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 foreach (TItem item in items)
                     list.Add(item);
-                Assert.AreEqual(items.Length, list.Count);
+                Assert.Equal(items.Length, list.Count);
 
                 foreach (TItem item in items)
-                    Assert.IsTrue(list.Contains(item));
+                    Assert.True(list.Contains(item));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCopyTo()
         {
             using (TList list = Factory.Create())
@@ -118,29 +118,29 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 foreach (TItem item in items)
                     list.Add(item);
-                Assert.AreEqual(items.Count, list.Count);
+                Assert.Equal(items.Count, list.Count);
 
                 TItem[] copy = new TItem[items.Count + 1];
                 list.CopyTo(copy, 1);
-                Assert.AreEqual(default(TItem), copy[0]);
+                Assert.Equal(default(TItem), copy[0]);
 
                 for (int i = 1; i < copy.Length; i++)
-                    Assert.IsTrue(items.Remove(copy[i]));
+                    Assert.True(items.Remove(copy[i]));
 
-                Assert.AreEqual(0, items.Count);
+                Assert.Equal(0, items.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestIsReadOnly()
         {
             using (TList list = Factory.Create())
             {
-                Assert.IsFalse(list.IsReadOnly);
+                Assert.False(list.IsReadOnly);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestGetEnumerator()
         {
             using (TList list = Factory.Create())
@@ -149,16 +149,16 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 foreach (TItem item in items)
                     list.Add(item);
-                Assert.AreEqual(items.Count, list.Count);
+                Assert.Equal(items.Count, list.Count);
 
                 foreach (TItem item in list)
-                    Assert.IsTrue(items.Remove(item));
+                    Assert.True(items.Remove(item));
 
-                Assert.AreEqual(0, items.Count);
+                Assert.Equal(0, items.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestGetEnumerator2()
         {
             using (TList list = Factory.Create())
@@ -167,12 +167,12 @@ namespace CSharpTest.Net.BPlusTree.Test
 
                 foreach (TItem item in items)
                     list.Add(item);
-                Assert.AreEqual(items.Count, list.Count);
+                Assert.Equal(items.Count, list.Count);
 
                 foreach (TItem item in (IEnumerable) list)
-                    Assert.IsTrue(items.Remove(item));
+                    Assert.True(items.Remove(item));
 
-                Assert.AreEqual(0, items.Count);
+                Assert.Equal(0, items.Count);
             }
         }
     }

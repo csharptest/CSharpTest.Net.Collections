@@ -19,12 +19,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using CSharpTest.Net.Collections;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestLurchTableThreading
     {
         private const int MAXTHREADS = 8;
@@ -103,7 +102,7 @@ namespace CSharpTest.Net.Library.Test
             );
 
             Guid result = new Guid(bytes);
-            Assert.AreEqual(guid.GetHashCode(), result.GetHashCode());
+            Assert.Equal(guid.GetHashCode(), result.GetHashCode());
             return result;
         }
 
@@ -125,7 +124,7 @@ namespace CSharpTest.Net.Library.Test
             return sample;
         }
 
-        [Test]
+        [Fact]
         public void CompareTest()
         {
             const int size = 1000000;
@@ -159,7 +158,7 @@ namespace CSharpTest.Net.Library.Test
                 timer = Stopwatch.StartNew();
                 Parallel(1, sample, item => dict.Remove(item));
                 Trace.TraceInformation("Dict Rem: {0}", timer.Elapsed);
-                Assert.AreEqual(0, dict.Count);
+                Assert.Equal(0, dict.Count);
 
                 timer = Stopwatch.StartNew();
                 Parallel(1, sample, item => test.Remove(item));
@@ -173,47 +172,47 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestDelete()
         {
             LurchTable<Guid, bool> Map = CreateMap<bool>();
             Guid[] ids = CreateSample(Guid.NewGuid(), COUNT, 4);
             foreach (Guid id in ids)
-                Assert.IsTrue(Map.TryAdd(id, true));
+                Assert.True(Map.TryAdd(id, true));
 
             bool test;
-            Parallel(1, ids, id => { Assert.IsTrue(Map.Remove(id)); });
+            Parallel(1, ids, id => { Assert.True(Map.Remove(id)); });
 
-            Assert.AreEqual(0, Map.Count);
+            Assert.Equal(0, Map.Count);
             foreach (Guid id in ids)
-                Assert.IsTrue(!Map.TryGetValue(id, out test));
+                Assert.True(!Map.TryGetValue(id, out test));
         }
 
-        [Test]
+        [Fact]
         public void TestGuidHashCollision()
         {
             Guid id1 = Guid.NewGuid();
             Guid id2 = NextHashCollision(id1);
 
-            Assert.AreNotEqual(id1, id2);
-            Assert.AreEqual(id1.GetHashCode(), id2.GetHashCode());
+            Assert.NotEqual(id1, id2);
+            Assert.Equal(id1.GetHashCode(), id2.GetHashCode());
         }
 
-        [Test]
+        [Fact]
         public void TestInsert()
         {
             LurchTable<Guid, bool> Map = CreateMap<bool>();
             Guid[] ids = CreateSample(Guid.NewGuid(), COUNT, 4);
 
             bool test;
-            Parallel(1, ids, id => { Assert.IsTrue(Map.TryAdd(id, true)); });
+            Parallel(1, ids, id => { Assert.True(Map.TryAdd(id, true)); });
 
-            Assert.AreEqual(ids.Length, Map.Count);
+            Assert.Equal(ids.Length, Map.Count);
             foreach (Guid id in ids)
-                Assert.IsTrue(Map.TryGetValue(id, out test) && test);
+                Assert.True(Map.TryGetValue(id, out test) && test);
         }
 
-        [Test]
+        [Fact]
         public void TestInsertDelete()
         {
             LurchTable<Guid, bool> Map = CreateMap<bool>();
@@ -222,16 +221,16 @@ namespace CSharpTest.Net.Library.Test
             bool test;
             Parallel(100, ids, id =>
             {
-                Assert.IsTrue(Map.TryAdd(id, true));
-                Assert.IsTrue(Map.Remove(id));
+                Assert.True(Map.TryAdd(id, true));
+                Assert.True(Map.Remove(id));
             });
 
-            Assert.AreEqual(0, Map.Count);
+            Assert.Equal(0, Map.Count);
             foreach (Guid id in ids)
-                Assert.IsTrue(!Map.TryGetValue(id, out test));
+                Assert.True(!Map.TryGetValue(id, out test));
         }
 
-        [Test]
+        [Fact]
         public void TestInsertUpdateDelete()
         {
             LurchTable<Guid, bool> Map = CreateMap<bool>();
@@ -240,17 +239,17 @@ namespace CSharpTest.Net.Library.Test
             bool test;
             Parallel(100, ids, id =>
             {
-                Assert.IsTrue(Map.TryAdd(id, true));
-                Assert.IsTrue(Map.TryUpdate(id, false, true));
-                Assert.IsTrue(Map.Remove(id));
+                Assert.True(Map.TryAdd(id, true));
+                Assert.True(Map.TryUpdate(id, false, true));
+                Assert.True(Map.Remove(id));
             });
 
-            Assert.AreEqual(0, Map.Count);
+            Assert.Equal(0, Map.Count);
             foreach (Guid id in ids)
-                Assert.IsTrue(!Map.TryGetValue(id, out test));
+                Assert.True(!Map.TryGetValue(id, out test));
         }
 
-        [Test]
+        [Fact]
         public void TestLimitedInsert()
         {
             LurchTable<Guid, bool> Map = new LurchTable<Guid, bool>(LurchTableOrder.Access, 1000);
@@ -260,11 +259,11 @@ namespace CSharpTest.Net.Library.Test
                 id =>
                 {
                     bool test;
-                    Assert.IsTrue(Map.TryAdd(id, true));
+                    Assert.True(Map.TryAdd(id, true));
                     Map.TryGetValue(id, out test);
                 });
 
-            Assert.AreEqual(1000, Map.Count);
+            Assert.Equal(1000, Map.Count);
         }
     }
 }

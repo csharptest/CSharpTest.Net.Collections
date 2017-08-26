@@ -16,15 +16,13 @@
 #endregion
 
 using System.Collections.Generic;
-using CSharpTest.Net.Collections;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.Serialization;
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class
         TestSimpleDictionary : TestDictionary<BPlusTree<int, string>, TestSimpleDictionary.BTreeFactory, int, string>
     {

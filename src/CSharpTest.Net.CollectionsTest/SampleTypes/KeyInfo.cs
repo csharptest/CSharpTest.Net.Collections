@@ -17,7 +17,7 @@
 
 using System;
 
-namespace CSharpTest.Net.BPlusTree.Test.SampleTypes
+namespace CSharpTest.Net.Collections.Test.SampleTypes
 {
     public class KeyInfo
     {

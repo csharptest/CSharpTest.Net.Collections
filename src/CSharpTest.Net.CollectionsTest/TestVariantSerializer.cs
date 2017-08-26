@@ -18,11 +18,11 @@
 using System;
 using System.IO;
 using CSharpTest.Net.Serialization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestVariantSerializer
     {
         private readonly Random _random = new Random();
@@ -40,11 +40,11 @@ namespace CSharpTest.Net.Library.Test
                 ms.Write(bytes, 0, bytes.Length);
                 // seek begin and read.
                 ms.Position = 0;
-                Assert.AreEqual(value, ser.ReadFrom(ms));
+                Assert.Equal(value, ser.ReadFrom(ms));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestSerializeInt()
         {
             ReadWrite(-1);
@@ -54,7 +54,7 @@ namespace CSharpTest.Net.Library.Test
                 ReadWrite(i);
         }
 
-        [Test]
+        [Fact]
         public void TestSerializeLong()
         {
             ReadWrite(-1L);
@@ -64,7 +64,7 @@ namespace CSharpTest.Net.Library.Test
                 ReadWrite(i);
         }
 
-        [Test]
+        [Fact]
         public void TestSerializeUInt()
         {
             ReadWrite(uint.MinValue);
@@ -73,7 +73,7 @@ namespace CSharpTest.Net.Library.Test
                 ReadWrite(i);
         }
 
-        [Test]
+        [Fact]
         public void TestSerializeULong()
         {
             ReadWrite(ulong.MinValue);

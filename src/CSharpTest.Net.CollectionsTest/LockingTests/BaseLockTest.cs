@@ -16,62 +16,62 @@
 #endregion
 
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test.LockingTests
+namespace CSharpTest.Net.Collections.Test.LockingTests
 {
-    public class BaseLockTest<TFactory>
+    public abstract class BaseLockTest<TFactory>
         where TFactory : ILockFactory, new()
     {
         protected readonly TFactory LockFactory = new TFactory();
 
-        [Test]
+        [Fact]
         public void TestTryRead()
         {
             using (ILockStrategy l = LockFactory.Create())
             {
-                Assert.IsTrue(l.TryRead(0));
+                Assert.True(l.TryRead(0));
                 l.ReleaseRead();
             }
         }
 
-        [Test]
+        [Fact]
         public void TestTryWrite()
         {
             using (ILockStrategy l = LockFactory.Create())
             {
-                Assert.IsTrue(l.TryWrite(0));
+                Assert.True(l.TryWrite(0));
                 l.ReleaseWrite();
             }
         }
 
-        [Test]
+        [Fact]
         public void TestTryReadThenTryWrite()
         {
             using (ILockStrategy l = LockFactory.Create())
             {
-                Assert.IsTrue(l.TryRead(0));
+                Assert.True(l.TryRead(0));
                 l.ReleaseRead();
 
-                Assert.IsTrue(l.TryWrite(0));
+                Assert.True(l.TryWrite(0));
                 l.ReleaseWrite();
             }
         }
 
-        [Test]
+        [Fact]
         public void TestTryWriteThenTryRead()
         {
             using (ILockStrategy l = LockFactory.Create())
             {
-                Assert.IsTrue(l.TryRead(0));
+                Assert.True(l.TryRead(0));
                 l.ReleaseRead();
 
-                Assert.IsTrue(l.TryWrite(0));
+                Assert.True(l.TryWrite(0));
                 l.ReleaseWrite();
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRead()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -80,7 +80,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWrite()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -89,7 +89,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestReadThenWrite()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -103,7 +103,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWriteThenRead()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -117,7 +117,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestReadWithTimeout()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -126,7 +126,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWriteWithTimeout()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -135,7 +135,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestReadThenWriteWithTimeout()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -149,7 +149,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWriteThenReadWithTimeout()
         {
             using (ILockStrategy l = LockFactory.Create())

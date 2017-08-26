@@ -18,9 +18,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
     public abstract class TestGenericCollection<TList, TItem>
         where TList : ICollection<TItem>, new()
@@ -32,59 +32,59 @@ namespace CSharpTest.Net.Library.Test
             TList list = new TList();
 
             int count = 0;
-            Assert.AreEqual(count, list.Count);
+            Assert.Equal(count, list.Count);
 
             foreach (TItem item in items)
             {
                 list.Add(item);
-                Assert.AreEqual(++count, list.Count);
+                Assert.Equal(++count, list.Count);
             }
             return list;
         }
 
-        [Test]
+        [Fact]
         public void TestAddRemove()
         {
             TList list = new TList();
             TItem[] items = GetSample();
 
             int count = 0;
-            Assert.AreEqual(count, list.Count);
+            Assert.Equal(count, list.Count);
 
             foreach (TItem item in items)
             {
                 list.Add(item);
-                Assert.AreEqual(++count, list.Count);
+                Assert.Equal(++count, list.Count);
             }
             foreach (TItem item in items)
             {
-                Assert.IsTrue(list.Remove(item));
-                Assert.AreEqual(--count, list.Count);
+                Assert.True(list.Remove(item));
+                Assert.Equal(--count, list.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestAddReverseRemove()
         {
             TList list = new TList();
             TItem[] items = GetSample();
 
             int count = 0;
-            Assert.AreEqual(count, list.Count);
+            Assert.Equal(count, list.Count);
 
             foreach (TItem item in items)
             {
                 list.Add(item);
-                Assert.AreEqual(++count, list.Count);
+                Assert.Equal(++count, list.Count);
             }
             for (int ix = items.Length - 1; ix >= 0; ix--)
             {
-                Assert.IsTrue(list.Remove(items[ix]));
-                Assert.AreEqual(--count, list.Count);
+                Assert.True(list.Remove(items[ix]));
+                Assert.Equal(--count, list.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestClear()
         {
             TList list = new TList();
@@ -92,14 +92,14 @@ namespace CSharpTest.Net.Library.Test
 
             foreach (TItem item in items)
                 list.Add(item);
-            Assert.AreEqual(items.Length, list.Count);
+            Assert.Equal(items.Length, list.Count);
 
-            Assert.AreNotEqual(0, list.Count);
+            Assert.NotEqual(0, list.Count);
             list.Clear();
-            Assert.AreEqual(0, list.Count);
+            Assert.Equal(0, list.Count);
         }
 
-        [Test]
+        [Fact]
         public void TestContains()
         {
             TList list = new TList();
@@ -107,13 +107,13 @@ namespace CSharpTest.Net.Library.Test
 
             foreach (TItem item in items)
                 list.Add(item);
-            Assert.AreEqual(items.Length, list.Count);
+            Assert.Equal(items.Length, list.Count);
 
             foreach (TItem item in items)
-                Assert.IsTrue(list.Contains(item));
+                Assert.True(list.Contains(item));
         }
 
-        [Test]
+        [Fact]
         public void TestCopyTo()
         {
             TList list = new TList();
@@ -121,25 +121,25 @@ namespace CSharpTest.Net.Library.Test
 
             foreach (TItem item in items)
                 list.Add(item);
-            Assert.AreEqual(items.Count, list.Count);
+            Assert.Equal(items.Count, list.Count);
 
             TItem[] copy = new TItem[items.Count + 1];
             list.CopyTo(copy, 1);
-            Assert.AreEqual(default(TItem), copy[0]);
+            Assert.Equal(default(TItem), copy[0]);
 
             for (int i = 1; i < copy.Length; i++)
-                Assert.IsTrue(items.Remove(copy[i]));
+                Assert.True(items.Remove(copy[i]));
 
-            Assert.AreEqual(0, items.Count);
+            Assert.Equal(0, items.Count);
         }
 
-        [Test]
+        [Fact]
         public void TestIsReadOnly()
         {
-            Assert.IsFalse(new TList().IsReadOnly);
+            Assert.False(new TList().IsReadOnly);
         }
 
-        [Test]
+        [Fact]
         public void TestGetEnumerator()
         {
             TList list = new TList();
@@ -147,15 +147,15 @@ namespace CSharpTest.Net.Library.Test
 
             foreach (TItem item in items)
                 list.Add(item);
-            Assert.AreEqual(items.Count, list.Count);
+            Assert.Equal(items.Count, list.Count);
 
             foreach (TItem item in list)
-                Assert.IsTrue(items.Remove(item));
+                Assert.True(items.Remove(item));
 
-            Assert.AreEqual(0, items.Count);
+            Assert.Equal(0, items.Count);
         }
 
-        [Test]
+        [Fact]
         public void TestGetEnumerator2()
         {
             TList list = new TList();
@@ -163,32 +163,32 @@ namespace CSharpTest.Net.Library.Test
 
             foreach (TItem item in items)
                 list.Add(item);
-            Assert.AreEqual(items.Count, list.Count);
+            Assert.Equal(items.Count, list.Count);
 
             foreach (TItem item in (IEnumerable) list)
-                Assert.IsTrue(items.Remove(item));
+                Assert.True(items.Remove(item));
 
-            Assert.AreEqual(0, items.Count);
+            Assert.Equal(0, items.Count);
         }
 
         public static void VerifyCollection<T, TC>(IEqualityComparer<T> comparer, ICollection<T> expected,
             TC collection) where TC : ICollection<T>
         {
-            Assert.AreEqual(expected.IsReadOnly, collection.IsReadOnly);
-            Assert.AreEqual(expected.Count, collection.Count);
+            Assert.Equal(expected.IsReadOnly, collection.IsReadOnly);
+            Assert.Equal(expected.Count, collection.Count);
             CompareEnumerations(comparer, expected, collection);
             using (IEnumerator<T> a = expected.GetEnumerator())
             using (IEnumerator<T> b = collection.GetEnumerator())
             {
                 bool result;
-                Assert.IsTrue(b.MoveNext());
+                Assert.True(b.MoveNext());
                 b.Reset();
-                Assert.AreEqual(result = a.MoveNext(), b.MoveNext());
+                Assert.Equal(result = a.MoveNext(), b.MoveNext());
                 while (result)
                 {
-                    Assert.IsTrue(comparer.Equals(a.Current, b.Current));
-                    Assert.IsTrue(comparer.Equals(a.Current, (T) ((IEnumerator) b).Current));
-                    Assert.AreEqual(result = a.MoveNext(), b.MoveNext());
+                    Assert.True(comparer.Equals(a.Current, b.Current));
+                    Assert.True(comparer.Equals(a.Current, (T) ((IEnumerator) b).Current));
+                    Assert.Equal(result = a.MoveNext(), b.MoveNext());
                 }
             }
 
@@ -199,7 +199,7 @@ namespace CSharpTest.Net.Library.Test
             CompareEnumerations(comparer, expected, collection);
 
             for (int i = 0; i < 5; i++)
-                Assert.IsTrue(collection.Contains(items[i]));
+                Assert.True(collection.Contains(items[i]));
         }
 
         public static void CompareEnumerations<T>(IEqualityComparer<T> comparer, IEnumerable<T> expected,
@@ -209,11 +209,11 @@ namespace CSharpTest.Net.Library.Test
             using (IEnumerator<T> b = collection.GetEnumerator())
             {
                 bool result;
-                Assert.AreEqual(result = a.MoveNext(), b.MoveNext());
+                Assert.Equal(result = a.MoveNext(), b.MoveNext());
                 while (result)
                 {
-                    Assert.IsTrue(comparer.Equals(a.Current, b.Current));
-                    Assert.AreEqual(result = a.MoveNext(), b.MoveNext());
+                    Assert.True(comparer.Equals(a.Current, b.Current));
+                    Assert.Equal(result = a.MoveNext(), b.MoveNext());
                 }
             }
         }

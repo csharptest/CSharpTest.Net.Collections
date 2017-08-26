@@ -18,9 +18,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using CSharpTest.Net.Collections.Test.Shared;
 using CSharpTest.Net.Synchronization;
 
-namespace CSharpTest.Net.Collections
+namespace CSharpTest.Net.Collections.Test
 {
     /// <summary>
     ///     Represents a thread-safe generic collection of key/value pairs.

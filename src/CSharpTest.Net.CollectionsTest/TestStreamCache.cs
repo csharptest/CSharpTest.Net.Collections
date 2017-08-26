@@ -18,17 +18,17 @@
 using System;
 using System.IO;
 using System.Threading;
-using CSharpTest.Net.Collections;
+using CSharpTest.Net.Collections.Test.IO;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.IO;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+
     public class TestStreamCache
     {
-        [Test]
+        [Fact]
         public void TestCacheLimit()
         {
             bool finished = false;
@@ -38,7 +38,7 @@ namespace CSharpTest.Net.Library.Test
                 ManualResetEvent ready = new ManualResetEvent(false);
                 ManualResetEvent release = new ManualResetEvent(false);
                 Thread t = new Thread(
-                    delegate()
+                    delegate ()
                     {
                         using (Stream stream = cache.Open(FileAccess.ReadWrite))
                         {
@@ -54,50 +54,50 @@ namespace CSharpTest.Net.Library.Test
                 t.IsBackground = true;
                 t.Start();
 
-                Assert.IsTrue(ready.WaitOne());
-                Assert.AreEqual(50, shared.Length);
+                Assert.True(ready.WaitOne());
+                Assert.Equal(50, shared.Length);
 
                 new Thread(
-                    delegate()
+                    delegate ()
                     {
                         Thread.Sleep(10);
                         release.Set();
                     }
                 ).Start();
 
-                Assert.IsFalse(finished);
+                Assert.False(finished);
                 using (Stream stream = cache.Open())
                 {
-                    Assert.IsTrue(finished);
-                    Assert.IsTrue(release.WaitOne(0));
-                    Assert.AreEqual(100, stream.Read(new byte[100], 0, 100));
+                    Assert.True(finished);
+                    Assert.True(release.WaitOne(0));
+                    Assert.Equal(100, stream.Read(new byte[100], 0, 100));
                 }
-                Assert.IsTrue(t.Join(1000));
+                Assert.True(t.Join(1000));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCacheRecoverAbandondMutex()
         {
             Stream stream = null;
             using (StreamCache cache = new StreamCache(new SharedMemoryStream(), 1))
             {
-                Thread t = new Thread(delegate() { stream = cache.Open(FileAccess.Read); });
+                Thread t = new Thread(delegate () { stream = cache.Open(FileAccess.Read); });
                 t.Start();
                 t.Join(); //The exit of this thread releases the stream...
 
                 using (Stream another = cache.Open())
                 {
-                    Assert.AreEqual(0, another.Position);
+                    Assert.Equal(0, another.Position);
                     // Another thread can then objtain the same underlying stream... we can demonstrate
                     // this by the fact that the Position property affects both streams.
                     stream.Position = 100;
-                    Assert.AreEqual(100, another.Position);
+                    Assert.Equal(100, another.Position);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCacheRecoverAbandondStream()
         {
             Stream stream;
@@ -114,21 +114,21 @@ namespace CSharpTest.Net.Library.Test
                 GC.WaitForPendingFinalizers();
 
                 Thread t = new Thread(
-                    delegate()
+                    delegate ()
                     {
                         using (stream = cache.Open(FileAccess.Read))
                         {
-                            Assert.AreEqual(new byte[55], IOStream.ReadAllBytes(stream));
+                            Assert.Equal(new byte[55], IOStream.ReadAllBytes(stream));
                         }
                     }
                 );
                 t.IsBackground = true;
                 t.Start();
-                Assert.IsTrue(t.Join(1000));
+                Assert.True(t.Join(1000));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestFileStreamCache()
         {
             Stream stream;
@@ -143,15 +143,15 @@ namespace CSharpTest.Net.Library.Test
                     }
                 }
 
-                Assert.AreEqual(100, tempFile.Length);
+                Assert.Equal(100, tempFile.Length);
                 using (stream = tempFile.Open())
                 {
-                    Assert.AreEqual(1, stream.ReadByte());
+                    Assert.Equal(1, stream.ReadByte());
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestFileStreamFactoryCreateABunch()
         {
             using (TempFile tempFile = new TempFile())
@@ -166,79 +166,86 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestFileStreamFactoryReturnsFileStream()
         {
             using (TempFile tempFile = new TempFile())
             {
                 FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.Create, FileAccess.ReadWrite,
                     FileShare.None, 1024, FileOptions.Asynchronous);
-                Assert.AreEqual(tempFile.TempPath, factory.FileName);
-                using (FileStream s = (FileStream) factory.Create())
+                Assert.Equal(tempFile.TempPath, factory.FileName);
+                using (FileStream s = (FileStream)factory.Create())
                 {
-                    Assert.IsTrue(s.CanRead && s.CanWrite && s.IsAsync);
+                    Assert.True(s.CanRead && s.CanWrite && s.IsAsync);
                 }
             }
         }
 
-        [Test]
-        //[ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void TestFileStreamInvalidAccessWithMode()
         {
-            using (TempFile tempFile = new TempFile())
+            Assert.Throws<ArgumentException>(() =>
             {
-                FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.Create, FileAccess.Read);
-                Assert.AreEqual(tempFile.TempPath, factory.FileName);
-                factory.Create().Dispose();
-                Assert.Fail();
-            }
+                using (TempFile tempFile = new TempFile())
+                {
+                    FileStreamFactory factory =
+                        new FileStreamFactory(tempFile.TempPath, FileMode.Create, FileAccess.Read);
+                    Assert.Equal(tempFile.TempPath, factory.FileName);
+                    factory.Create().Dispose();
+                    Assert.True(false);
+                }
+            });
         }
 
-        [Test]
-        //[ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [Fact]
         public void TestFileStreamInvalidBufferSize()
         {
-            using (TempFile tempFile = new TempFile())
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.Create, FileAccess.ReadWrite,
-                    FileShare.None, 0);
-                Assert.AreEqual(tempFile.TempPath, factory.FileName);
-                factory.Create().Dispose();
-                Assert.Fail();
-            }
+                using (TempFile tempFile = new TempFile())
+                {
+                    FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.Create, FileAccess.ReadWrite,
+                        FileShare.None, 0);
+                    Assert.Equal(tempFile.TempPath, factory.FileName);
+                    factory.Create().Dispose();
+                    Assert.True(false);
+                }
+            });
         }
 
-        [Test]
-        //[ExpectedException(typeof(IOException))]
+        [Fact]
         public void TestFileStreamInvalidFileShare()
         {
-            using (TempFile tempFile = new TempFile())
+            Assert.Throws<IOException>(() =>
             {
-                FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.OpenOrCreate, FileAccess.ReadWrite,
-                    FileShare.None);
-                using (factory.Create())
+                using (TempFile tempFile = new TempFile())
                 {
-                    factory.Create().Dispose();
-                    Assert.Fail();
+                    FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.OpenOrCreate, FileAccess.ReadWrite,
+                        FileShare.None);
+                    using (factory.Create())
+                    {
+                        factory.Create().Dispose();
+                        Assert.True(false);
+                    }
                 }
-            }
+            });
         }
 
-        [Test]
+        [Fact]
         public void TestStreamCacheDisposes()
         {
             Stream stream;
             using (StreamCache cache = new StreamCache(new SharedMemoryStream(), 1))
             {
                 stream = cache.Open();
-                Assert.IsTrue(stream.CanRead && stream.CanWrite);
+                Assert.True(stream.CanRead && stream.CanWrite);
             }
 
-            Assert.IsFalse(stream.CanRead || stream.CanWrite);
+            Assert.False(stream.CanRead || stream.CanWrite);
             try
             {
                 stream.ReadByte();
-                Assert.Fail();
+                Assert.True(false);
             } /* why InvalidOperation?, the underlying stream was disposed, not the stream itself */
             catch (InvalidOperationException)
             {
@@ -248,14 +255,14 @@ namespace CSharpTest.Net.Library.Test
             try
             {
                 stream.WriteByte(1);
-                Assert.Fail();
+                Assert.True(false);
             } /* Now it's been disposed */
             catch (ObjectDisposedException)
             {
             }
         }
 
-        [Test]
+        [Fact]
         public void TestStreamCanI()
         {
             Stream stream;
@@ -263,32 +270,32 @@ namespace CSharpTest.Net.Library.Test
             {
                 using (stream = cache.Open())
                 {
-                    Assert.IsTrue(stream.CanRead);
-                    Assert.IsTrue(stream.CanWrite);
-                    Assert.IsTrue(stream.CanSeek);
+                    Assert.True(stream.CanRead);
+                    Assert.True(stream.CanWrite);
+                    Assert.True(stream.CanSeek);
                 }
-                using (stream = ((IFactory<Stream>) cache).Create())
+                using (stream = ((IFactory<Stream>)cache).Create())
                 {
-                    Assert.IsTrue(stream.CanRead);
-                    Assert.IsTrue(stream.CanWrite);
-                    Assert.IsTrue(stream.CanSeek);
+                    Assert.True(stream.CanRead);
+                    Assert.True(stream.CanWrite);
+                    Assert.True(stream.CanSeek);
                 }
                 using (stream = cache.Open(FileAccess.Read))
                 {
-                    Assert.IsTrue(stream.CanRead);
-                    Assert.IsFalse(stream.CanWrite);
-                    Assert.IsTrue(stream.CanSeek);
+                    Assert.True(stream.CanRead);
+                    Assert.False(stream.CanWrite);
+                    Assert.True(stream.CanSeek);
                 }
                 using (stream = cache.Open(FileAccess.Write))
                 {
-                    Assert.IsFalse(stream.CanRead);
-                    Assert.IsTrue(stream.CanWrite);
-                    Assert.IsTrue(stream.CanSeek);
+                    Assert.False(stream.CanRead);
+                    Assert.True(stream.CanWrite);
+                    Assert.True(stream.CanSeek);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestStreamReadWrite()
         {
             Stream stream;
@@ -300,7 +307,7 @@ namespace CSharpTest.Net.Library.Test
                 }
                 using (stream = cache.Open(FileAccess.Read))
                 {
-                    Assert.AreEqual(new byte[55], IOStream.ReadAllBytes(stream));
+                    Assert.Equal(new byte[55], IOStream.ReadAllBytes(stream));
                 }
             }
         }

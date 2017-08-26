@@ -18,13 +18,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using CSharpTest.Net.Collections;
+using CSharpTest.Net.Collections.Test.Shared;
 using CSharpTest.Net.Serialization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestCustomStorage : BasicTests
     {
         protected override BPlusTreeOptions<int, string> Options =>
@@ -127,26 +127,28 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
-        //[ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void TestFailedWrite()
         {
-            BPlusTreeOptions<int, string> options = Options;
-            using (BPlusTree<int, string> tree = new BPlusTree<int, string>(options))
+            Assert.Throws<InvalidOperationException>(() =>
             {
-                for (int i = 0; i < 10; i++)
-                    tree[i] = i.ToString();
+                BPlusTreeOptions<int, string> options = Options;
+                using (BPlusTree<int, string> tree = new BPlusTree<int, string>(options))
+                {
+                    for (int i = 0; i < 10; i++)
+                        tree[i] = i.ToString();
 
-                ((MyNodeStore) options.StorageSystem).ReadOnly = true;
-                tree.Add(50, string.Empty);
-            }
+                    ((MyNodeStore) options.StorageSystem).ReadOnly = true;
+                    tree.Add(50, string.Empty);
+                }
+            });
         }
 
-        [Test]
+        [Fact]
         public void TestStorageSystemOption()
         {
             BPlusTreeOptions<int, string> options = Options;
-            Assert.AreEqual(StorageType.Custom, options.StorageType);
+            Assert.Equal(StorageType.Custom, options.StorageType);
         }
     }
 }

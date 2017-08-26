@@ -15,7 +15,9 @@
 
 #endregion
 
-namespace CSharpTest.Net.Reflection
+using CSharpTest.Net.Collections.Test.Shared;
+
+namespace CSharpTest.Net.Collections.Test.Reflection
 {
     /// <summary>
     ///     Allows setting or getting a property or field of a known type on an object via reflection

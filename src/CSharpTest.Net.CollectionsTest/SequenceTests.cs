@@ -18,14 +18,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using CSharpTest.Net.Collections;
 using CSharpTest.Net.Serialization;
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class SequenceTests
     {
         protected virtual BPlusTree<int, string>.Options Options
@@ -101,73 +100,73 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestForwardInsertTo100()
         {
             SequencedTest(0, 1, 100, "Forward");
         }
 
-        [Test]
+        [Fact]
         public void TestForwardInsertTo1000()
         {
             SequencedTest(0, 1, 1000, "Forward");
         }
 
-        [Test]
+        [Fact]
         public void TestForwardInsertTo2000()
         {
             SequencedTest(0, 1, 2000, "Forward");
         }
 
-        [Test]
+        [Fact]
         public void TestForwardInsertTo3000()
         {
             SequencedTest(0, 1, 3000, "Forward");
         }
 
-        [Test]
+        [Fact]
         public void TestForwardInsertTo4000()
         {
             SequencedTest(0, 1, 4000, "Forward");
         }
 
-        [Test]
+        [Fact]
         public void TestForwardInsertTo5000()
         {
             SequencedTest(0, 1, 5000, "Forward");
         }
 
-        [Test]
+        [Fact]
         public void TestReverseInsertTo100()
         {
             SequencedTest(100, -1, 0, "Reverse");
         }
 
-        [Test]
+        [Fact]
         public void TestReverseInsertTo1000()
         {
             SequencedTest(1000, -1, 0, "Reverse");
         }
 
-        [Test]
+        [Fact]
         public void TestReverseInsertTo2000()
         {
             SequencedTest(2000, -1, 0, "Reverse");
         }
 
-        [Test]
+        [Fact]
         public void TestReverseInsertTo3000()
         {
             SequencedTest(3000, -1, 0, "Reverse");
         }
 
-        [Test]
+        [Fact]
         public void TestReverseInsertTo4000()
         {
             SequencedTest(4000, -1, 0, "Reverse");
         }
 
-        [Test]
+        [Fact]
         public void TestReverseInsertTo5000()
         {
             SequencedTest(5000, -1, 0, "Reverse");

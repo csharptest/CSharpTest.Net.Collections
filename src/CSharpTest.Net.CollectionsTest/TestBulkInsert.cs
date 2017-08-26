@@ -20,15 +20,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using CSharpTest.Net.Collections;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestBulkInsert
     {
         protected BPlusTree<int, string>.Options Options =>
@@ -76,7 +75,7 @@ namespace CSharpTest.Net.BPlusTree.Test
 
             using (BPlusTree<int, string> tree = new BPlusTree<int, string>(options))
             {
-                Assert.AreEqual(expected.Count, tree.BulkInsert(expected));
+                Assert.Equal(expected.Count, tree.BulkInsert(expected));
                 VerifyDictionary(expected, tree);
             }
         }
@@ -115,30 +114,30 @@ namespace CSharpTest.Net.BPlusTree.Test
             string val;
             foreach (KeyValuePair<int, string> pair in tree)
             {
-                Assert.IsTrue(test.TryGetValue(pair.Key, out val));
-                Assert.AreEqual(pair.Value, val);
-                Assert.IsTrue(test.Remove(pair.Key));
+                Assert.True(test.TryGetValue(pair.Key, out val));
+                Assert.Equal(pair.Value, val);
+                Assert.True(test.Remove(pair.Key));
             }
-            Assert.AreEqual(0, test.Count);
+            Assert.Equal(0, test.Count);
             test = null;
-            Assert.IsNull(test);
-            Assert.AreEqual(pairs.Count, tree.Count);
+            Assert.Null(test);
+            Assert.Equal(pairs.Count, tree.Count);
 
             foreach (KeyValuePair<int, string> pair in pairs)
             {
-                Assert.IsTrue(tree.TryGetValue(pair.Key, out val));
-                Assert.AreEqual(pair.Value, val);
+                Assert.True(tree.TryGetValue(pair.Key, out val));
+                Assert.Equal(pair.Value, val);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBulkInsertRandom()
         {
             for (int count = 0; count < 260; count++)
                 TestMergeRandom(Options, 1, count);
         }
 
-        [Test]
+        [Fact]
         public void TestBulkInsertSorted()
         {
             Dictionary<int, string> test = new Dictionary<int, string>();
@@ -156,14 +155,14 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestMergeInsertRandom()
         {
             for (int count = 0; count < 260; count += 7)
                 TestMergeRandom(Options, 4, count);
         }
 
-        [Test]
+        [Fact]
         public void TestMergeRandomInFile()
         {
             BPlusTreeOptions<int, string> options = Options;
@@ -194,16 +193,16 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
-        [Explicit]
+        [Fact]
+        [Trait("Category", "Benchmark")]
         public void TestMergeRandomInFileLoop()
         {
             while (Debugger.IsAttached)
                 TestMergeRandomInFile();
         }
 
-        [Test]
-        public void TestMergeSequenceInFile()
+        [Fact]
+        public void TestMergeSequenceInFile1()
         {
             BPlusTreeOptions<int, string> options = Options;
             using (TempFile temp = new TempFile())
@@ -227,7 +226,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestMergeSortedEnumerations()
         {
             Dictionary<int, string> test = new Dictionary<int, string>();
@@ -238,22 +237,22 @@ namespace CSharpTest.Net.BPlusTree.Test
                     sets.ToArray()))
             {
                 string val;
-                Assert.IsTrue(test.TryGetValue(pair.Key, out val));
-                Assert.AreEqual(pair.Value, val);
-                Assert.IsTrue(test.Remove(pair.Key));
+                Assert.True(test.TryGetValue(pair.Key, out val));
+                Assert.Equal(pair.Value, val);
+                Assert.True(test.Remove(pair.Key));
             }
 
-            Assert.AreEqual(0, test.Count);
+            Assert.Equal(0, test.Count);
         }
 
-        [Test]
+        [Fact]
         public void TestMergeSortedEnumerations1000()
         {
             for (int i = 0; i < 1000; i++)
                 TestMergeSortedEnumerations();
         }
 
-        [Test]
+        [Fact]
         public void TestReplaceContents()
         {
             Dictionary<int, string> test = new Dictionary<int, string>();

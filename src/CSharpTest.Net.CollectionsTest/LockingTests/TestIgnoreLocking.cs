@@ -16,24 +16,23 @@
 #endregion
 
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test.LockingTests
+namespace CSharpTest.Net.Collections.Test.LockingTests
 {
-    [TestFixture]
     public class TestIgnoreLocking : BaseLockTest<IgnoreLockFactory>
     {
-        [Test]
+        [Fact]
         public void NoWriteIncrement()
         {
             using (ILockStrategy l = LockFactory.Create())
             {
-                Assert.AreEqual(0, l.WriteVersion);
+                Assert.Equal(0, l.WriteVersion);
                 using (l.Write())
                 {
-                    Assert.AreEqual(0, l.WriteVersion);
+                    Assert.Equal(0, l.WriteVersion);
                 }
-                Assert.AreEqual(0, l.WriteVersion);
+                Assert.Equal(0, l.WriteVersion);
             }
         }
     }

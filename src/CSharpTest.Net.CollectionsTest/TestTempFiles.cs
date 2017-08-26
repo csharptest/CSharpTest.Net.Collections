@@ -19,173 +19,165 @@ using System;
 using System.IO;
 using System.Text;
 using CSharpTest.Net.IO;
-using NUnit.Framework;
+using Xunit;
 
 #pragma warning disable 1591
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+
     public class TestTempFiles
     {
-        [TestFixtureSetUp]
-        public virtual void Setup()
-        {
-        }
-
-        [TestFixtureTearDown]
-        public virtual void Teardown()
-        {
-        }
-
-        [Test]
+        [Fact]
         public void TestAttach()
         {
             string path = Path.GetTempFileName();
-            Assert.IsTrue(File.Exists(path));
+            Assert.True(File.Exists(path));
             File.WriteAllText(path, "Test");
 
             TempFile filea = TempFile.Attach(path);
-            Assert.AreEqual(path, filea.TempPath);
-            Assert.AreEqual("Test", File.ReadAllText(filea.TempPath));
+            Assert.Equal(path, filea.TempPath);
+            Assert.Equal("Test", File.ReadAllText(filea.TempPath));
 
             filea.Dispose();
-            Assert.IsFalse(File.Exists(path));
+            Assert.False(File.Exists(path));
 
             using (TempFile filec = new TempFile(path))
             {
-                Assert.IsFalse(File.Exists(path));
+                Assert.False(File.Exists(path));
             }
         }
 
 
-        [Test]
-        //[ExpectedException(typeof(ArgumentException))]
+        [Fact]
         public void TestBadPathOnAttach()
         {
-            TempFile f = TempFile.Attach("@~+_(%!&($_~!(&*+%_~&^%^|||&&&\\\\ THIS IS AN INVALID FILE NAME.*");
-            f.Dispose();
+            Assert.Throws<ArgumentException>(() =>
+            {
+                TempFile f = TempFile.Attach("@~+_(%!&($_~!(&*+%_~&^%^|||&&&\\\\ THIS IS AN INVALID FILE NAME.*");
+                f.Dispose();
+            });
         }
 
-        [Test]
+        [Fact]
         public void TestCopyTo()
         {
             TempFile filea = new TempFile();
 
             File.WriteAllText(filea.TempPath, "Test");
-            Assert.AreEqual("Test", File.ReadAllText(filea.TempPath));
+            Assert.Equal("Test", File.ReadAllText(filea.TempPath));
 
             TempFile fileb = new TempFile();
-            Assert.AreNotEqual(filea.TempPath, fileb.TempPath);
+            Assert.NotEqual(filea.TempPath, fileb.TempPath);
 
             filea.CopyTo(fileb.TempPath, true);
-            Assert.AreEqual("Test", File.ReadAllText(fileb.TempPath));
+            Assert.Equal("Test", File.ReadAllText(fileb.TempPath));
 
             File.Delete(filea.TempPath);
-            Assert.IsFalse(File.Exists(filea.TempPath));
+            Assert.False(File.Exists(filea.TempPath));
 
             fileb.CopyTo(filea.TempPath);
-            Assert.AreEqual("Test", File.ReadAllText(filea.TempPath));
+            Assert.Equal("Test", File.ReadAllText(filea.TempPath));
 
             filea.Dispose();
             fileb.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void TestDetach()
         {
             TempFile filea = new TempFile();
             string path = filea.TempPath;
-            Assert.IsTrue(File.Exists(path));
+            Assert.True(File.Exists(path));
 
-            Assert.AreEqual(path, filea.Detatch());
-            Assert.IsTrue(File.Exists(path));
+            Assert.Equal(path, filea.Detatch());
+            Assert.True(File.Exists(path));
             filea.Dispose();
-            Assert.IsTrue(File.Exists(path));
+            Assert.True(File.Exists(path));
 
             File.Delete(path);
         }
 
-        [Test]
+        [Fact]
         public void TestDispose()
         {
             TempFile file = new TempFile();
-            Assert.IsTrue(File.Exists(file.TempPath));
-            Assert.IsTrue(file.Exists);
+            Assert.True(File.Exists(file.TempPath));
+            Assert.True(file.Exists);
 
             file.Dispose();
-            Assert.IsFalse(file.Exists);
+            Assert.False(file.Exists);
         }
 
-        [Test]
+        [Fact]
         public void TestFileCreateAccess()
         {
             TempFile file = new TempFile();
 
             Stream c = file.Create();
-            Assert.IsTrue(c.CanWrite);
-            Assert.IsFalse(c.CanRead);
+            Assert.True(c.CanWrite);
+            Assert.False(c.CanRead);
 
             Stream r = file.Read();
-            Assert.IsFalse(r.CanWrite);
-            Assert.IsTrue(r.CanRead);
+            Assert.False(r.CanWrite);
+            Assert.True(r.CanRead);
 
             c.Dispose();
             r.Dispose();
             file.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void TestFileDelete()
         {
             TempFile file = new TempFile();
 
-            Assert.IsTrue(File.Exists(file.TempPath));
+            Assert.True(File.Exists(file.TempPath));
             TempFile.Delete(file.TempPath);
 
-            Assert.IsFalse(File.Exists(file.TempPath));
+            Assert.False(File.Exists(file.TempPath));
             file.Dispose();
 
             //ignres bad paths:
             TempFile.Delete("@~+_(%!&($_~!(&*+%_~&^%^|||&&&\\\\ THIS IS AN INVALID FILE NAME.*");
         }
 
-        [Test]
+        [Fact]
         public void TestFileOpenAccess()
         {
             TempFile file = new TempFile();
 
             Stream o = file.Open();
-            Assert.IsTrue(o.CanWrite);
-            Assert.IsTrue(o.CanRead);
+            Assert.True(o.CanWrite);
+            Assert.True(o.CanRead);
 
             Stream r = file.Read();
-            Assert.IsFalse(r.CanWrite);
-            Assert.IsTrue(r.CanRead);
+            Assert.False(r.CanWrite);
+            Assert.True(r.CanRead);
 
             o.Dispose();
             r.Dispose();
             file.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void TestFileReadAccess()
         {
             TempFile file = new TempFile();
 
             Stream r = file.Read();
-            Assert.IsFalse(r.CanWrite);
-            Assert.IsTrue(r.CanRead);
+            Assert.False(r.CanWrite);
+            Assert.True(r.CanRead);
 
             Stream o = file.Open();
-            Assert.IsTrue(o.CanWrite);
-            Assert.IsTrue(o.CanRead);
+            Assert.True(o.CanWrite);
+            Assert.True(o.CanRead);
 
             o.Dispose();
             r.Dispose();
             file.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void TestFinalizer()
         {
             string filename;
@@ -193,12 +185,12 @@ namespace CSharpTest.Net.Library.Test
             {
                 TempFile file = new TempFile();
                 filename = file.TempPath;
-                Assert.IsTrue(File.Exists(file.TempPath));
+                Assert.True(File.Exists(file.TempPath));
 
                 IDisposable flock = file.Open();
                 file.Dispose();
 
-                Assert.IsTrue(File.Exists(file.TempPath)); //dua, it's still open
+                Assert.True(File.Exists(file.TempPath)); //dua, it's still open
 
                 flock.Dispose();
                 file = null;
@@ -211,10 +203,10 @@ namespace CSharpTest.Net.Library.Test
             GC.Collect(0, GCCollectionMode.Forced);
             GC.WaitForPendingFinalizers();
 
-            Assert.IsFalse(File.Exists(filename));
+            Assert.False(File.Exists(filename));
         }
 
-        [Test]
+        [Fact]
         public void TestFinalizerReschedule()
         {
             IDisposable flock;
@@ -223,12 +215,12 @@ namespace CSharpTest.Net.Library.Test
             {
                 TempFile file = new TempFile();
                 filename = file.TempPath;
-                Assert.IsTrue(File.Exists(file.TempPath));
+                Assert.True(File.Exists(file.TempPath));
 
                 flock = file.Open();
                 file.Dispose();
 
-                Assert.IsTrue(File.Exists(file.TempPath)); //dua, it's still open
+                Assert.True(File.Exists(file.TempPath)); //dua, it's still open
                 file = null;
             }
             finally
@@ -239,7 +231,7 @@ namespace CSharpTest.Net.Library.Test
             GC.Collect(0, GCCollectionMode.Forced);
             GC.WaitForPendingFinalizers();
 
-            Assert.IsTrue(File.Exists(filename));
+            Assert.True(File.Exists(filename));
 
             //now the finalizer should have fire, as proven by TestFinalizer(), see if the
             //rescheduled object will finalize...
@@ -248,92 +240,96 @@ namespace CSharpTest.Net.Library.Test
             GC.Collect(0, GCCollectionMode.Forced);
             GC.WaitForPendingFinalizers();
 
-            Assert.IsFalse(File.Exists(filename));
+            Assert.False(File.Exists(filename));
         }
 
-        [Test]
+        [Fact]
         public void TestFromCopyWithExtension()
         {
             using (TempFile a = TempFile.FromExtension(".test"))
             {
                 a.WriteAllText("a");
-                Assert.AreEqual("a", a.ReadAllText());
-                Assert.AreEqual(".test", Path.GetExtension(a.TempPath));
+                Assert.Equal("a", a.ReadAllText());
+                Assert.Equal(".test", Path.GetExtension(a.TempPath));
 
                 using (TempFile b = TempFile.FromCopy(a.TempPath))
                 {
-                    Assert.AreEqual("a", b.ReadAllText());
-                    Assert.AreEqual(".test", Path.GetExtension(b.TempPath));
+                    Assert.Equal("a", b.ReadAllText());
+                    Assert.Equal(".test", Path.GetExtension(b.TempPath));
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestInfo()
         {
             TempFile f = new TempFile();
             f.Length = 5;
-            Assert.AreEqual(f.Length, f.Info.Length);
+            Assert.Equal(f.Length, f.Info.Length);
             f.Dispose();
 
-            Assert.AreEqual(0, f.Length);
+            Assert.Equal(0, f.Length);
         }
 
-        [Test]
-        //[ExpectedException(typeof(ObjectDisposedException))]
+        [Fact]
         public void TestInfoOnDisposed()
         {
-            TempFile f = new TempFile();
-            f.Dispose();
-            f.Info.OpenText();
+            Assert.Throws<ObjectDisposedException>(() =>
+            {
+                TempFile f = new TempFile();
+                f.Dispose();
+                f.Info.OpenText();
+            });
         }
 
-        [Test]
+        [Fact]
         public void TestLength()
         {
             using (TempFile f = new TempFile())
             {
-                Assert.AreEqual(0, f.Length);
+                Assert.Equal(0, f.Length);
                 f.Delete();
-                Assert.AreEqual(0, f.Length);
+                Assert.Equal(0, f.Length);
                 f.Length = 255;
-                Assert.AreEqual(255, f.Length);
+                Assert.Equal(255, f.Length);
                 f.Length = 0;
-                Assert.AreEqual(0, f.Length);
-                Assert.IsTrue(f.Exists);
+                Assert.Equal(0, f.Length);
+                Assert.True(f.Exists);
             }
         }
 
-        [Test]
-        //[ExpectedException(typeof(ObjectDisposedException))]
+        [Fact]
         public void TestPathOnDisposed()
         {
-            TempFile f = new TempFile();
-            f.Dispose();
-            Assert.Fail(f.TempPath);
+            Assert.Throws<ObjectDisposedException>(() =>
+            {
+                TempFile f = new TempFile();
+                f.Dispose();
+                Assert.True(false, f.TempPath);
+            });
         }
 
-        [Test]
+        [Fact]
         public void TestReadWrite()
         {
             string test = "Hello World!\u1255";
             TempFile file = new TempFile();
             File.WriteAllBytes(file.TempPath, Encoding.UTF8.GetBytes(test));
 
-            Assert.AreEqual(Encoding.UTF8.GetBytes(test), file.ReadAllBytes());
-            Assert.AreEqual(test, file.ReadAllText());
+            Assert.Equal(Encoding.UTF8.GetBytes(test), file.ReadAllBytes());
+            Assert.Equal(test, file.ReadAllText());
 
             file.Delete();
-            Assert.IsFalse(File.Exists(file.TempPath));
-            Assert.IsFalse(file.Exists);
+            Assert.False(File.Exists(file.TempPath));
+            Assert.False(file.Exists);
             file.WriteAllBytes(Encoding.UTF8.GetBytes(test));
-            Assert.AreEqual(test, file.ReadAllText());
+            Assert.Equal(test, file.ReadAllText());
 
             file.Delete();
-            Assert.IsFalse(File.Exists(file.TempPath));
-            Assert.IsFalse(file.Exists);
+            Assert.False(File.Exists(file.TempPath));
+            Assert.False(file.Exists);
             file.WriteAllText(test);
-            Assert.AreEqual(test, file.ReadAllText());
+            Assert.Equal(test, file.ReadAllText());
         }
     }
 }

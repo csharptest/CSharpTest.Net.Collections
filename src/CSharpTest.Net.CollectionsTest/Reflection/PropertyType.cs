@@ -18,8 +18,9 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using CSharpTest.Net.Collections.Test.Shared;
 
-namespace CSharpTest.Net.Reflection
+namespace CSharpTest.Net.Collections.Test.Reflection
 {
     /// <summary>
     ///     Allows reflection upon a property or field by name.

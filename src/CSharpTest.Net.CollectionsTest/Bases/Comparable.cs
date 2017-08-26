@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace CSharpTest.Net.Bases
+namespace CSharpTest.Net.Collections.Test.Bases
 {
     /// <summary> Provides a base-class for non-reference comparison of objects </summary>
     [DebuggerNonUserCode]

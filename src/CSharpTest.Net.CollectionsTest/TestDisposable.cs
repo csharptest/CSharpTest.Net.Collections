@@ -16,24 +16,14 @@
 #endregion
 
 using System;
-using CSharpTest.Net.Bases;
-using NUnit.Framework;
+using CSharpTest.Net.Collections.Test.Bases;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestDisposable
     {
-        [TestFixtureSetUp]
-        public virtual void Setup()
-        {
-        }
-
-        [TestFixtureTearDown]
-        public virtual void Teardown()
-        {
-        }
-
         private class MyDisposable : Disposable
         {
             public int _disposedCount;
@@ -49,48 +39,50 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestAssertBeforeDispose()
         {
             MyDisposable o = new MyDisposable();
             o.TestAssert();
         }
 
-        [Test]
-        //[ExpectedException(typeof(ObjectDisposedException))]
+        [Fact]
         public void TestAssertWhenDisposed()
         {
-            MyDisposable o = new MyDisposable();
-            o.Dispose();
-            o.TestAssert();
+            Assert.Throws<ObjectDisposedException>(() =>
+            {
+                MyDisposable o = new MyDisposable();
+                o.Dispose();
+                o.TestAssert();
+            });
         }
 
-        [Test]
+        [Fact]
         public void TestDisposedEvent()
         {
             MyDisposable o = new MyDisposable();
             bool disposed = false;
             o.Disposed += delegate { disposed = true; };
             o.Dispose();
-            Assert.IsTrue(disposed, "Disposed event failed.");
+            Assert.True(disposed, "Disposed event failed.");
         }
 
-        [Test]
+        [Fact]
         public void TestDisposedOnce()
         {
             MyDisposable o = new MyDisposable();
             using (o)
             {
-                Assert.AreEqual(0, o._disposedCount);
+                Assert.Equal(0, o._disposedCount);
                 o.Dispose();
-                Assert.AreEqual(1, o._disposedCount);
+                Assert.Equal(1, o._disposedCount);
                 o.Dispose();
-                Assert.AreEqual(1, o._disposedCount);
+                Assert.Equal(1, o._disposedCount);
             }
-            Assert.AreEqual(1, o._disposedCount);
+            Assert.Equal(1, o._disposedCount);
         }
 
-        [Test]
+        [Fact]
         public void TestDisposeOnFinalize()
         {
             MyDisposable o = new MyDisposable();
@@ -101,10 +93,10 @@ namespace CSharpTest.Net.Library.Test
             GC.Collect(0, GCCollectionMode.Forced);
             GC.WaitForPendingFinalizers();
 
-            Assert.IsTrue(disposed, "Disposed event failed.");
+            Assert.True(disposed, "Disposed event failed.");
         }
 
-        [Test]
+        [Fact]
         public void TestRemoveDisposedEvent()
         {
             MyDisposable o = new MyDisposable();
@@ -113,7 +105,7 @@ namespace CSharpTest.Net.Library.Test
             o.Disposed += handler;
             o.Disposed -= handler;
             o.Dispose();
-            Assert.IsFalse(disposed, "Disposed fired?");
+            Assert.False(disposed, "Disposed fired?");
         }
     }
 }

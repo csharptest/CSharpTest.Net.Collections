@@ -17,8 +17,9 @@
 
 using System;
 using System.IO;
+using CSharpTest.Net.Collections.Test.Shared;
 
-namespace CSharpTest.Net.IO
+namespace CSharpTest.Net.Collections.Test.IO
 {
     /// <summary>
     ///     Creates a stream over an array of byte arrays in memory to reduce use of the LOH and array resizing operation.

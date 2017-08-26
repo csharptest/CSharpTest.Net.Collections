@@ -18,16 +18,12 @@
 using System;
 using System.IO;
 using System.Threading;
-using CSharpTest.Net.Threading;
-using NUnit.Framework;
+using CSharpTest.Net.Collections.Test.Threading;
+using Xunit;
 
-#if NET20
-using Action = System.Threading.ThreadStart;
-#endif
-
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+
     public class TestWorkQueue
     {
         private static void ProcessOne(int[] counters)
@@ -37,32 +33,34 @@ namespace CSharpTest.Net.Library.Test
             Interlocked.Decrement(ref counters[0]);
         }
 
-        [Test]
-        //[ExpectedException(typeof(ObjectDisposedException))]
+        [Fact]
         public void TestEnqueueAfterDispose()
         {
-            int counter = 0;
-            WorkQueue worker = new WorkQueue(1);
-            worker.Complete(false, 100);
-            worker.Enqueue(delegate { counter++; });
-            Assert.Fail("Enqueue after Dispose()", counter);
+            Assert.Throws<ObjectDisposedException>(() =>
+            {
+                int counter = 0;
+                WorkQueue worker = new WorkQueue(1);
+                worker.Complete(false, 100);
+                worker.Enqueue(delegate { counter++; });
+                Assert.True(false, "Enqueue after Dispose()");
+            });
         }
 
-        [Test]
+        [Fact]
         public void TestExceptionHandled()
         {
             Exception error = null;
             using (WorkQueue worker = new WorkQueue(1))
             {
-                worker.OnError += delegate(object o, ErrorEventArgs e) { error = e.GetException(); };
+                worker.OnError += delegate (object o, ErrorEventArgs e) { error = e.GetException(); };
                 worker.Enqueue(delegate { throw new ArgumentException("Handled?"); });
                 worker.Complete(true, -1);
             }
-            Assert.IsTrue(error is ArgumentException);
-            Assert.AreEqual("Handled?", error.Message);
+            Assert.True(error is ArgumentException);
+            Assert.Equal("Handled?", error.Message);
         }
 
-        [Test]
+        [Fact]
         public void TestMultipleActionsComplete()
         {
             int[] count = new int[1];
@@ -76,10 +74,10 @@ namespace CSharpTest.Net.Library.Test
                     });
                 worker.Complete(true, -1);
             }
-            Assert.AreEqual(1000, count[0]);
+            Assert.Equal(1000, count[0]);
         }
 
-        [Test]
+        [Fact]
         public void TestMultipleActionsIncomplete()
         {
             int[] count = new int[1];
@@ -93,47 +91,47 @@ namespace CSharpTest.Net.Library.Test
                 for (int i = 0; i < 10000; i++)
                     worker.Enqueue(a);
             }
-            Assert.AreNotEqual(0, count[0]);
-            Assert.AreNotEqual(10000, count[0]);
+            Assert.NotEqual(0, count[0]);
+            Assert.NotEqual(10000, count[0]);
         }
 
-        [Test]
+        [Fact]
         public void TestMultipleActionTComplete()
         {
             int[] counters = new int[10];
             using (WorkQueue worker = new WorkQueue(Math.Max(2, Environment.ProcessorCount)))
             {
                 for (int i = 0; i < 1000; i++)
-                    worker.Enqueue(delegate(int offset) { Interlocked.Increment(ref counters[offset]); }, i % 10);
+                    worker.Enqueue(delegate (int offset) { Interlocked.Increment(ref counters[offset]); }, i % 10);
                 worker.Complete(true, -1);
             }
             foreach (int counter in counters)
-                Assert.AreEqual(100, counter);
+                Assert.Equal(100, counter);
         }
 
-        [Test]
+        [Fact]
         public void TestSingleAction()
         {
             using (ManualResetEvent finished = new ManualResetEvent(false))
             using (WorkQueue worker = new WorkQueue(2))
             {
                 worker.Enqueue(delegate { finished.Set(); });
-                Assert.IsTrue(finished.WaitOne(100));
+                Assert.True(finished.WaitOne(100));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestSingleActionT()
         {
             using (ManualResetEvent finished = new ManualResetEvent(false))
             using (WorkQueue worker = new WorkQueue(2))
             {
                 worker.Enqueue(delegate { finished.Set(); });
-                Assert.IsTrue(finished.WaitOne(100));
+                Assert.True(finished.WaitOne(100));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestThreadAborts()
         {
             int[] counter = new int[1];
@@ -143,7 +141,7 @@ namespace CSharpTest.Net.Library.Test
                     worker.Enqueue(counter);
                 worker.Complete(false, 10);
             }
-            Assert.AreNotEqual(0, counter[0]);
+            Assert.NotEqual(0, counter[0]);
         }
     }
 }

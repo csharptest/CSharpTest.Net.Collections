@@ -15,11 +15,11 @@
 
 #endregion
 
-using System;
 using System.IO;
+using CSharpTest.Net.Collections.Test.Shared;
 using CSharpTest.Net.Interfaces;
 
-namespace CSharpTest.Net.IO
+namespace CSharpTest.Net.Collections.Test.IO
 {
     /// <summary>
     ///     A memory stream that can be cloned to create an instance for another thread to access

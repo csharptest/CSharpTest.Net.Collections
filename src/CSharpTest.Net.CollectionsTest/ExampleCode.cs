@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using CSharpTest.Net.Collections;
 using CSharpTest.Net.Serialization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class ExampleCode
     {
         private class Counts
@@ -16,7 +15,7 @@ namespace CSharpTest.Net.Library.Test
             public int Queued, Dequeued;
         }
 
-        [Test]
+        [Fact]
         public void BPlusTreeDemo()
         {
             BPlusTree<string, DateTime>.OptionsV2 options = new BPlusTree<string, DateTime>.OptionsV2(PrimitiveSerializer.String, PrimitiveSerializer.DateTime);
@@ -50,7 +49,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void LurchTableDemo()
         {
             Counts counts = new Counts();
@@ -95,7 +94,7 @@ namespace CSharpTest.Net.Library.Test
                 thread.Join();
             }
 
-            Assert.AreEqual(counts.Queued, counts.Dequeued);
+            Assert.Equal(counts.Queued, counts.Dequeued);
         }
     }
 }

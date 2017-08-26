@@ -16,42 +16,42 @@
 #endregion
 
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test.LockingTests
+namespace CSharpTest.Net.Collections.Test.LockingTests
 {
     public class TestReservedWriteLocking<TFactory> : BaseThreadedWriterTest<TFactory>
         where TFactory : ILockFactory, new()
     {
-        [Test]
+        [Fact]
         public override void TestWriteCounter()
         {
             using (ILockStrategy l = LockFactory.Create())
             {
-                Assert.AreEqual(0, l.WriteVersion);
+                Assert.Equal(0, l.WriteVersion);
 
-                Assert.IsTrue(l.TryRead(0));
+                Assert.True(l.TryRead(0));
                 l.ReleaseRead();
-                Assert.AreEqual(0, l.WriteVersion);
+                Assert.Equal(0, l.WriteVersion);
 
-                Assert.IsTrue(l.TryWrite(0));
-                Assert.AreEqual(0, l.WriteVersion);
+                Assert.True(l.TryWrite(0));
+                Assert.Equal(0, l.WriteVersion);
                 l.ReleaseWrite();
-                Assert.AreEqual(0, l.WriteVersion);
+                Assert.Equal(0, l.WriteVersion);
 
                 using (l.Write())
                 {
-                    Assert.AreEqual(0, l.WriteVersion);
-                    Assert.IsTrue(l.TryWrite(0));
+                    Assert.Equal(0, l.WriteVersion);
+                    Assert.True(l.TryWrite(0));
                     // Once a nested write lock is acquired the real lock is obtained.
-                    Assert.AreEqual(1, l.WriteVersion);
+                    Assert.Equal(1, l.WriteVersion);
                     l.ReleaseWrite();
-                    Assert.AreEqual(1, l.WriteVersion);
+                    Assert.Equal(1, l.WriteVersion);
                 }
 
-                Assert.IsTrue(l.TryWrite(0));
+                Assert.True(l.TryWrite(0));
                 l.ReleaseWrite();
-                Assert.AreEqual(1, l.WriteVersion);
+                Assert.Equal(1, l.WriteVersion);
             }
         }
     }

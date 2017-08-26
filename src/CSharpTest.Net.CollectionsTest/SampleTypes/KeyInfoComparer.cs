@@ -17,7 +17,7 @@
 
 using System.Collections.Generic;
 
-namespace CSharpTest.Net.BPlusTree.Test.SampleTypes
+namespace CSharpTest.Net.Collections.Test.SampleTypes
 {
     internal class KeyInfoComparer : IComparer<KeyInfo>
     {

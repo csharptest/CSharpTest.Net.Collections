@@ -16,18 +16,17 @@
 #endregion
 
 using System;
-using CSharpTest.Net.Collections;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestBPlusTreeOptions
     {
-        [Test]
+        [Fact]
         public void TestCloneWithCallLockV1()
         {
             BPlusTree<int, int>.Options options = new BPlusTree<int, int>.Options(PrimitiveSerializer.Int32, PrimitiveSerializer.Int32)
@@ -37,18 +36,18 @@ namespace CSharpTest.Net.BPlusTree.Test
             };
             BPlusTree<int, int>.Options copy = options.Clone();
 
-            Assert.IsFalse(ReferenceEquals(options, copy));
-            Assert.IsTrue(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
+            Assert.False(ReferenceEquals(options, copy));
+            Assert.True(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
 
             //If we get/set the lock prior to clone we will have the same lock instance.
             options.CallLevelLock = new SimpleReadWriteLocking();
             copy = options.Clone();
 
-            Assert.IsFalse(ReferenceEquals(options, copy));
-            Assert.IsTrue(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
+            Assert.False(ReferenceEquals(options, copy));
+            Assert.True(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
         }
 
-        [Test]
+        [Fact]
         public void TestCloneWithCallLockV2()
         {
             BPlusTree<int, int>.OptionsV2 options = new BPlusTree<int, int>.OptionsV2(PrimitiveSerializer.Int32, PrimitiveSerializer.Int32)
@@ -58,18 +57,18 @@ namespace CSharpTest.Net.BPlusTree.Test
             };
             BPlusTree<int, int>.OptionsV2 copy = options.Clone();
 
-            Assert.IsFalse(ReferenceEquals(options, copy));
-            Assert.IsFalse(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
+            Assert.False(ReferenceEquals(options, copy));
+            Assert.False(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
 
             //If we get/set the lock prior to clone we will have the same lock instance.
             options.CallLevelLock = new SimpleReadWriteLocking();
             copy = options.Clone();
 
-            Assert.IsFalse(ReferenceEquals(options, copy));
-            Assert.IsTrue(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
+            Assert.False(ReferenceEquals(options, copy));
+            Assert.True(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
         }
 
-        [Test]
+        [Fact]
         public void TestICloneable()
         {
             var opt = new BPlusTree<int, int>.Options(PrimitiveSerializer.Int32, PrimitiveSerializer.Int32)
@@ -79,12 +78,12 @@ namespace CSharpTest.Net.BPlusTree.Test
             };
             BPlusTree<int, int>.Options options = (BPlusTree<int, int>.Options) opt.Clone();
 
-            Assert.AreEqual(CreatePolicy.IfNeeded, options.CreateFile);
-            Assert.AreEqual(4, options.MaximumChildNodes);
-            Assert.AreEqual(4, options.MaximumValueNodes);
+            Assert.Equal(CreatePolicy.IfNeeded, options.CreateFile);
+            Assert.Equal(4, options.MaximumChildNodes);
+            Assert.Equal(4, options.MaximumValueNodes);
         }
 
-        [Test]
+        [Fact]
         public void TestReadOnly()
         {
             using (TempFile file = new TempFile())
@@ -105,14 +104,14 @@ namespace CSharpTest.Net.BPlusTree.Test
                 opt.ReadOnly = true;
                 using (BPlusTree<int, int> tree = new BPlusTree<int, int>(opt))
                 {
-                    Assert.AreEqual(tree[1], 2);
-                    Assert.AreEqual(tree[3], 4);
-                    Assert.AreEqual(tree[5], 6);
+                    Assert.Equal(tree[1], 2);
+                    Assert.Equal(tree[3], 4);
+                    Assert.Equal(tree[5], 6);
 
                     try
                     {
                         tree[1] = 0;
-                        Assert.Fail();
+                        Assert.True(false);
                     }
                     catch (InvalidOperationException)
                     {
@@ -121,7 +120,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     try
                     {
                         tree.Remove(1);
-                        Assert.Fail();
+                        Assert.True(false);
                     }
                     catch (InvalidOperationException)
                     {

@@ -17,53 +17,53 @@
 
 using System;
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test.LockingTests
+namespace CSharpTest.Net.Collections.Test.LockingTests
 {
-    public class BaseThreadedWriterTest<TFactory> : BaseLockTest<TFactory>
+    public abstract class BaseThreadedWriterTest<TFactory> : BaseLockTest<TFactory>
         where TFactory : ILockFactory, new()
     {
-        [Test]
+        [Fact]
         public void TestThreadedTryWrite()
         {
             using (ILockStrategy l = LockFactory.Create())
             {
-                Assert.IsTrue(l.TryWrite(0));
+                Assert.True(l.TryWrite(0));
                 l.ReleaseWrite();
 
                 using (new ThreadedWriter(l))
                 {
-                    Assert.IsFalse(l.TryWrite(0));
+                    Assert.False(l.TryWrite(0));
                 }
 
-                Assert.IsTrue(l.TryWrite(0));
+                Assert.True(l.TryWrite(0));
                 l.ReleaseWrite();
             }
         }
 
-        [Test]
+        [Fact]
         public virtual void TestWriteCounter()
         {
             ILockStrategy l = LockFactory.Create();
 
             int count = l.WriteVersion;
 
-            Assert.IsTrue(l.TryRead(0));
+            Assert.True(l.TryRead(0));
             l.ReleaseRead();
-            Assert.AreEqual(count, l.WriteVersion);
+            Assert.Equal(count, l.WriteVersion);
 
-            Assert.IsTrue(l.TryWrite(0));
+            Assert.True(l.TryWrite(0));
             l.ReleaseWrite();
-            Assert.AreNotEqual(count, l.WriteVersion);
+            Assert.NotEqual(count, l.WriteVersion);
             count = l.WriteVersion;
 
-            Assert.IsTrue(l.TryWrite(0));
+            Assert.True(l.TryWrite(0));
             l.ReleaseWrite();
-            Assert.AreNotEqual(count, l.WriteVersion);
+            Assert.NotEqual(count, l.WriteVersion);
         }
 
-        [Test]
+        [Fact]
         public void TestWriteRecursion()
         {
             ILockStrategy l = LockFactory.Create();
@@ -75,15 +75,17 @@ namespace CSharpTest.Net.Library.Test.LockingTests
         }
 
 
-        [Test]
-        //[ExpectedException(typeof(TimeoutException))]
+        [Fact]
         public void TestThreadedWriteTimeout()
         {
-            using (ILockStrategy l = LockFactory.Create())
-            using (new ThreadedWriter(l))
-            using (l.Write(0))
+            Assert.Throws<TimeoutException>(() =>
             {
-            }
+                using (ILockStrategy l = LockFactory.Create())
+                using (new ThreadedWriter(l))
+                using (l.Write(0))
+                {
+                }
+            });
         }
 
         #region ThreadedReader/ThreadedWriter

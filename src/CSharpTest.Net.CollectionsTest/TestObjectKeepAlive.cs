@@ -18,11 +18,11 @@
 using System;
 using System.Threading;
 using CSharpTest.Net.Utils;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestObjectKeepAlive
     {
         private static bool _destroyed;
@@ -35,7 +35,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestKeepAliveMax()
         {
             WeakReference r;
@@ -50,28 +50,28 @@ namespace CSharpTest.Net.Library.Test
             }
 
             _destroyed = false;
-            Assert.IsTrue(r.IsAlive);
+            Assert.True(r.IsAlive);
 
             for (int i = 0; i < 49; i++)
                 keep.Add(i);
 
-            Assert.IsTrue(r.IsAlive);
+            Assert.True(r.IsAlive);
 
             GC.GetTotalMemory(true);
             GC.WaitForPendingFinalizers();
-            Assert.IsTrue(r.IsAlive);
-            Assert.IsFalse(_destroyed);
+            Assert.True(r.IsAlive);
+            Assert.False(_destroyed);
 
             keep.Add(new object());
             keep.Add(new object());
 
             GC.GetTotalMemory(true);
             GC.WaitForPendingFinalizers();
-            Assert.IsFalse(r.IsAlive);
-            Assert.IsTrue(_destroyed);
+            Assert.False(r.IsAlive);
+            Assert.True(_destroyed);
         }
 
-        [Test]
+        [Fact]
         public void TestKeepAliveMin()
         {
             WeakReference r;
@@ -89,34 +89,34 @@ namespace CSharpTest.Net.Library.Test
             }
 
             _destroyed = false;
-            Assert.IsTrue(r.IsAlive);
+            Assert.True(r.IsAlive);
 
             for (int i = 0; i < 100; i++)
                 keep.Tick();
 
-            Assert.IsTrue(r.IsAlive);
+            Assert.True(r.IsAlive);
 
             GC.GetTotalMemory(true);
             GC.WaitForPendingFinalizers();
-            Assert.IsTrue(r.IsAlive);
-            Assert.IsFalse(_destroyed);
+            Assert.True(r.IsAlive);
+            Assert.False(_destroyed);
 
             Thread.Sleep(1);
 
             GC.GetTotalMemory(true);
             GC.WaitForPendingFinalizers();
-            Assert.IsTrue(r.IsAlive);
-            Assert.IsFalse(_destroyed);
+            Assert.True(r.IsAlive);
+            Assert.False(_destroyed);
 
             keep.Clear();
 
             GC.GetTotalMemory(true);
             GC.WaitForPendingFinalizers();
-            Assert.IsFalse(r.IsAlive);
-            Assert.IsTrue(_destroyed);
+            Assert.False(r.IsAlive);
+            Assert.True(_destroyed);
         }
 
-        [Test]
+        [Fact]
         public void TestKeepAliveTime()
         {
             WeakReference r;
@@ -132,17 +132,17 @@ namespace CSharpTest.Net.Library.Test
             }
 
             _destroyed = false;
-            Assert.IsTrue(r.IsAlive);
+            Assert.True(r.IsAlive);
 
             for (int i = 0; i < 5; i++)
                 keep.Add(i);
 
-            Assert.IsTrue(r.IsAlive);
+            Assert.True(r.IsAlive);
 
             GC.GetTotalMemory(true);
             GC.WaitForPendingFinalizers();
-            Assert.IsTrue(r.IsAlive);
-            Assert.IsFalse(_destroyed);
+            Assert.True(r.IsAlive);
+            Assert.False(_destroyed);
 
             long start = DateTime.UtcNow.Ticks;
             while (start + timeout.Ticks > DateTime.UtcNow.Ticks)
@@ -151,19 +151,19 @@ namespace CSharpTest.Net.Library.Test
             //Time has elapsed, yet it nothing is added, and Tick() is not called, it remains in memory
             GC.GetTotalMemory(true);
             GC.WaitForPendingFinalizers();
-            Assert.IsTrue(r.IsAlive);
-            Assert.IsFalse(_destroyed);
+            Assert.True(r.IsAlive);
+            Assert.False(_destroyed);
 
             //Once the collection is touched with either a call to Add or Tick, timeout will expire
             keep.Add(new object());
 
             GC.GetTotalMemory(true);
             GC.WaitForPendingFinalizers();
-            Assert.IsFalse(r.IsAlive);
-            Assert.IsTrue(_destroyed);
+            Assert.False(r.IsAlive);
+            Assert.True(_destroyed);
         }
 
-        [Test]
+        [Fact]
         public void TestTruncateLarge()
         {
             TimeSpan timeout = TimeSpan.FromMilliseconds(25);

@@ -16,11 +16,10 @@
 #endregion
 
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
 
-namespace CSharpTest.Net.Library.Test.LockingTests
+namespace CSharpTest.Net.Collections.Test.LockingTests
 {
-    [TestFixture]
+    
     public class TestExclusiveLocking : BaseThreadedReaderWriterTest<LockFactory<ExclusiveLocking>>
     {
         public override void TestReaderAllowsReader()

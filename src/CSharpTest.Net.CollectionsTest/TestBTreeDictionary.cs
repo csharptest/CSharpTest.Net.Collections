@@ -16,18 +16,17 @@
 #endregion
 
 //#define DEBUG
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using CSharpTest.Net.BPlusTree.Test;
-using CSharpTest.Net.Collections;
 using CSharpTest.Net.Interfaces;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestBTreeDictionary : TestDictionary<BTreeDictionary<int, string>, TestBTreeDictionary.BTreeFactory,
         int, string>
     {
@@ -123,7 +122,7 @@ namespace CSharpTest.Net.Library.Test
                 if (verify().TryGetValue(i, out test)) throw new Exception();
         }
 
-        [Test]
+        [Fact]
         public void TestArray()
         {
             List<KeyValuePair<int, string>> sample = new List<KeyValuePair<int, string>>(GetSample());
@@ -132,15 +131,15 @@ namespace CSharpTest.Net.Library.Test
             sample.Sort((a, b) => data.Comparer.Compare(a.Key, b.Key));
             KeyValuePair<int, string>[] array = data.ToArray();
 
-            Assert.AreEqual(sample.Count, array.Length);
+            Assert.Equal(sample.Count, array.Length);
             for (int i = 0; i < sample.Count; i++)
             {
-                Assert.AreEqual(sample[i].Key, array[i].Key);
-                Assert.AreEqual(sample[i].Value, array[i].Value);
+                Assert.Equal(sample[i].Key, array[i].Key);
+                Assert.Equal(sample[i].Value, array[i].Value);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestClone()
         {
             BTreeDictionary<int, string> data = new BTreeDictionary<int, string>(Comparer, GetSample());
@@ -150,22 +149,22 @@ namespace CSharpTest.Net.Library.Test
             {
                 while (e1.MoveNext() && e2.MoveNext())
                 {
-                    Assert.AreEqual(e1.Current.Key, e2.Current.Key);
-                    Assert.AreEqual(e1.Current.Value, e2.Current.Value);
+                    Assert.Equal(e1.Current.Key, e2.Current.Key);
+                    Assert.Equal(e1.Current.Value, e2.Current.Value);
                 }
-                Assert.IsFalse(e1.MoveNext() || e2.MoveNext());
+                Assert.False(e1.MoveNext() || e2.MoveNext());
             }
         }
 
-        [Test]
+        [Fact]
         public void TestEnumerateFrom()
         {
             BTreeDictionary<int, string> data = new BTreeDictionary<int, string>(Comparer);
             for (int i = 0; i < 100; i++)
-                Assert.IsTrue(data.TryAdd(i, i.ToString()));
+                Assert.True(data.TryAdd(i, i.ToString()));
 
-            Assert.AreEqual(50, new List<KeyValuePair<int, string>>(data.EnumerateFrom(50)).Count);
-            Assert.AreEqual(25, new List<KeyValuePair<int, string>>(data.EnumerateFrom(75)).Count);
+            Assert.Equal(50, new List<KeyValuePair<int, string>>(data.EnumerateFrom(50)).Count);
+            Assert.Equal(25, new List<KeyValuePair<int, string>>(data.EnumerateFrom(75)).Count);
 
             for (int i = 0; i < 100; i++)
             {
@@ -175,11 +174,11 @@ namespace CSharpTest.Net.Library.Test
                     first = kv.Key;
                     break;
                 }
-                Assert.AreEqual(i, first);
+                Assert.Equal(i, first);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestFirstAndLast()
         {
             BTreeDictionary<int, string> data = new BTreeDictionary<int, string>();
@@ -189,32 +188,32 @@ namespace CSharpTest.Net.Library.Test
             data.Add(4, "d");
             data.Add(5, "e");
 
-            Assert.AreEqual(1, data.First().Key);
-            Assert.AreEqual("a", data.First().Value);
+            Assert.Equal(1, data.First().Key);
+            Assert.Equal("a", data.First().Value);
             data.Remove(1);
-            Assert.AreEqual(2, data.First().Key);
-            Assert.AreEqual("b", data.First().Value);
+            Assert.Equal(2, data.First().Key);
+            Assert.Equal("b", data.First().Value);
 
-            Assert.AreEqual(5, data.Last().Key);
-            Assert.AreEqual("e", data.Last().Value);
+            Assert.Equal(5, data.Last().Key);
+            Assert.Equal("e", data.Last().Value);
             data.Remove(5);
-            Assert.AreEqual(4, data.Last().Key);
-            Assert.AreEqual("d", data.Last().Value);
+            Assert.Equal(4, data.Last().Key);
+            Assert.Equal("d", data.Last().Value);
 
             data.Remove(4);
             data.Remove(3);
 
             KeyValuePair<int, string> kv;
-            Assert.IsTrue(data.TryGetLast(out kv));
-            Assert.IsTrue(data.TryGetFirst(out kv));
+            Assert.True(data.TryGetLast(out kv));
+            Assert.True(data.TryGetFirst(out kv));
             data.Remove(2);
-            Assert.IsFalse(data.TryGetLast(out kv));
-            Assert.IsFalse(data.TryGetFirst(out kv));
+            Assert.False(data.TryGetLast(out kv));
+            Assert.False(data.TryGetFirst(out kv));
 
             try
             {
                 data.First();
-                Assert.Fail("Should raise InvalidOperationException");
+                Assert.True(false,"Should raise InvalidOperationException");
             }
             catch (InvalidOperationException)
             {
@@ -222,92 +221,92 @@ namespace CSharpTest.Net.Library.Test
             try
             {
                 data.Last();
-                Assert.Fail("Should raise InvalidOperationException");
+                Assert.True(false,"Should raise InvalidOperationException");
             }
             catch (InvalidOperationException)
             {
             }
         }
 
-        [Test]
+        [Fact]
         public void TestForwardInsertTo1000()
         {
             SequencedTest(0, 1, 1000, "Forward");
         }
 
-        [Test]
+        [Fact]
         public void TestForwardInsertTo5000()
         {
             SequencedTest(0, 1, 5000, "Forward");
         }
 
-        [Test]
+        [Fact]
         public void TestGetOrAdd()
         {
             BTreeDictionary<int, string> data = new BTreeDictionary<int, string>(Comparer);
-            Assert.AreEqual("a", data.GetOrAdd(1, "a"));
-            Assert.AreEqual("a", data.GetOrAdd(1, "b"));
+            Assert.Equal("a", data.GetOrAdd(1, "a"));
+            Assert.Equal("a", data.GetOrAdd(1, "b"));
         }
 
-        [Test]
+        [Fact]
         public void TestIndexer()
         {
             BTreeDictionary<int, string> data = new BTreeDictionary<int, string>(Comparer, GetSample());
             BTreeDictionary<int, string> copy = new BTreeDictionary<int, string>();
             copy.AddRange(data);
-            Assert.AreEqual(copy.Count, data.Count);
+            Assert.Equal(copy.Count, data.Count);
             foreach (int key in data.Keys)
-                Assert.AreEqual(data[key], copy[key]);
+                Assert.Equal(data[key], copy[key]);
         }
 
-        [Test]
+        [Fact]
         public void TestKeyValueCollections()
         {
             List<KeyValuePair<int, string>> sample = new List<KeyValuePair<int, string>>(GetSample());
             BTreeDictionary<int, string> data = new BTreeDictionary<int, string>(sample);
             //Key collection
-            Assert.AreEqual(data.Count, data.Keys.Count);
-            Assert.IsTrue(data.Keys.IsReadOnly);
+            Assert.Equal(data.Count, data.Keys.Count);
+            Assert.True(data.Keys.IsReadOnly);
             for (int i = 0; i < sample.Count && i < 5; i++)
-                Assert.IsTrue(data.Keys.Contains(sample[i].Key));
+                Assert.True(data.Keys.Contains(sample[i].Key));
 
             IEnumerator<int> ek = data.Keys.GetEnumerator();
-            Assert.IsTrue(ek.MoveNext());
+            Assert.True(ek.MoveNext());
             int firstkey = ek.Current;
-            Assert.IsTrue(ek.MoveNext());
-            Assert.AreNotEqual(firstkey, ek.Current);
+            Assert.True(ek.MoveNext());
+            Assert.NotEqual(firstkey, ek.Current);
             ek.Reset();
-            Assert.IsTrue(ek.MoveNext());
-            Assert.AreEqual(firstkey, ek.Current);
-            Assert.AreEqual(firstkey, ((IEnumerator)ek).Current);
+            Assert.True(ek.MoveNext());
+            Assert.Equal(firstkey, ek.Current);
+            Assert.Equal(firstkey, ((IEnumerator)ek).Current);
 
             //Value collection
-            Assert.AreEqual(data.Count, data.Values.Count);
-            Assert.IsTrue(data.Values.IsReadOnly);
+            Assert.Equal(data.Count, data.Values.Count);
+            Assert.True(data.Values.IsReadOnly);
             for (int i = 0; i < sample.Count && i < 5; i++)
-                Assert.IsTrue(data.Values.Contains(sample[i].Value));
+                Assert.True(data.Values.Contains(sample[i].Value));
 
             IEnumerator<string> ev = data.Values.GetEnumerator();
-            Assert.IsTrue(ev.MoveNext());
+            Assert.True(ev.MoveNext());
             string firstvalue = ev.Current;
-            Assert.IsTrue(ev.MoveNext());
-            Assert.AreNotEqual(firstvalue, ev.Current);
+            Assert.True(ev.MoveNext());
+            Assert.NotEqual(firstvalue, ev.Current);
             ev.Reset();
-            Assert.IsTrue(ev.MoveNext());
-            Assert.AreEqual(firstvalue, ((IEnumerator)ev).Current);
+            Assert.True(ev.MoveNext());
+            Assert.Equal(firstvalue, ((IEnumerator)ev).Current);
         }
 
-        [Test]
+        [Fact]
         public void TestRangeEnumerate()
         {
             BTreeDictionary<int, string> data = new BTreeDictionary<int, string>(Comparer);
             for (int i = 0; i < 100; i++)
-                Assert.IsTrue(data.TryAdd(i, i.ToString()));
+                Assert.True(data.TryAdd(i, i.ToString()));
 
             int ix = 0;
             foreach (KeyValuePair<int, string> kv in data.EnumerateRange(-500, 5000))
-                Assert.AreEqual(ix++, kv.Key);
-            Assert.AreEqual(100, ix);
+                Assert.Equal(ix++, kv.Key);
+            Assert.Equal(100, ix);
 
             foreach (
                 KeyValuePair<int, int> range in
@@ -315,61 +314,61 @@ namespace CSharpTest.Net.Library.Test
             {
                 ix = range.Key;
                 foreach (KeyValuePair<int, string> kv in data.EnumerateRange(ix, range.Value))
-                    Assert.AreEqual(ix++, kv.Key);
-                Assert.AreEqual(range.Value, ix - 1);
+                    Assert.Equal(ix++, kv.Key);
+                Assert.Equal(range.Value, ix - 1);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestReadOnly()
         {
             BTreeDictionary<int, string> data = new BTreeDictionary<int, string>(Comparer, GetSample());
-            Assert.IsFalse(data.IsReadOnly);
+            Assert.False(data.IsReadOnly);
 
             BTreeDictionary<int, string> copy = data.MakeReadOnly();
-            Assert.IsFalse(ReferenceEquals(data, copy));
-            Assert.AreEqual(data.Count, copy.Count);
-            Assert.IsTrue(copy.IsReadOnly);
+            Assert.False(ReferenceEquals(data, copy));
+            Assert.Equal(data.Count, copy.Count);
+            Assert.True(copy.IsReadOnly);
 
-            Assert.IsTrue(ReferenceEquals(copy, copy.MakeReadOnly()));
+            Assert.True(ReferenceEquals(copy, copy.MakeReadOnly()));
             data = copy.Clone();
-            Assert.IsFalse(data.IsReadOnly);
-            Assert.IsFalse(ReferenceEquals(copy, data));
-            Assert.AreEqual(data.Count, copy.Count);
+            Assert.False(data.IsReadOnly);
+            Assert.False(ReferenceEquals(copy, data));
+            Assert.Equal(data.Count, copy.Count);
         }
 
-        [Test]
+        [Fact]
         public void TestReverseInsertTo1000()
         {
             SequencedTest(1000, -1, 0, "Reverse");
         }
 
-        [Test]
+        [Fact]
         public void TestReverseInsertTo5000()
         {
             SequencedTest(5000, -1, 0, "Reverse");
         }
 
-        [Test]
+        [Fact]
         public void TestTryRoutines()
         {
             BTreeDictionary<int, string> data = new BTreeDictionary<int, string>(Comparer);
-            Assert.IsTrue(data.TryAdd(1, "a"));
-            Assert.IsFalse(data.TryAdd(1, "a"));
+            Assert.True(data.TryAdd(1, "a"));
+            Assert.False(data.TryAdd(1, "a"));
 
-            Assert.IsTrue(data.TryUpdate(1, "a"));
-            Assert.IsTrue(data.TryUpdate(1, "c"));
-            Assert.IsTrue(data.TryUpdate(1, "d", "c"));
-            Assert.IsFalse(data.TryUpdate(1, "f", "c"));
-            Assert.AreEqual("d", data[1]);
-            Assert.IsTrue(data.TryUpdate(1, "a", data[1]));
-            Assert.AreEqual("a", data[1]);
-            Assert.IsFalse(data.TryUpdate(2, "b"));
+            Assert.True(data.TryUpdate(1, "a"));
+            Assert.True(data.TryUpdate(1, "c"));
+            Assert.True(data.TryUpdate(1, "d", "c"));
+            Assert.False(data.TryUpdate(1, "f", "c"));
+            Assert.Equal("d", data[1]);
+            Assert.True(data.TryUpdate(1, "a", data[1]));
+            Assert.Equal("a", data[1]);
+            Assert.False(data.TryUpdate(2, "b"));
 
             string val;
-            Assert.IsTrue(data.TryRemove(1, out val) && val == "a");
-            Assert.IsFalse(data.TryRemove(2, out val));
-            Assert.AreNotEqual(val, "a");
+            Assert.True(data.TryRemove(1, out val) && val == "a");
+            Assert.False(data.TryRemove(2, out val));
+            Assert.NotEqual(val, "a");
         }
     }
 }

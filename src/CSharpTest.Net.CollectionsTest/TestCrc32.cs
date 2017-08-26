@@ -16,11 +16,11 @@
 #endregion
 
 using CSharpTest.Net.IO;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestCrc32
     {
         private static void AssertCrc32(string input, int expected)
@@ -35,70 +35,70 @@ namespace CSharpTest.Net.Library.Test
         private static void AssertCrc32(byte[] input, int expected)
         {
             Crc32 crc = new Crc32(input);
-            Assert.AreEqual(expected, crc.Value);
+            Assert.Equal(expected, crc.Value);
 
             crc = new Crc32(0);
             crc.Add(input);
-            Assert.AreEqual(expected, crc.Value);
+            Assert.Equal(expected, crc.Value);
 
             crc = new Crc32();
             crc.Add(input, 0, input.Length);
-            Assert.AreEqual(expected, crc.Value);
+            Assert.Equal(expected, crc.Value);
 
             crc = new Crc32();
             foreach (byte b in input)
                 crc.Add(b);
-            Assert.AreEqual(expected, crc.Value);
+            Assert.Equal(expected, crc.Value);
         }
 
-        [Test]
+        [Fact]
         public void TestAddByteRange()
         {
             Crc32 all = new Crc32(new byte[] {0x2, 0x3, 0x4, 0x5, 0x6});
             Crc32 crc = new Crc32();
-            Assert.AreEqual(0, crc.Value);
+            Assert.Equal(0, crc.Value);
             crc.Add(new byte[] {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8}, 1, 5);
-            Assert.AreEqual(all.Value, crc.Value);
+            Assert.Equal(all.Value, crc.Value);
         }
 
-        [Test]
+        [Fact]
         public void TestCrc32Equals()
         {
             Crc32 empty = new Crc32();
             Crc32 value = new Crc32("Hello");
             Crc32 copy = new Crc32(value.Value);
 
-            Assert.IsTrue(value.Equals(copy));
-            Assert.IsFalse(value.Equals(empty));
-            Assert.IsTrue(value.Equals(copy.Value));
-            Assert.IsFalse(value.Equals(empty.Value));
+            Assert.True(value.Equals(copy));
+            Assert.False(value.Equals(empty));
+            Assert.True(value.Equals(copy.Value));
+            Assert.False(value.Equals(empty.Value));
 
-            Assert.IsTrue(value.Equals((object) copy));
-            Assert.IsFalse(value.Equals((object) empty));
-            Assert.IsTrue(value.Equals((object) copy.Value));
-            Assert.IsFalse(value.Equals((object) empty.Value));
+            Assert.True(value.Equals((object) copy));
+            Assert.False(value.Equals((object) empty));
+            Assert.True(value.Equals((object) copy.Value));
+            Assert.False(value.Equals((object) empty.Value));
         }
 
-        [Test]
+        [Fact]
         public void TestHashValue()
         {
             Crc32 crc = new Crc32();
-            Assert.AreEqual(0, crc.Value);
-            Assert.AreEqual(0, crc.GetHashCode());
+            Assert.Equal(0, crc.Value);
+            Assert.Equal(0, crc.GetHashCode());
 
             crc.Add(0x1b);
 
-            Assert.AreNotEqual(0, crc.Value);
-            Assert.AreEqual(crc.Value, crc.GetHashCode());
+            Assert.NotEqual(0, crc.Value);
+            Assert.Equal(crc.Value, crc.GetHashCode());
         }
 
-        [Test]
+        [Fact]
         public void TestKnown123456789()
         {
             AssertCrc32("123456789", unchecked((int) 0xCBF43926));
         }
 
-        [Test]
+        [Fact]
         public void TestKnownBytesLeading0Xff()
         {
             AssertCrc32(
@@ -110,7 +110,7 @@ namespace CSharpTest.Net.Library.Test
                 }, 0x49a04d82);
         }
 
-        [Test]
+        [Fact]
         public void TestKnownBytesLeadingZero()
         {
             AssertCrc32(
@@ -122,7 +122,7 @@ namespace CSharpTest.Net.Library.Test
                 }, unchecked((int) 0x923D6EFD));
         }
 
-        [Test]
+        [Fact]
         public void TestKnownBytesSequence()
         {
             AssertCrc32(
@@ -134,69 +134,69 @@ namespace CSharpTest.Net.Library.Test
                 }, 0x688b3bfa);
         }
 
-        [Test]
+        [Fact]
         public void TestKnownResume1()
         {
             AssertCrc32("resume", 0x60c1d0a0);
         }
 
-        [Test]
+        [Fact]
         public void TestKnownResume2()
         {
             //the string is "resumé" with the accented 'é'; however, I did not want to depend on proper text encoding.
             AssertCrc32("resum" + (char) 233, unchecked((int) 0x84cf1fab));
         }
 
-        [Test]
+        [Fact]
         public void TestOperatorEquality()
         {
             Crc32 empty = new Crc32();
             Crc32 value = new Crc32("Hello");
             Crc32 copy = new Crc32(value.Value);
 
-            Assert.IsTrue(value == copy);
-            Assert.IsFalse(value == empty);
-            Assert.IsTrue(value == copy.Value);
-            Assert.IsFalse(value == empty.Value);
+            Assert.True(value == copy);
+            Assert.False(value == empty);
+            Assert.True(value == copy.Value);
+            Assert.False(value == empty.Value);
 
-            Assert.IsFalse(value != copy);
-            Assert.IsTrue(value != empty);
-            Assert.IsFalse(value != copy.Value);
-            Assert.IsTrue(value != empty.Value);
+            Assert.False(value != copy);
+            Assert.True(value != empty);
+            Assert.False(value != copy.Value);
+            Assert.True(value != empty.Value);
         }
 
-        [Test]
+        [Fact]
         public void TestOperatorPlusBytes()
         {
             Crc32 all = new Crc32(new byte[] {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8});
             Crc32 crc = new Crc32();
-            Assert.AreEqual(0, crc.Value);
+            Assert.Equal(0, crc.Value);
             crc += new byte[] {0x1, 0x2, 0x3, 0x4};
             crc += 0x5;
             crc += 0x6;
             crc += 0x7;
             crc += 0x8;
-            Assert.AreEqual(all.Value, crc.Value);
+            Assert.Equal(all.Value, crc.Value);
         }
 
-        [Test]
+        [Fact]
         public void TestOperatorPlusString()
         {
             Crc32 all = new Crc32("hello there world");
             Crc32 crc = new Crc32();
-            Assert.AreEqual(0, crc.Value);
+            Assert.Equal(0, crc.Value);
             crc += "hello ";
             crc += "there ";
             crc += "world";
-            Assert.AreEqual(all.Value, crc.Value);
+            Assert.Equal(all.Value, crc.Value);
         }
 
-        [Test]
+        [Fact]
         public void TestToString()
         {
-            Assert.AreEqual("00000000", new Crc32().ToString());
-            Assert.AreEqual("00100100", new Crc32(0x00100100).ToString());
-            Assert.AreEqual("F0100100", new Crc32(unchecked((int) 0xF0100100)).ToString());
+            Assert.Equal("00000000", new Crc32().ToString());
+            Assert.Equal("00100100", new Crc32(0x00100100).ToString());
+            Assert.Equal("F0100100", new Crc32(unchecked((int) 0xF0100100)).ToString());
         }
     }
 }

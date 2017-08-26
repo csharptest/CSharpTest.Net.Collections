@@ -21,9 +21,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
     [StructLayout(LayoutKind.Sequential)]
     internal struct TestInfo
@@ -93,15 +93,15 @@ namespace CSharpTest.Net.BPlusTree.Test
             foreach (KeyValuePair<Guid, TestInfo> item in y)
             {
                 TestInfo value;
-                Assert.IsTrue(x.TryGetValue(item.Key, out value));
-                Assert.AreEqual(item.Key, item.Value.MyKey);
-                Assert.AreEqual(item.Value.MyKey, value.MyKey);
-                Assert.AreEqual(item.Value.SetNumber, value.SetNumber);
-                Assert.AreEqual(item.Value.CreateOrder, value.CreateOrder);
-                Assert.IsTrue(BinaryComparer.Equals(item.Value.RandomBytes, value.RandomBytes));
-                Assert.IsTrue(copy.Remove(item.Key));
+                Assert.True(x.TryGetValue(item.Key, out value));
+                Assert.Equal(item.Key, item.Value.MyKey);
+                Assert.Equal(item.Value.MyKey, value.MyKey);
+                Assert.Equal(item.Value.SetNumber, value.SetNumber);
+                Assert.Equal(item.Value.CreateOrder, value.CreateOrder);
+                Assert.True(BinaryComparer.Equals(item.Value.RandomBytes, value.RandomBytes));
+                Assert.True(copy.Remove(item.Key));
             }
-            Assert.IsEmpty(copy);
+            Assert.Empty(copy);
         }
     }
 

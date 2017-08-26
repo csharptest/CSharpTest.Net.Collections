@@ -19,14 +19,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using CSharpTest.Net.Collections.Test.IO;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+
     public class TestFragmentedFile
     {
         private readonly Random _random = new Random();
@@ -55,38 +56,38 @@ namespace CSharpTest.Net.Library.Test
             foreach (KeyValuePair<long, byte[]> kv in data)
                 using (Stream io = ff.Open(kv.Key, FileAccess.Read))
                 {
-                    Assert.AreEqual(kv.Value, IOStream.ReadAllBytes(io));
+                    Assert.Equal(kv.Value, IOStream.ReadAllBytes(io));
                 }
             //Enumerate:
             Dictionary<long, byte[]> copy = new Dictionary<long, byte[]>(data);
             foreach (KeyValuePair<long, Stream> fragment in ff.ForeachBlock(true, true, null))
             {
-                Assert.AreEqual(copy[fragment.Key], IOStream.ReadAllBytes(fragment.Value));
-                Assert.IsTrue(copy.Remove(fragment.Key));
+                Assert.Equal(copy[fragment.Key], IOStream.ReadAllBytes(fragment.Value));
+                Assert.True(copy.Remove(fragment.Key));
             }
             //Update:
             foreach (long id in new List<long>(data.Keys))
             {
-                Assert.AreEqual(data[id], IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
+                Assert.Equal(data[id], IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
 
                 using (Stream io = ff.Open(id, FileAccess.Write))
                 {
                     io.Write(data[id] = MakeBytes(blockSize * 2), 0, blockSize * 2);
                 }
-                Assert.AreEqual(data[id], IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
+                Assert.Equal(data[id], IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
 
                 using (Stream io = ff.Open(id, FileAccess.Write))
                 {
                     io.Write(data[id] = MakeBytes(blockSize / 2), 0, blockSize / 2);
                 }
-                Assert.AreEqual(data[id], IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
+                Assert.Equal(data[id], IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
             }
             //Delete:
             foreach (long id in new List<long>(data.Keys))
                 ff.Delete(id);
             //Empty?
             foreach (KeyValuePair<long, Stream> fragment in ff.ForeachBlock(true, true, null))
-                Assert.Fail();
+                Assert.True(false);
         }
 
         public void AssertThrows<TException>(ThreadStart proc) where TException : Exception
@@ -97,15 +98,14 @@ namespace CSharpTest.Net.Library.Test
             }
             catch (Exception error)
             {
-                Assert.IsTrue(error is TException, "Unexpected Exception type {0} thrown from {1}", error.GetType(),
-                    proc.Target);
+                Assert.True(error is TException, $"Unexpected Exception type {error.GetType()} thrown from {proc.Target}");
                 return;
             }
 
-            Assert.Fail("Expected Exception of type {0} from {1}", typeof(TException), proc.Target);
+            Assert.True(false, $"Expected Exception of type {typeof(TException)} from {proc.Target}");
         }
 
-        [Test]
+        [Fact]
         public void TestClear()
         {
             Dictionary<long, byte[]> data = new Dictionary<long, byte[]>();
@@ -119,15 +119,15 @@ namespace CSharpTest.Net.Library.Test
                 int count = 0;
                 foreach (KeyValuePair<long, Stream> fragment in ff.ForeachBlock(true, true, null))
                     count++;
-                Assert.AreEqual(256, count);
+                Assert.Equal(256, count);
                 ff.Clear();
                 //Empty?
                 foreach (KeyValuePair<long, Stream> fragment in ff.ForeachBlock(true, true, null))
-                    Assert.Fail();
+                    Assert.True(false);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCloseAndReopen()
         {
             using (TempFile file = new TempFile())
@@ -141,23 +141,23 @@ namespace CSharpTest.Net.Library.Test
                     {
                         PrimitiveSerializer.Guid.WriteTo(guid, io);
                     }
-                    Assert.AreEqual(id, ff.FirstIdentity);
+                    Assert.Equal(id, ff.FirstIdentity);
                 }
                 using (FragmentedFile ff = new FragmentedFile(file.TempPath, 512))
                 {
-                    Assert.AreEqual(id, ff.FirstIdentity);
+                    Assert.Equal(id, ff.FirstIdentity);
                     using (Stream io = ff.Open(id, FileAccess.Read))
                     {
-                        Assert.AreEqual(guid, PrimitiveSerializer.Guid.ReadFrom(io));
+                        Assert.Equal(guid, PrimitiveSerializer.Guid.ReadFrom(io));
                     }
                 }
                 using (FragmentedFile ff = new FragmentedFile(file.TempPath, 512, 10, 10, FileAccess.Read, FileShare.None,
                     FileOptions.None))
                 {
-                    Assert.AreEqual(id, ff.FirstIdentity);
+                    Assert.Equal(id, ff.FirstIdentity);
                     using (Stream io = ff.Open(id, FileAccess.Read))
                     {
-                        Assert.AreEqual(guid, PrimitiveSerializer.Guid.ReadFrom(io));
+                        Assert.Equal(guid, PrimitiveSerializer.Guid.ReadFrom(io));
                     }
 
                     AssertThrows<InvalidOperationException>(delegate { ff.Open(id, FileAccess.Write).Dispose(); });
@@ -165,7 +165,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCreateAndRead()
         {
             using (TempFile file = new TempFile())
@@ -178,15 +178,15 @@ namespace CSharpTest.Net.Library.Test
                     PrimitiveSerializer.Guid.WriteTo(guid, io);
                 }
 
-                Assert.AreEqual(id, ff.FirstIdentity);
+                Assert.Equal(id, ff.FirstIdentity);
                 using (Stream io = ff.Open(id, FileAccess.Read))
                 {
-                    Assert.AreEqual(guid, PrimitiveSerializer.Guid.ReadFrom(io));
+                    Assert.Equal(guid, PrimitiveSerializer.Guid.ReadFrom(io));
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestMultiBlocks()
         {
             using (TempFile file = new TempFile())
@@ -196,7 +196,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestOptionsNoBuffering()
         {
             // If you have issues with this test, your hardware may not support it, or your sector size is larger than 4096
@@ -217,12 +217,12 @@ namespace CSharpTest.Net.Library.Test
                 foreach (KeyValuePair<long, byte[]> kv in data)
                     using (Stream io = ff.Open(kv.Key, FileAccess.Read))
                     {
-                        Assert.AreEqual(kv.Value, IOStream.ReadAllBytes(io));
+                        Assert.Equal(kv.Value, IOStream.ReadAllBytes(io));
                     }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestOptionsWriteThrough()
         {
             long id;
@@ -242,12 +242,12 @@ namespace CSharpTest.Net.Library.Test
                 foreach (KeyValuePair<long, byte[]> kv in data)
                     using (Stream io = ff.Open(kv.Key, FileAccess.Read))
                     {
-                        Assert.AreEqual(kv.Value, IOStream.ReadAllBytes(io));
+                        Assert.Equal(kv.Value, IOStream.ReadAllBytes(io));
                     }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestReaderStream()
         {
             using (SharedMemoryStream shared = new SharedMemoryStream())
@@ -261,10 +261,10 @@ namespace CSharpTest.Net.Library.Test
 
                 using (Stream read = ff.Open(id, FileAccess.Read))
                 {
-                    Assert.IsTrue(read.CanRead);
-                    Assert.IsFalse(read.CanWrite);
-                    Assert.IsFalse(read.CanSeek);
-                    Assert.AreEqual(id, PrimitiveSerializer.Int64.ReadFrom(read));
+                    Assert.True(read.CanRead);
+                    Assert.False(read.CanWrite);
+                    Assert.False(read.CanSeek);
+                    Assert.Equal(id, PrimitiveSerializer.Int64.ReadFrom(read));
                     read.Flush(); //no-op
 
                     AssertThrows<NotSupportedException>(delegate { read.Position = 0; });
@@ -277,7 +277,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRecoverBlocks()
         {
             long idFirst, idSecond, idThird;
@@ -301,13 +301,13 @@ namespace CSharpTest.Net.Library.Test
 
                 using (FragmentedFile f2 = new FragmentedFile(file.TempPath, 512))
                 {
-                    Assert.IsTrue(f2.Create() < idSecond);
-                    Assert.IsTrue(f2.Create() > idThird);
+                    Assert.True(f2.Create() < idSecond);
+                    Assert.True(f2.Create() > idThird);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRollbackCreate()
         {
             SharedMemoryStream shared = new SharedMemoryStream();
@@ -318,11 +318,11 @@ namespace CSharpTest.Net.Library.Test
                 long id;
                 byte[] bytes = MakeBytes(255);
                 using (Stream write = ff.Create(out id))
-                using (ITransactable trans = (ITransactable) write)
+                using (ITransactable trans = (ITransactable)write)
                 {
                     write.Write(bytes, 0, bytes.Length);
                     trans.Commit();
-                    Assert.AreEqual(bytes, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
+                    Assert.Equal(bytes, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
                     trans.Rollback();
                 }
 
@@ -330,7 +330,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestSingleBlockCrud()
         {
             using (TempFile file = new TempFile())
@@ -346,7 +346,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestTransactBlock()
         {
             SharedMemoryStream shared = new SharedMemoryStream();
@@ -361,69 +361,73 @@ namespace CSharpTest.Net.Library.Test
                     write.Write(orig, 0, orig.Length);
                 }
 
-                Assert.AreEqual(orig, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
+                Assert.Equal(orig, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
 
                 byte[] change = MakeBytes(800);
                 using (Stream write = ff.Open(id, FileAccess.Write))
-                using (ITransactable trans = (ITransactable) write) //the Fragmented File Streams are ITransactable
+                using (ITransactable trans = (ITransactable)write) //the Fragmented File Streams are ITransactable
                 {
                     write.Write(change, 0, change.Length);
-                    Assert.AreEqual(orig, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
+                    Assert.Equal(orig, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
 
                     trans.Commit(); //commit changes so that readers can read
-                    Assert.AreEqual(change, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
+                    Assert.Equal(change, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
 
                     trans.Rollback(); //rollback even after commit to 'undo' the changes
-                    Assert.AreEqual(orig, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
+                    Assert.Equal(orig, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
                 } //once disposed you can no longer rollback, if rollback has not been called commit is implied.
 
-                Assert.AreEqual(orig, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
+                Assert.Equal(orig, IOStream.ReadAllBytes(ff.Open(id, FileAccess.Read)));
             }
         }
 
-        [Test]
-        //[ExpectedException(typeof(ObjectDisposedException))]
+        [Fact]
         public void TestTransactFail()
         {
-            SharedMemoryStream shared = new SharedMemoryStream();
-            FragmentedFile.CreateNew(shared, 512, 100, 2).Dispose();
-
-            using (FragmentedFile ff = new FragmentedFile(shared, 512, 100, 2))
+            Assert.Throws<ObjectDisposedException>(() =>
             {
-                long id;
-                byte[] bytes = MakeBytes(255);
-                using (Stream write = ff.Create(out id))
-                using (ITransactable trans = (ITransactable) write)
+                SharedMemoryStream shared = new SharedMemoryStream();
+                FragmentedFile.CreateNew(shared, 512, 100, 2).Dispose();
+
+                using (FragmentedFile ff = new FragmentedFile(shared, 512, 100, 2))
                 {
-                    write.Write(bytes, 0, bytes.Length);
-                    ff.Dispose();
-                    trans.Commit();
+                    long id;
+                    byte[] bytes = MakeBytes(255);
+                    using (Stream write = ff.Create(out id))
+                    using (ITransactable trans = (ITransactable)write)
+                    {
+                        write.Write(bytes, 0, bytes.Length);
+                        ff.Dispose();
+                        trans.Commit();
+                    }
                 }
-            }
+            });
         }
 
-        [Test]
-        //[ExpectedException(typeof(ObjectDisposedException))]
+        [Fact]
         public void TestTransactWriteAfterCommit()
         {
-            SharedMemoryStream shared = new SharedMemoryStream();
-            FragmentedFile.CreateNew(shared, 512, 100, 2).Dispose();
-
-            using (FragmentedFile ff = new FragmentedFile(shared, 512, 100, 2))
+            Assert.Throws<ObjectDisposedException>(() =>
             {
-                long id;
-                byte[] bytes = MakeBytes(255);
-                using (Stream write = ff.Create(out id))
-                using (ITransactable trans = (ITransactable) write)
+                SharedMemoryStream shared = new SharedMemoryStream();
+                FragmentedFile.CreateNew(shared, 512, 100, 2).Dispose();
+
+                using (FragmentedFile ff = new FragmentedFile(shared, 512, 100, 2))
                 {
-                    write.Write(bytes, 0, bytes.Length);
-                    trans.Commit();
-                    write.Write(bytes, 0, bytes.Length);
+                    long id;
+                    byte[] bytes = MakeBytes(255);
+                    using (Stream write = ff.Create(out id))
+                    using (ITransactable trans = (ITransactable)write)
+                    {
+                        write.Write(bytes, 0, bytes.Length);
+                        trans.Commit();
+                        write.Write(bytes, 0, bytes.Length);
+                    }
                 }
-            }
+            });
         }
 
-        [Test]
+        [Fact]
         public void TestTwoBlocks()
         {
             using (TempFile file = new TempFile())
@@ -433,7 +437,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWriterStream()
         {
             using (SharedMemoryStream shared = new SharedMemoryStream())
@@ -442,9 +446,9 @@ namespace CSharpTest.Net.Library.Test
                 long id = ff.Create();
                 using (Stream write = ff.Open(id, FileAccess.Write))
                 {
-                    Assert.IsFalse(write.CanRead);
-                    Assert.IsTrue(write.CanWrite);
-                    Assert.IsFalse(write.CanSeek);
+                    Assert.False(write.CanRead);
+                    Assert.True(write.CanWrite);
+                    Assert.False(write.CanSeek);
                     PrimitiveSerializer.Int64.WriteTo(id, write);
                     write.Flush(); //no-op
 

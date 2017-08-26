@@ -88,7 +88,7 @@ namespace CSharpTest.Net.Collections
 
             public bool TryGetNode<TNode>(IStorageHandle handle, out TNode tnode, ISerializer<TNode> serializer)
             {
-                if (_serializer == null) _serializer = (ISerializer<Node>) serializer;
+                if (_serializer == null) _serializer = (ISerializer<Node>)serializer;
 
                 FetchFromStore<TNode> fetch = new FetchFromStore<TNode>
                 {
@@ -109,13 +109,14 @@ namespace CSharpTest.Net.Collections
 
             public void Update<TNode>(IStorageHandle handle, ISerializer<TNode> serializer, TNode tnode)
             {
-                if (_serializer == null) _serializer = (ISerializer<Node>) serializer;
+                if (_serializer == null) _serializer = (ISerializer<Node>)serializer;
 
                 _cache[handle] = tnode;
                 _dirty[handle] = tnode;
 
-                IAsyncResult completion = _asyncWriteBehind;
-                if (_dirty.Count > _asyncThreshold && (completion == null || completion.IsCompleted))
+                //IAsyncResult completion = _asyncWriteBehind;
+                if (_dirty.Count > _asyncThreshold )//&& (completion == null || completion.IsCompleted))
+                {
                     try
                     {
                     }
@@ -126,9 +127,10 @@ namespace CSharpTest.Net.Collections
                         {
                             if (locked)
                             {
-                                completion = _asyncWriteBehind;
-                                if (completion == null || completion.IsCompleted)
-                                    _asyncWriteBehind = _writeBehindFunc.BeginInvoke(null, null);
+                                //completion = _asyncWriteBehind;
+                                //if (completion == null || completion.IsCompleted)
+                                //    _asyncWriteBehind = _writeBehindFunc.BeginInvoke(null, null);
+                                Flush();
                             }
                         }
                         finally
@@ -137,6 +139,8 @@ namespace CSharpTest.Net.Collections
                                 Monitor.Exit(_flushSync);
                         }
                     }
+
+                }
             }
 
             public void Destroy(IStorageHandle handle)
@@ -207,7 +211,7 @@ namespace CSharpTest.Net.Collections
             {
                 ISerializer<Node> ser = _serializer;
                 if (ser != null && item.Value != null)
-                    _store.Update(item.Key, ser, (Node) item.Value);
+                    _store.Update(item.Key, ser, (Node)item.Value);
             }
 
             private void Flush()
@@ -244,7 +248,7 @@ namespace CSharpTest.Net.Collections
                     if (DirtyCache.TryGetValue(key, out value) && value != null)
                     {
                         Success = true;
-                        Value = (TNode) value;
+                        Value = (TNode)value;
                         return true;
                     }
 
@@ -262,7 +266,7 @@ namespace CSharpTest.Net.Collections
                 public bool UpdateValue(IStorageHandle key, ref object value)
                 {
                     Success = value != null;
-                    Value = (TNode) value;
+                    Value = (TNode)value;
                     return false;
                 }
             }

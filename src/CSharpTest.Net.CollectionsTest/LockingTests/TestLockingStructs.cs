@@ -18,75 +18,80 @@
 using System;
 using System.Threading;
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test.LockingTests
+namespace CSharpTest.Net.Collections.Test.LockingTests
 {
-    [TestFixture]
+
     public class TestLockingStructs
     {
         protected readonly ILockFactory LockFactory = new LockFactory<SimpleReadWriteLocking>();
 
-        [Test]
-        //[ExpectedException(typeof(SynchronizationLockException))]
+        [Fact]
         public void TestIdiotReaderUsesDispose()
         {
-            using (ILockStrategy l = LockFactory.Create())
-            using (ReadLock r = new ReadLock(l, 0))
+            Assert.Throws<SynchronizationLockException>(() =>
             {
-                Assert.IsTrue(r.HasReadLock);
-                ((IDisposable) r)
-                    .Dispose(); //You cannot do this, the using statement has a 'copy' of ReadLock, don't call dispose.
-            }
+                using (ILockStrategy l = LockFactory.Create())
+                using (ReadLock r = new ReadLock(l, 0))
+                {
+                    Assert.True(r.HasReadLock);
+                    ((IDisposable)r)
+                        .Dispose(); //You cannot do this, the using statement has a 'copy' of ReadLock, don't call dispose.
+                }
+            });
         }
 
-        [Test]
-        //[ExpectedException(typeof(SynchronizationLockException))]
+        [Fact]
         public void TestIdiotUsesSafeLockDispose()
         {
-            object instance = new object();
-            using (SafeLock safeLock = new SafeLock(instance, 0))
+            Assert.Throws<SynchronizationLockException>(() =>
             {
-                ((IDisposable) safeLock)
-                    .Dispose(); //since the using statement has the same boxed pointer to r, we are allowed to dispose
-            }
+                object instance = new object();
+                using (SafeLock safeLock = new SafeLock(instance, 0))
+                {
+                    ((IDisposable)safeLock)
+                        .Dispose(); //since the using statement has the same boxed pointer to r, we are allowed to dispose
+                }
+            });
         }
 
-        [Test]
-        //[ExpectedException(typeof(SynchronizationLockException))]
+        [Fact]
         public void TestIdiotWriterUsesDispose()
         {
-            using (ILockStrategy l = LockFactory.Create())
-            using (WriteLock w = new WriteLock(l, 0))
+            Assert.Throws<SynchronizationLockException>(() =>
             {
-                Assert.IsTrue(w.HasWriteLock);
-                ((IDisposable) w)
-                    .Dispose(); //You cannot do this, the using statement has a 'copy' of ReadLock, don't call dispose.
-            }
+                using (ILockStrategy l = LockFactory.Create())
+                using (WriteLock w = new WriteLock(l, 0))
+                {
+                    Assert.True(w.HasWriteLock);
+                    ((IDisposable)w).Dispose(); //You cannot do this, the using statement has a 'copy' of ReadLock, don't call dispose.
+                }
+            });
         }
 
-        [Test]
+        [Fact]
         public void TestReadLockSuccess()
         {
             using (ILockStrategy l = LockFactory.Create())
             using (ReadLock r = new ReadLock(l, 0))
             {
-                Assert.IsTrue(r.HasReadLock);
+                Assert.True(r.HasReadLock);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestReadLockTimeout()
         {
             using (ILockStrategy l = LockFactory.Create())
             using (new ThreadedWriter(l))
             using (ReadLock r = new ReadLock(l, 0))
             {
-                Assert.IsFalse(r.HasReadLock);
+                Assert.False(r.HasReadLock);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestSafeLockSuccess()
         {
             object instance = new object();
@@ -95,7 +100,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestSafeLockSuccessWithTException()
         {
             object instance = new object();
@@ -104,52 +109,57 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
         }
 
-        [Test]
-        //[ExpectedException(typeof(TimeoutException))]
+        [Fact]
         public void TestSafeLockTimeout()
         {
-            object instance = new object();
-            using (new ThreadedWriter(new SimpleReadWriteLocking(instance)))
-            using (new SafeLock(instance, 0))
+            Assert.Throws<TimeoutException>(() =>
             {
-                Assert.Fail();
-            }
+                object instance = new object();
+                using (new ThreadedWriter(new SimpleReadWriteLocking(instance)))
+                using (new SafeLock(instance, 0))
+                {
+                    Assert.True(false);
+                }
+            });
         }
 
-        [Test]
-        //[ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [Fact]
         public void TestSafeLockTimeoutWithTException()
         {
-            object instance = new object();
-            using (new ThreadedWriter(new SimpleReadWriteLocking(instance)))
-            using (new SafeLock<ArgumentOutOfRangeException>(instance, 0))
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                Assert.Fail();
-            }
+
+                object instance = new object();
+                using (new ThreadedWriter(new SimpleReadWriteLocking(instance)))
+                using (new SafeLock<ArgumentOutOfRangeException>(instance, 0))
+                {
+                    Assert.True(false);
+                }
+            });
         }
 
-        [Test]
+        [Fact]
         public void TestWriteLockSuccess()
         {
             using (ILockStrategy l = LockFactory.Create())
             using (WriteLock w = new WriteLock(l, 0))
             {
-                Assert.IsTrue(w.HasWriteLock);
+                Assert.True(w.HasWriteLock);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWriteLockTimeout()
         {
             using (ILockStrategy l = LockFactory.Create())
             using (new ThreadedWriter(l))
             using (WriteLock w = new WriteLock(l, 0))
             {
-                Assert.IsFalse(w.HasWriteLock);
+                Assert.False(w.HasWriteLock);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestYouCanDisposeReadLock()
         {
             using (ILockStrategy l = LockFactory.Create())
@@ -159,7 +169,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestYouCanDisposeSafeLock()
         {
             object instance = new object();
@@ -169,7 +179,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestYouCanDisposeWriteLock()
         {
             using (ILockStrategy l = LockFactory.Create())

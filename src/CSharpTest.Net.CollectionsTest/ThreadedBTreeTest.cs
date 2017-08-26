@@ -20,40 +20,22 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using CSharpTest.Net.BPlusTree.Test.SampleTypes;
-using CSharpTest.Net.Collections;
+using System.Threading.Tasks;
+using CSharpTest.Net.Collections.Test.Reflection;
+using CSharpTest.Net.Collections.Test.SampleTypes;
+using CSharpTest.Net.Collections.Test.Threading;
 using CSharpTest.Net.IO;
-using CSharpTest.Net.Reflection;
 using CSharpTest.Net.Serialization;
 using CSharpTest.Net.Synchronization;
-using CSharpTest.Net.Threading;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
-    public class ThreadedBTreeTest
+
+    public class ThreadedBTreeTest : IDisposable
     {
-        [SetUp]
-        public void ClearRecords()
-        {
-            RecordsCreated = 0;
-        }
-
-        protected static int RecordsCreated;
-        protected TempFile TempFile;
-
-        [TestFixtureSetUp]
-        public virtual void Setup()
-        {
-            TempFile = new TempFile();
-        }
-
-        [TestFixtureTearDown]
-        public virtual void Teardown()
-        {
-            TempFile.Dispose();
-        }
+        protected static int RecordsCreated = 0;
+        protected TempFile TempFile = new TempFile();
 
         private int StartAndAbortWriters(BPlusTreeOptions<KeyInfo, DataValue> options, TempFile copy)
         {
@@ -65,7 +47,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                 using (WorkQueue work = new WorkQueue(Environment.ProcessorCount))
                 {
                     Exception lastError = null;
-                    work.OnError += delegate(object o, ErrorEventArgs e) { lastError = e.GetException(); };
+                    work.OnError += delegate (object o, ErrorEventArgs e) { lastError = e.GetException(); };
 
                     Thread.Sleep(1);
                     for (int i = 0; i < Environment.ProcessorCount; i++)
@@ -80,11 +62,11 @@ namespace CSharpTest.Net.BPlusTree.Test
                     work.Complete(false, 0); //hard-abort all threads
 
                     //if(lastError != null)
-                    //    Assert.AreEqual(typeof(InvalidDataException), lastError.GetType());
+                    //    Assert.Equal(typeof(InvalidDataException), lastError.GetType());
                 }
 
                 // force the file to close without disposing the btree
-                IDisposable tmp = (IDisposable) new PropertyValue(dictionary, "_storage").Value;
+                IDisposable tmp = (IDisposable)new PropertyValue(dictionary, "_storage").Value;
                 tmp.Dispose();
             }
             catch
@@ -155,16 +137,16 @@ namespace CSharpTest.Net.BPlusTree.Test
                         found.Remove(kv.Key);
                     }
 
-                    Assert.AreEqual(0, found.Count);
+                    Assert.Equal(0, found.Count);
 
                     foreach (KeyValuePair<KeyInfo, DataValue> kv in values)
                     {
                         read++;
                         DataValue test;
-                        Assert.IsTrue(_data.TryGetValue(kv.Key, out test));
-                        Assert.AreEqual(kv.Key.UID, test.Key.UID);
-                        Assert.AreEqual(kv.Value.Hash, test.Hash);
-                        Assert.AreEqual(kv.Value.Bytes, test.Bytes);
+                        Assert.True(_data.TryGetValue(kv.Key, out test));
+                        Assert.Equal(kv.Key.UID, test.Key.UID);
+                        Assert.Equal(kv.Value.Hash, test.Hash);
+                        Assert.Equal(kv.Value.Bytes, test.Bytes);
                     }
 
                     foreach (KeyValuePair<KeyInfo, DataValue> kv in values)
@@ -175,13 +157,13 @@ namespace CSharpTest.Net.BPlusTree.Test
                         write++;
                         _data[kv.Key] = new DataValue(kv.Key, bytes);
                         read++;
-                        Assert.AreEqual(bytes, _data[kv.Key].Bytes);
+                        Assert.Equal(bytes, _data[kv.Key].Bytes);
                     }
 
                     foreach (KeyInfo key in new List<KeyInfo>(values.Keys))
                     {
                         delete++;
-                        Assert.IsTrue(_data.Remove(key));
+                        Assert.True(_data.Remove(key));
                         values.Remove(key);
                     }
                 }
@@ -195,15 +177,15 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
-        [Explicit]
+        [Fact]
+        [Trait("Category", "Benchmark")]
         public void LoopTestAbortWritersAndRecover()
         {
             for (int i = 0; i < 10; i++)
                 TestAbortWritersAndRecover();
         }
 
-        [Test]
+        [Fact]
         public void TestAbortWritersAndRecover()
         {
             BPlusTree<KeyInfo, DataValue>.Options options = new BPlusTree<KeyInfo, DataValue>.Options(
@@ -223,39 +205,38 @@ namespace CSharpTest.Net.BPlusTree.Test
                     options.CreateFile = CreatePolicy.Never;
                     int recoveredRecords = BPlusTree<KeyInfo, DataValue>.RecoverFile(options);
                     if (recoveredRecords < RecordsCreated)
-                        Assert.Fail("Unable to recover records, recieved ({0} of {1}).", recoveredRecords,
-                            RecordsCreated);
+                        Assert.True(false, $"Unable to recover records, recieved ({recoveredRecords} of {RecordsCreated}).");
 
                     options.FileName = copy.TempPath;
                     recoveredRecords = BPlusTree<KeyInfo, DataValue>.RecoverFile(options);
-                    Assert.IsTrue(recoveredRecords >= minRecordCreated,
+                    Assert.True(recoveredRecords >= minRecordCreated,
                         "Expected at least " + minRecordCreated + " found " + recoveredRecords);
 
                     using (BPlusTree<KeyInfo, DataValue> dictionary = new BPlusTree<KeyInfo, DataValue>(options))
                     {
                         dictionary.EnableCount();
-                        Assert.AreEqual(recoveredRecords, dictionary.Count);
+                        Assert.Equal(recoveredRecords, dictionary.Count);
 
                         foreach (KeyValuePair<KeyInfo, DataValue> kv in dictionary)
                         {
-                            Assert.AreEqual(kv.Key.UID, kv.Value.Key.UID);
+                            Assert.Equal(kv.Key.UID, kv.Value.Key.UID);
                             dictionary.Remove(kv.Key);
                         }
 
-                        Assert.AreEqual(0, dictionary.Count);
+                        Assert.Equal(0, dictionary.Count);
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestAtomicUpdate()
         {
             int threads = Environment.ProcessorCount;
             const int updates = 10000;
 
-            KeyValueUpdate<int, int> fnIncrement = delegate(int k, int i) { return i + 1; };
-            Action<BPlusTree<int, int>> fnDoUpdates = delegate(BPlusTree<int, int> t)
+            KeyValueUpdate<int, int> fnIncrement = delegate (int k, int i) { return i + 1; };
+            Action<BPlusTree<int, int>> fnDoUpdates = delegate (BPlusTree<int, int> t)
             {
                 for (int i = 0; i < updates; i++) t.TryUpdate(1, fnIncrement);
             };
@@ -272,17 +253,17 @@ namespace CSharpTest.Net.BPlusTree.Test
                     for (int i = 0; i < threads; i++)
                         w.Enqueue(fnDoUpdates, tree);
 
-                    Assert.IsTrue(w.Complete(true, 60000));
+                    Assert.True(w.Complete(true, 60000));
                 }
 
-                Assert.AreEqual(updates * threads, tree[1]);
+                Assert.Equal(updates * threads, tree[1]);
             }
 
             Trace.TraceInformation("Updated {0} times on each of {1} threads in {2}ms", updates, threads,
                 time.ElapsedMilliseconds);
         }
 
-        [Test]
+        [Fact]
         public void TestCallLevelLocking()
         {
             BPlusTree<int, int>.OptionsV2 options = new BPlusTree<int, int>.OptionsV2(
@@ -293,7 +274,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             using (BPlusTree<int, int> dictionary = new BPlusTree<int, int>(options))
             {
                 bool canwrite = false, canread = false;
-                ThreadStart proc = delegate
+                Action proc = () =>
                 {
                     try
                     {
@@ -304,6 +285,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     {
                         canwrite = false;
                     }
+
                     try
                     {
                         int i;
@@ -316,38 +298,39 @@ namespace CSharpTest.Net.BPlusTree.Test
                     }
                 };
 
-                Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000));
-                Assert.IsTrue(canwrite);
-                Assert.IsTrue(canread);
+                Assert.True(Task.Run(proc).Wait(1000));
+                Assert.True(canwrite);
+                Assert.True(canread);
 
                 //now we lock the entire btree:
                 using (dictionary.CallLevelLock.Write())
                 {
                     //they can't read or write
-                    Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000));
-                    Assert.IsFalse(canwrite);
-                    Assert.IsFalse(canread);
+                    Assert.True(Task.Run(proc).Wait(1000));
+                    Assert.False(canwrite);
+                    Assert.False(canread);
                     //but we can
                     proc();
-                    Assert.IsTrue(canwrite);
-                    Assert.IsTrue(canread);
+                    Assert.True(canwrite);
+                    Assert.True(canread);
                 }
+
                 //lock release all is well
-                Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000));
-                Assert.IsTrue(canwrite);
-                Assert.IsTrue(canread);
+                Assert.True(Task.Run(proc).Wait(1000));
+                Assert.True(canwrite);
+                Assert.True(canread);
 
                 //We can also make sure noone else gains exclusive access with a read lock
                 using (dictionary.CallLevelLock.Read())
                 {
-                    Assert.IsTrue(proc.BeginInvoke(null, null).AsyncWaitHandle.WaitOne(1000));
-                    Assert.IsTrue(canwrite);
-                    Assert.IsTrue(canread);
+                    Assert.True(Task.Run(proc).Wait(1000));
+                    Assert.True(canwrite);
+                    Assert.True(canread);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestConcurrentCreateReadUpdateDelete8000()
         {
             BPlusTree<KeyInfo, DataValue>.OptionsV2 options = new BPlusTree<KeyInfo, DataValue>.OptionsV2(
@@ -374,17 +357,17 @@ namespace CSharpTest.Net.BPlusTree.Test
             using (WorkQueue work = new WorkQueue(Environment.ProcessorCount))
             {
                 Exception lastError = null;
-                work.OnError += delegate(object o, ErrorEventArgs e) { lastError = e.GetException(); };
+                work.OnError += delegate (object o, ErrorEventArgs e) { lastError = e.GetException(); };
 
                 for (int i = 0; i < Environment.ProcessorCount; i++)
                     work.Enqueue(new ThreadedTest(dictionary, 1000).Run);
 
-                Assert.IsTrue(work.Complete(true, 60000));
-                Assert.IsNull(lastError, "Exception raised in worker: {0}", lastError);
+                Assert.True(work.Complete(true, 60000));
+                Assert.True(lastError == null, $"Exception raised in worker: {lastError}");
             }
         }
 
-        [Test]
+        [Fact]
         public void TestErrorsOnInsertAndDelete()
         {
             const int CountPerThread = 100;
@@ -399,7 +382,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             using (WorkQueue work = new WorkQueue(Environment.ProcessorCount))
             {
                 Exception lastError = null;
-                work.OnError += delegate(object o, ErrorEventArgs e) { lastError = e.GetException(); };
+                work.OnError += delegate (object o, ErrorEventArgs e) { lastError = e.GetException(); };
 
                 for (int i = 0; i < Environment.ProcessorCount; i++)
                     work.Enqueue(new ThreadedTest(dictionary, CountPerThread).Run);
@@ -422,9 +405,14 @@ namespace CSharpTest.Net.BPlusTree.Test
                         {
                         }
 
-                Assert.IsTrue(work.Complete(true, 60000));
-                Assert.IsNull(lastError, "Exception raised in worker: {0}", lastError);
+                Assert.True(work.Complete(true, 60000));
+                Assert.True(lastError == null, $"Exception raised in worker: {lastError}");
             }
+        }
+
+        public void Dispose()
+        {
+            TempFile.Dispose();
         }
     }
 }

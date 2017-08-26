@@ -16,11 +16,11 @@
 #endregion
 
 using System.IO;
-using CSharpTest.Net.Crypto;
+using CSharpTest.Net.Collections.Test.Crypto;
 using CSharpTest.Net.Serialization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test.SampleTypes
+namespace CSharpTest.Net.Collections.Test.SampleTypes
 {
     internal class DataValueSerializer : ISerializer<DataValue>
     {
@@ -34,7 +34,7 @@ namespace CSharpTest.Net.BPlusTree.Test.SampleTypes
             );
 
             Hash cmpHash = Hash.FromString(PrimitiveSerializer.String.ReadFrom(stream));
-            Assert.AreEqual(value.Hash, cmpHash);
+            Assert.Equal(value.Hash, cmpHash);
             return value;
         }
 

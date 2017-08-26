@@ -16,12 +16,12 @@
 #endregion
 
 using System;
-using System.IO;
 using System.Security.Cryptography;
-using CSharpTest.Net.Bases;
+using CSharpTest.Net.Collections.Test.Bases;
+using CSharpTest.Net.Collections.Test.Shared;
 using CSharpTest.Net.IO;
 
-namespace CSharpTest.Net.Crypto
+namespace CSharpTest.Net.Collections.Test.Crypto
 {
     /// <summary> Represents a comparable, sortable, hash code </summary>
     public sealed class Hash : Comparable<Hash>

@@ -16,15 +16,14 @@
 #endregion
 
 using System.Collections.Generic;
-using CSharpTest.Net.Collections;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class BasicTestsVersion2 : BasicTests
     {
         private static TempFile _tempFile;
@@ -43,12 +42,12 @@ namespace CSharpTest.Net.BPlusTree.Test
                     FileName = _tempFile.TempPath
                 }.CalcBTreeOrder(4, 10);
 
-                Assert.AreEqual(FileVersion.Version2, options.FileVersion);
+                Assert.Equal(FileVersion.Version2, options.FileVersion);
                 return options;
             }
         }
 
-        [Test]
+        [Fact]
         public void TestAutoCommit()
         {
             BPlusTree<int, string>.OptionsV2 options = (BPlusTree<int, string>.OptionsV2) Options;
@@ -57,78 +56,78 @@ namespace CSharpTest.Net.BPlusTree.Test
             using (BPlusTree<int, string> tree = Create(options))
             {
                 tree.EnableCount();
-                Assert.AreEqual(0, tree.Count);
+                Assert.Equal(0, tree.Count);
 
                 tree.Add(1, "A");
                 tree.Rollback();
-                Assert.AreEqual(0, tree.Count);
+                Assert.Equal(0, tree.Count);
 
                 tree.Add(1, "A");
                 tree.Add(2, "B"); //The second write exceeds 30 bytes and auto-commits
                 tree.Rollback();
-                Assert.AreEqual(2, tree.Count);
+                Assert.Equal(2, tree.Count);
                 tree.Add(3, "C");
                 tree.Add(4, "D"); //The second write will commit, but not the last
                 tree.Add(5, "E");
                 tree.Rollback();
-                Assert.AreEqual(4, tree.Count);
-                Assert.IsFalse(tree.ContainsKey(5));
+                Assert.Equal(4, tree.Count);
+                Assert.False(tree.ContainsKey(5));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCommitRollback()
         {
             using (BPlusTree<int, string> tree = Create(Options))
             {
                 tree.EnableCount();
-                Assert.AreEqual(0, tree.Count);
+                Assert.Equal(0, tree.Count);
                 tree.Rollback();
-                Assert.AreEqual(0, tree.Count);
+                Assert.Equal(0, tree.Count);
                 tree.Commit();
-                Assert.AreEqual(0, tree.Count);
+                Assert.Equal(0, tree.Count);
 
                 tree.Add(1, "A");
                 tree.Rollback();
-                Assert.AreEqual(0, tree.Count);
+                Assert.Equal(0, tree.Count);
                 tree.Commit();
-                Assert.AreEqual(0, tree.Count);
+                Assert.Equal(0, tree.Count);
 
                 tree.Add(1, "A");
                 tree.Commit();
-                Assert.AreEqual(1, tree.Count);
+                Assert.Equal(1, tree.Count);
                 tree.Rollback();
-                Assert.AreEqual(1, tree.Count);
+                Assert.Equal(1, tree.Count);
 
                 tree.Add(2, "B");
                 tree.Rollback();
-                Assert.AreEqual(1, tree.Count);
+                Assert.Equal(1, tree.Count);
                 tree[1] = "abc";
                 tree.Commit();
-                Assert.AreEqual(1, tree.Count);
+                Assert.Equal(1, tree.Count);
                 tree.Rollback();
 
-                Assert.AreEqual("abc", tree[1]);
-                Assert.IsFalse(tree.ContainsKey(2));
+                Assert.Equal("abc", tree[1]);
+                Assert.False(tree.ContainsKey(2));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestLogOptions()
         {
             BPlusTree<int, string>.OptionsV2 options = (BPlusTree<int, string>.OptionsV2) Options;
 
-            Assert.AreEqual(ExistingLogAction.Default, options.ExistingLogAction);
+            Assert.Equal(ExistingLogAction.Default, options.ExistingLogAction);
             options.ExistingLogAction = ExistingLogAction.Ignore;
-            Assert.AreEqual(ExistingLogAction.Ignore, options.ExistingLogAction);
+            Assert.Equal(ExistingLogAction.Ignore, options.ExistingLogAction);
 
-            Assert.AreEqual(-1, options.TransactionLogLimit);
+            Assert.Equal(-1, options.TransactionLogLimit);
             options.TransactionLogLimit = int.MaxValue;
-            Assert.AreEqual(int.MaxValue, options.TransactionLogLimit);
+            Assert.Equal(int.MaxValue, options.TransactionLogLimit);
         }
     }
 
-    [TestFixture]
+    
     public class BasicTestsVersion2NoCache : BasicTests
     {
         private static TempFile _tempFile;
@@ -149,13 +148,13 @@ namespace CSharpTest.Net.BPlusTree.Test
                     StoragePerformance = StoragePerformance.Fastest
                 }.CalcBTreeOrder(4, 10);
 
-                Assert.AreEqual(FileVersion.Version2, options.FileVersion);
+                Assert.Equal(FileVersion.Version2, options.FileVersion);
                 return options;
             }
         }
     }
 
-    [TestFixture]
+    
     public class
         DictionaryTestsVersion2 : TestDictionary<BPlusTree<int, string>, TestSimpleDictionary.BTreeFactory, int, string>
     {

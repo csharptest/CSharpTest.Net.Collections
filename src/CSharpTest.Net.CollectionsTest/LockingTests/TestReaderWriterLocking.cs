@@ -16,20 +16,20 @@
 #endregion
 
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test.LockingTests
+namespace CSharpTest.Net.Collections.Test.LockingTests
 {
-    [TestFixture]
+    
     public class TestReaderWriterLocking : BaseThreadedReaderWriterTest<LockFactory<ReaderWriterLocking>>
     {
-        [Test]
+        [Fact]
         public void ReadToWriteFails()
         {
             using (ILockStrategy l = LockFactory.Create())
             using (l.Read())
             {
-                Assert.IsFalse(l.TryWrite(10));
+                Assert.False(l.TryWrite(10));
             }
         }
     }

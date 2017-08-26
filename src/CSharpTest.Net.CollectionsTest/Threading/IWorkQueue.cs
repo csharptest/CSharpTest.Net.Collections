@@ -18,7 +18,7 @@
 using System;
 using System.IO;
 
-namespace CSharpTest.Net.Threading
+namespace CSharpTest.Net.Collections.Test.Threading
 {
     /// <summary> Provides an interface for a simple WorkQueue </summary>
     public interface IWorkQueue<T> : IDisposable

@@ -31,7 +31,7 @@ namespace CSharpTest.Net.Synchronization
         /// <summary>
         ///     wraps the reader/writer lock
         /// </summary>
-        public ReaderWriterLocking() : this(new ReaderWriterLockSlim())
+        public ReaderWriterLocking() : this(new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion))
         {
         }
 
@@ -56,7 +56,15 @@ namespace CSharpTest.Net.Synchronization
         [DebuggerNonUserCode]
         public bool TryRead(int timeout)
         {
-            return _lock.TryEnterReadLock(timeout);
+            try
+            {
+                _lock.TryEnterReadLock(timeout);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -73,7 +81,15 @@ namespace CSharpTest.Net.Synchronization
         [DebuggerNonUserCode]
         public bool TryWrite(int timeout)
         {
-            return _lock.TryEnterWriteLock(timeout);
+            try
+            {
+                _lock.TryEnterWriteLock(timeout);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         /// <summary>

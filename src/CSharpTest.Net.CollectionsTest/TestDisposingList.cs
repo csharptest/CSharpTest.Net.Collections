@@ -17,13 +17,12 @@
 
 using System;
 using System.Collections.Generic;
-using CSharpTest.Net.Collections;
-using NUnit.Framework;
+using Xunit;
 
 #pragma warning disable 1591
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestDisposingList
     {
         private static readonly List<IDisposable> disposeOrder = new List<IDisposable>();
@@ -36,7 +35,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestGeneric()
         {
             disposeOrder.Clear();
@@ -51,18 +50,18 @@ namespace CSharpTest.Net.Library.Test
             list.Dispose();
 
             //Removed from list?
-            Assert.AreEqual(0, list.Count);
+            Assert.Equal(0, list.Count);
             //All were disposed?
-            Assert.AreEqual(2, disposeOrder.Count);
+            Assert.Equal(2, disposeOrder.Count);
             //Disposed in reverse order of creation?
-            Assert.IsTrue(ReferenceEquals(b, disposeOrder[0]));
-            Assert.IsTrue(ReferenceEquals(a, disposeOrder[1]));
+            Assert.True(ReferenceEquals(b, disposeOrder[0]));
+            Assert.True(ReferenceEquals(a, disposeOrder[1]));
 
-            Assert.AreEqual(2, new DisposingList<DisposeInOrder>(new[] {a, b}).Count);
-            Assert.AreEqual(0, new DisposingList<DisposeInOrder>(5).Count);
+            Assert.Equal(2, new DisposingList<DisposeInOrder>(new[] {a, b}).Count);
+            Assert.Equal(0, new DisposingList<DisposeInOrder>(5).Count);
         }
 
-        [Test]
+        [Fact]
         public void TestNonGeneric()
         {
             disposeOrder.Clear();
@@ -77,15 +76,15 @@ namespace CSharpTest.Net.Library.Test
             list.Dispose();
 
             //Removed from list?
-            Assert.AreEqual(0, list.Count);
+            Assert.Equal(0, list.Count);
             //All were disposed?
-            Assert.AreEqual(2, disposeOrder.Count);
+            Assert.Equal(2, disposeOrder.Count);
             //Disposed in reverse order of creation?
-            Assert.IsTrue(ReferenceEquals(b, disposeOrder[0]));
-            Assert.IsTrue(ReferenceEquals(a, disposeOrder[1]));
+            Assert.True(ReferenceEquals(b, disposeOrder[0]));
+            Assert.True(ReferenceEquals(a, disposeOrder[1]));
 
-            Assert.AreEqual(2, new DisposingList(new IDisposable[] {a, b}).Count);
-            Assert.AreEqual(0, new DisposingList(5).Count);
+            Assert.Equal(2, new DisposingList(new IDisposable[] {a, b}).Count);
+            Assert.Equal(0, new DisposingList(5).Count);
         }
     }
 }

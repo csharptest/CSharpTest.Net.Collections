@@ -16,12 +16,11 @@
 #endregion
 
 using System.Collections.Generic;
-using CSharpTest.Net.Collections;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
     /// <summary>
     ///     Demonstrates a few possible ways to use a BPlusTree across process boundaries by having a single-writer and
@@ -36,7 +35,7 @@ namespace CSharpTest.Net.BPlusTree.Test
     ///     not have any intentions of further support for this capability, it's generally just a bad idea ;)  Instead, IIWY I
     ///     would look to use RPC to talk to the process controlling the writes.
     /// </summary>
-    [TestFixture]
+    
     public class TestMultiInstance
     {
         private IEnumerable<KeyValuePair<int, string>> MakeValues(int start, int count)
@@ -47,7 +46,7 @@ namespace CSharpTest.Net.BPlusTree.Test
 
         // Opens and reviews a 'read-only' instance of an already open B+Tree.  Will only have access to data that the writer
         // has comitted to disk.
-        [Test]
+        [Fact]
         public void TestReadOnlyCopy()
         {
             using (TempFile tempFile = new TempFile())
@@ -67,7 +66,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     using (BPlusTree<int, string> copy = new BPlusTree<int, string>(readcopy))
                     {
                         copy.EnableCount();
-                        Assert.AreEqual(0, copy.Count);
+                        Assert.Equal(0, copy.Count);
                     }
 
                     //insert some data...
@@ -76,7 +75,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     using (BPlusTree<int, string> copy = new BPlusTree<int, string>(readcopy))
                     {
                         copy.EnableCount();
-                        Assert.AreEqual(0, copy.Count);
+                        Assert.Equal(0, copy.Count);
                     }
                     tree.Commit();
 
@@ -88,9 +87,9 @@ namespace CSharpTest.Net.BPlusTree.Test
                     using (BPlusTree<int, string> copy = new BPlusTree<int, string>(readcopy))
                     {
                         copy.EnableCount();
-                        Assert.AreEqual(100, copy.Count);
-                        Assert.AreEqual(0, copy.First().Key);
-                        Assert.AreEqual(99, copy.Last().Key);
+                        Assert.Equal(100, copy.Count);
+                        Assert.Equal(0, copy.First().Key);
+                        Assert.Equal(99, copy.Last().Key);
                     }
 
                     tree.Commit();
@@ -101,7 +100,7 @@ namespace CSharpTest.Net.BPlusTree.Test
         // Demonstrates creating a second copy of an existing tree while its still open, and then keeping that copy in sync
         // with the orignal by replaying the log periodically.  Calling Commit() on the writer instance will reset the log, 
         // so periodic calls to Commit should be avoided to allow reading the log file.
-        [Test]
+        [Fact]
         public void TestSyncFromLogging()
         {
             using (TempFile tempFile = new TempFile())
@@ -136,28 +135,28 @@ namespace CSharpTest.Net.BPlusTree.Test
                         new BulkInsertOptions {InputIsSorted = true, CommitOnCompletion = false, ReplaceContents = true}
                     );
 
-                    Assert.AreEqual(1, copy.Count);
-                    Assert.AreEqual("0", copy[0]);
+                    Assert.Equal(1, copy.Count);
+                    Assert.Equal("0", copy[0]);
 
                     tlog.ReplayLog(copy, ref logpos);
-                    Assert.AreEqual(1, copy.Count);
+                    Assert.Equal(1, copy.Count);
 
                     //insert some data...
                     tree.AddRange(MakeValues(1, 99));
 
                     tlog.ReplayLog(copy, ref logpos);
-                    Assert.AreEqual(100, copy.Count);
+                    Assert.Equal(100, copy.Count);
 
                     //insert some data...
                     for (int i = 0; i < 100; i++)
                         tree.Remove(i);
                     tlog.ReplayLog(copy, ref logpos);
-                    Assert.AreEqual(0, copy.Count);
+                    Assert.Equal(0, copy.Count);
 
                     tree.AddRange(MakeValues(1000, 1000));
 
                     tlog.ReplayLog(copy, ref logpos);
-                    Assert.AreEqual(1000, copy.Count);
+                    Assert.Equal(1000, copy.Count);
                 }
             }
         }

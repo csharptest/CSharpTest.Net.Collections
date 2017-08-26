@@ -18,76 +18,80 @@
 using System;
 using System.Threading;
 using CSharpTest.Net.Synchronization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test.LockingTests
+namespace CSharpTest.Net.Collections.Test.LockingTests
 {
-    [TestFixture]
+
     public class TestSimpleReadWriteLocking : BaseThreadedReaderWriterTest<LockFactory<SimpleReadWriteLocking>>
     {
-        [Test]
-        //[ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void DisposedWithReaders()
         {
-            ILockStrategy l = LockFactory.Create();
-            ThreadedReader thread = new ThreadedReader(l);
-            try
+            Assert.Throws<InvalidOperationException>(() =>
             {
-                l.Dispose();
-            }
-            finally
-            {
+                ILockStrategy l = LockFactory.Create();
+                ThreadedReader thread = new ThreadedReader(l);
                 try
                 {
-                    thread.Dispose();
+                    l.Dispose();
                 }
-                catch (ObjectDisposedException)
+                finally
                 {
+                    try
+                    {
+                        thread.Dispose();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                    }
                 }
-            }
+            });
         }
 
-        [Test]
-        //[ExpectedException(typeof(InvalidOperationException))]
+        [Fact]
         public void DisposedWithWriters()
         {
-            ILockStrategy l = LockFactory.Create();
-            ThreadedWriter thread = new ThreadedWriter(l);
-            try
+            Assert.Throws<InvalidOperationException>(() =>
             {
-                l.Dispose();
-            }
-            finally
-            {
+                ILockStrategy l = LockFactory.Create();
+                ThreadedWriter thread = new ThreadedWriter(l);
                 try
                 {
-                    thread.Dispose();
+                    l.Dispose();
                 }
-                catch (ObjectDisposedException)
+                finally
                 {
+                    try
+                    {
+                        thread.Dispose();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                    }
                 }
-            }
+            });
         }
 
-        [Test]
+        [Fact]
         public void ExplicitSyncObject()
         {
             object obj = new object();
             ILockStrategy l = new SimpleReadWriteLocking(obj);
             using (new ThreadedWriter(l))
             {
-                Assert.IsFalse(Monitor.TryEnter(obj, 0));
+                Assert.False(Monitor.TryEnter(obj, 0));
             }
             l.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void ReadToWriteFails()
         {
             using (ILockStrategy l = LockFactory.Create())
             using (l.Read())
             {
-                Assert.IsFalse(l.TryWrite(10));
+                Assert.False(l.TryWrite(10));
             }
         }
     }

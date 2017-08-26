@@ -19,14 +19,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using CSharpTest.Net.Collections;
+using System.Threading.Tasks;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.BPlusTree.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class ThreadedMassInsertTest
     {
         private static readonly ManualResetEvent mreStop = new ManualResetEvent(false);
@@ -122,7 +122,7 @@ namespace CSharpTest.Net.BPlusTree.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestConcurrency()
         {
             mreStop.Reset();
@@ -136,15 +136,14 @@ namespace CSharpTest.Net.BPlusTree.Test
                 using (BPlusTree<Guid, TestInfo> tree = new BPlusTree<Guid, TestInfo>(options))
                 {
                     tree.EnableCount();
-                    List<IAsyncResult> actions = new List<IAsyncResult>();
-                    Action<BPlusTree<Guid, TestInfo>>[] tests = new Action<BPlusTree<Guid, TestInfo>>[]
-                    {
+                    List<Task> actions = new List<Task>();
+                    Action<BPlusTree<Guid, TestInfo>>[] tests = {
                         DeleteStuff, UpdateStuff, AddStuff, AddRanges, BulkyInserts,
                         FetchStuff, FetchStuff, FetchStuff, FetchStuff, FetchStuff
                     };
 
                     foreach (Action<BPlusTree<Guid, TestInfo>> t in tests)
-                        actions.Add(t.BeginInvoke(tree, null, null));
+                        actions.Add(Task.Run(() => t(tree)));
 
                     do
                     {
@@ -153,8 +152,9 @@ namespace CSharpTest.Net.BPlusTree.Test
                     } while (Debugger.IsAttached);
 
                     mreStop.Set();
-                    for (int i = 0; i < actions.Count; i++)
-                        tests[i].EndInvoke(actions[i]);
+
+                    //for (int i = 0; i < actions.Count; i++)
+                    //    tests[i].EndInvoke(actions[i]);
 
                     Trace.TraceInformation("Dictionary.Count = {0}", tree.Count);
                 }

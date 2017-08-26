@@ -21,15 +21,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
-using CSharpTest.Net.Collections;
+using CSharpTest.Net.Collections.Test.Threading;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.IO;
-using CSharpTest.Net.Threading;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestTransactedCompoundFile
     {
         private readonly Random rand = new Random();
@@ -43,8 +42,8 @@ namespace CSharpTest.Net.Library.Test
 
         private void CompareBytes(byte[] original, int offset, int len, byte[] value)
         {
-            Assert.AreEqual(len, value.Length);
-            Assert.AreEqual(
+            Assert.Equal(len, value.Length);
+            Assert.Equal(
                 Convert.ToBase64String(original, offset, len),
                 Convert.ToBase64String(value, 0, value.Length)
             );
@@ -85,7 +84,7 @@ namespace CSharpTest.Net.Library.Test
                         try
                         {
                             IOStream.ReadAllBytes(file.Read(handles[i]));
-                            Assert.Fail();
+                            Assert.True(false);
                         }
                         catch (ArgumentOutOfRangeException)
                         {
@@ -112,7 +111,7 @@ namespace CSharpTest.Net.Library.Test
                 }
                 foreach (KeyValuePair<uint, byte[]> kv in state)
                 {
-                    Assert.AreEqual(0, BinaryComparer.Compare(kv.Value, IOStream.ReadAllBytes(file.Read(kv.Key))));
+                    Assert.Equal(0, BinaryComparer.Compare(kv.Value, IOStream.ReadAllBytes(file.Read(kv.Key))));
                     if (stop.WaitOne(0))
                         return;
                 }
@@ -124,7 +123,7 @@ namespace CSharpTest.Net.Library.Test
                     r.NextBytes(bytes);
                     file.Write(h, bytes, 0, bytes.Length);
                     state[h] = bytes;
-                    Assert.AreEqual(0, BinaryComparer.Compare(bytes, IOStream.ReadAllBytes(file.Read(h))));
+                    Assert.Equal(0, BinaryComparer.Compare(bytes, IOStream.ReadAllBytes(file.Read(h))));
                     if (stop.WaitOne(0))
                         return;
                 }
@@ -139,7 +138,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void ConcurrencyTest()
         {
             using (TempFile temp = new TempFile())
@@ -159,7 +158,7 @@ namespace CSharpTest.Net.Library.Test
                     Thread.Sleep(1000);
                     test.Commit();
                     File.Copy(temp.TempPath, copy.TempPath, true);
-                    Assert.AreEqual(0, copy.Length % 512);
+                    Assert.Equal(0, copy.Length % 512);
                     int hcount = (int) (copy.Length / 512);
 
                     using (TransactedCompoundFile verify = new TransactedCompoundFile(
@@ -192,11 +191,11 @@ namespace CSharpTest.Net.Library.Test
 
                 stop.Set();
                 workers.Complete(false, 1000);
-                Assert.IsFalse(failed);
+                Assert.False(failed);
             }
         }
 
-        [Test]
+        [Fact]
         public void RandomTest()
         {
             Dictionary<uint, byte[]> store = new Dictionary<uint, byte[]>();
@@ -229,7 +228,7 @@ namespace CSharpTest.Net.Library.Test
                             case 2:
                             {
                                 id = RandomPick(store.Keys);
-                                Assert.IsTrue(store.Remove(id));
+                                Assert.True(store.Remove(id));
                                 test.Delete(id);
                                 break;
                             }
@@ -241,7 +240,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void SimpleTest()
         {
             uint handle;
@@ -252,9 +251,9 @@ namespace CSharpTest.Net.Library.Test
                     new TransactedCompoundFile(
                         new TransactedCompoundFile.Options(temp.TempPath) {BlockSize = 512, CreateNew = true}))
                 {
-                    Assert.AreEqual(TransactedCompoundFile.FirstIdentity, test.Create());
+                    Assert.Equal(TransactedCompoundFile.FirstIdentity, test.Create());
                     test.Write(TransactedCompoundFile.FirstIdentity, Encoding.UTF8.GetBytes("Roger was here."), 0, 15);
-                    Assert.AreEqual("Roger was here.",
+                    Assert.Equal("Roger was here.",
                         Encoding.UTF8.GetString(
                             IOStream.ReadAllBytes(test.Read(TransactedCompoundFile.FirstIdentity))));
 
@@ -279,7 +278,7 @@ namespace CSharpTest.Net.Library.Test
                     new TransactedCompoundFile(
                         new TransactedCompoundFile.Options(temp.TempPath) {BlockSize = 512, CreateNew = false}))
                 {
-                    Assert.AreEqual("Roger was here.",
+                    Assert.Equal("Roger was here.",
                         Encoding.UTF8.GetString(
                             IOStream.ReadAllBytes(test.Read(TransactedCompoundFile.FirstIdentity))));
                     CompareBytes(bytes, 0, bytes.Length, IOStream.ReadAllBytes(test.Read(handle)));
@@ -287,7 +286,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestClear()
         {
             using (TempFile temp = new TempFile())
@@ -310,7 +309,7 @@ namespace CSharpTest.Net.Library.Test
                         try
                         {
                             IOStream.ReadAllBytes(file.Read(handles[i]));
-                            Assert.Fail();
+                            Assert.True(false);
                         }
                         catch (ArgumentOutOfRangeException)
                         {
@@ -319,7 +318,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCommit()
         {
             using (TempFile temp = new TempFile())
@@ -349,7 +348,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCommitOnDispose()
         {
             using (TempFile temp = new TempFile())
@@ -365,7 +364,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCommitOnWrite()
         {
             using (TempFile temp = new TempFile())
@@ -382,7 +381,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestCommitWrite()
         {
             using (TempFile temp = new TempFile())
@@ -398,23 +397,26 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
-        //[ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [Fact]
         public void TestExceedWriteMax()
         {
-            using (TempFile temp = new TempFile())
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                TransactedCompoundFile.Options options = new TransactedCompoundFile.Options(temp.TempPath) {BlockSize = 512};
-                byte[] sample = new byte[options.MaxWriteSize + 1];
-                new Random().NextBytes(sample);
-                using (TransactedCompoundFile file = new TransactedCompoundFile(options))
+                using (TempFile temp = new TempFile())
                 {
-                    file.Write(file.Create(), sample, 0, sample.Length);
+                    TransactedCompoundFile.Options options =
+                        new TransactedCompoundFile.Options(temp.TempPath) {BlockSize = 512};
+                    byte[] sample = new byte[options.MaxWriteSize + 1];
+                    new Random().NextBytes(sample);
+                    using (TransactedCompoundFile file = new TransactedCompoundFile(options))
+                    {
+                        file.Write(file.Create(), sample, 0, sample.Length);
+                    }
                 }
-            }
+            });
         }
 
-        [Test]
+        [Fact]
         public void TestLargeWrite()
         {
             using (TempFile temp = new TempFile())
@@ -443,7 +445,7 @@ namespace CSharpTest.Net.Library.Test
                         file.Delete(handles[i]);
                     }
                     file.Commit();
-                    Assert.AreEqual(size, temp.Info.Length);
+                    Assert.Equal(size, temp.Info.Length);
                     for (int i = 0; i < 252; i++)
                     {
                         uint hid = file.Create();
@@ -451,15 +453,15 @@ namespace CSharpTest.Net.Library.Test
                         file.Write(hid, sample, i, 300);
                     }
                     file.Commit();
-                    Assert.AreEqual(size, temp.Info.Length);
+                    Assert.Equal(size, temp.Info.Length);
 
                     file.Create();
-                    Assert.AreNotEqual(size, temp.Info.Length);
+                    Assert.NotEqual(size, temp.Info.Length);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestNoCommit()
         {
             using (TempFile temp = new TempFile())
@@ -475,7 +477,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestNormalWrite()
         {
             using (TempFile temp = new TempFile())
@@ -491,35 +493,35 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestOptions()
         {
             using (TempFile temp = new TempFile())
             {
                 TransactedCompoundFile.Options o = new TransactedCompoundFile.Options(temp.TempPath);
-                Assert.AreEqual(temp.TempPath, o.FilePath);
-                Assert.AreEqual(4096, o.BlockSize);
-                Assert.AreEqual(8192, o.BlockSize = 8192);
-                Assert.AreEqual(false, o.CreateNew);
-                Assert.AreEqual(true, o.CreateNew = true);
-                Assert.AreEqual(false, o.ReadOnly);
-                Assert.AreEqual(true, o.ReadOnly = true);
-                Assert.AreEqual(false, o.CommitOnDispose);
-                Assert.AreEqual(true, o.CommitOnDispose = true);
-                Assert.AreEqual(false, o.CommitOnWrite);
-                Assert.AreEqual(true, o.CommitOnWrite = true);
-                Assert.AreEqual(FileOptions.None, o.FileOptions);
-                Assert.AreEqual(FileOptions.WriteThrough, o.FileOptions = FileOptions.WriteThrough);
-                Assert.AreEqual(TransactedCompoundFile.LoadingRule.Default, o.LoadingRule);
-                Assert.AreEqual(TransactedCompoundFile.LoadingRule.Primary,
+                Assert.Equal(temp.TempPath, o.FilePath);
+                Assert.Equal(4096, o.BlockSize);
+                Assert.Equal(8192, o.BlockSize = 8192);
+                Assert.Equal(false, o.CreateNew);
+                Assert.Equal(true, o.CreateNew = true);
+                Assert.Equal(false, o.ReadOnly);
+                Assert.Equal(true, o.ReadOnly = true);
+                Assert.Equal(false, o.CommitOnDispose);
+                Assert.Equal(true, o.CommitOnDispose = true);
+                Assert.Equal(false, o.CommitOnWrite);
+                Assert.Equal(true, o.CommitOnWrite = true);
+                Assert.Equal(FileOptions.None, o.FileOptions);
+                Assert.Equal(FileOptions.WriteThrough, o.FileOptions = FileOptions.WriteThrough);
+                Assert.Equal(TransactedCompoundFile.LoadingRule.Default, o.LoadingRule);
+                Assert.Equal(TransactedCompoundFile.LoadingRule.Primary,
                     o.LoadingRule = TransactedCompoundFile.LoadingRule.Primary);
 
                 TransactedCompoundFile.Options copy = ((ICloneable<TransactedCompoundFile.Options>) o).Clone();
-                Assert.AreEqual(FileOptions.WriteThrough, copy.FileOptions);
+                Assert.Equal(FileOptions.WriteThrough, copy.FileOptions);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRevertChanges()
         {
             using (TempFile temp = new TempFile())
@@ -546,7 +548,7 @@ namespace CSharpTest.Net.Library.Test
                             try
                             {
                                 IOStream.ReadAllBytes(file.Read(handles[i]));
-                                Assert.Fail();
+                                Assert.True(false);
                             }
                             catch (ArgumentOutOfRangeException)
                             {
@@ -555,7 +557,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestRevertWithChanges()
         {
             using (TempFile temp = new TempFile())
@@ -589,7 +591,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void VerifyCommitAsTransaction()
         {
             using (TempFile temp1 = new TempFile())
@@ -606,7 +608,7 @@ namespace CSharpTest.Net.Library.Test
                 using (TransactedCompoundFile file = new TransactedCompoundFile(options))
                 {
                     for (uint h = 1u; h < count; h++)
-                        Assert.AreEqual(h, file.Create());
+                        Assert.Equal(h, file.Create());
                     for (uint h = 1u; h < count; h++)
                         file.Write(h, sample1, 0, sample1.Length);
                     file.Commit(); //persist.
@@ -635,7 +637,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void VerifyLoadRulesWithBothCorruptions()
         {
             using (TempFile temp = new TempFile())
@@ -649,7 +651,7 @@ namespace CSharpTest.Net.Library.Test
                 using (TransactedCompoundFile file = new TransactedCompoundFile(options))
                 {
                     for (uint h = 1u; h < count; h++)
-                        Assert.AreEqual(h, file.Create());
+                        Assert.Equal(h, file.Create());
                     for (uint h = 1u; h < count; h++)
                         file.Write(h, sample, 0, sample.Length);
                     file.Commit();
@@ -666,7 +668,7 @@ namespace CSharpTest.Net.Library.Test
                 {
                     options.LoadingRule = TransactedCompoundFile.LoadingRule.Primary;
                     new TransactedCompoundFile(options).Dispose();
-                    Assert.Fail("Should not load");
+                    Assert.True(false,"Should not load");
                 }
                 catch (InvalidDataException)
                 {
@@ -675,7 +677,7 @@ namespace CSharpTest.Net.Library.Test
                 {
                     options.LoadingRule = TransactedCompoundFile.LoadingRule.Secondary;
                     new TransactedCompoundFile(options).Dispose();
-                    Assert.Fail("Should not load");
+                    Assert.True(false,"Should not load");
                 }
                 catch (InvalidDataException)
                 {
@@ -697,7 +699,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void VerifyLoadRulesWithCorruptPrimary()
         {
             using (TempFile temp = new TempFile())
@@ -711,7 +713,7 @@ namespace CSharpTest.Net.Library.Test
                 using (TransactedCompoundFile file = new TransactedCompoundFile(options))
                 {
                     for (uint h = 1u; h < count; h++)
-                        Assert.AreEqual(h, file.Create());
+                        Assert.Equal(h, file.Create());
                     for (uint h = 1u; h < count; h++)
                         file.Write(h, sample, 0, sample.Length);
                     file.Commit();
@@ -726,7 +728,7 @@ namespace CSharpTest.Net.Library.Test
                 {
                     options.LoadingRule = TransactedCompoundFile.LoadingRule.Primary;
                     new TransactedCompoundFile(options).Dispose();
-                    Assert.Fail("Should not load");
+                    Assert.True(false,"Should not load");
                 }
                 catch (InvalidDataException)
                 {
@@ -746,7 +748,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void VerifyLoadRulesWithCorruptSecondary()
         {
             using (TempFile temp = new TempFile())
@@ -760,7 +762,7 @@ namespace CSharpTest.Net.Library.Test
                 using (TransactedCompoundFile file = new TransactedCompoundFile(options))
                 {
                     for (uint h = 1u; h < count; h++)
-                        Assert.AreEqual(h, file.Create());
+                        Assert.Equal(h, file.Create());
                     for (uint h = 1u; h < count; h++)
                         file.Write(h, sample, 0, sample.Length);
                     file.Commit();
@@ -776,7 +778,7 @@ namespace CSharpTest.Net.Library.Test
                 {
                     options.LoadingRule = TransactedCompoundFile.LoadingRule.Secondary;
                     new TransactedCompoundFile(options).Dispose();
-                    Assert.Fail("Should not load");
+                    Assert.True(false,"Should not load");
                 }
                 catch (InvalidDataException)
                 {
