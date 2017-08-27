@@ -146,8 +146,7 @@ namespace CSharpTest.Net.Collections
         /// <summary> Returns a new collection adding the item provided </summary>
         public void Add(T item)
         {
-            int pos;
-            Add(item, out pos);
+            Add(item, out _);
         }
 
         /// <summary> Returns a new collection adding the item provided </summary>
@@ -168,10 +167,9 @@ namespace CSharpTest.Net.Collections
         /// <summary> Adds a range of items to the collection </summary>
         public void AddRange(IEnumerable<T> other)
         {
-            int pos;
             foreach (T item in other)
             {
-                pos = _list.BinarySearch(item, _comparer);
+                var pos = _list.BinarySearch(item, _comparer);
                 if (pos < 0)
                     _list.Insert(~pos, item);
             }
@@ -233,10 +231,9 @@ namespace CSharpTest.Net.Collections
         /// <example>{ 1, 2, 3 }.RemoveAll({ 2, 3, 4 }) == { 1 }</example>
         public void RemoveAll(IEnumerable<T> other)
         {
-            int pos;
             foreach (T item in other)
             {
-                pos = _list.BinarySearch(item, _comparer);
+                var pos = _list.BinarySearch(item, _comparer);
                 if (pos >= 0)
                     _list.RemoveAt(pos);
             }
@@ -247,10 +244,9 @@ namespace CSharpTest.Net.Collections
         public SetList<T> IntersectWith(SetList<T> other)
         {
             List<T> result = new List<T>(Math.Max(0, _list.Count - other._list.Count));
-            int pos;
             foreach (T item in other._list)
             {
-                pos = _list.BinarySearch(item, _comparer);
+                var pos = _list.BinarySearch(item, _comparer);
                 if (pos >= 0)
                     result.Add(item);
             }
@@ -271,10 +267,9 @@ namespace CSharpTest.Net.Collections
         public SetList<T> ComplementOf(SetList<T> other)
         {
             List<T> result = new List<T>(other._list.Count);
-            int pos;
             foreach (T item in other._list)
             {
-                pos = _list.BinarySearch(item, _comparer);
+                var pos = _list.BinarySearch(item, _comparer);
                 if (pos < 0)
                     result.Add(item);
             }
@@ -286,10 +281,9 @@ namespace CSharpTest.Net.Collections
         public SetList<T> SubtractSet(SetList<T> other)
         {
             List<T> result = new List<T>(_list.Count);
-            int pos;
             foreach (T item in _list)
             {
-                pos = other._list.BinarySearch(item, _comparer);
+                var pos = other._list.BinarySearch(item, _comparer);
                 if (pos < 0)
                     result.Add(item);
             }

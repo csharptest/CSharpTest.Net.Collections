@@ -400,7 +400,7 @@ namespace CSharpTest.Net.Collections.Test
         {
             Assert.Throws<ObjectDisposedException>(() =>
             {
-                IConcurrentDictionary<int, string> test = new LurchTableTest<int, string>();
+                LurchTableTest<int, string> test = new LurchTableTest<int, string>();
                 test.Dispose();
                 test.Add(1, "");
             });

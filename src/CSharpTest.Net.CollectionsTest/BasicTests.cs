@@ -416,7 +416,6 @@ namespace CSharpTest.Net.Collections.Test
             BPlusTreeOptions<int, string> options = Options.Clone();
             using (TempFile temp = new TempFile())
             {
-                //using (BPlusTree<int, string> data = Create(Options))
                 using (BPlusTree<int, string> data = Create(options))
                 {
                     const bool bulk = true;
