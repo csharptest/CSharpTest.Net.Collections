@@ -111,22 +111,18 @@ namespace CSharpTest.Net.Synchronization
         {
             if (_sync == null) throw new ObjectDisposedException(GetType().FullName);
             bool success = false;
-            try
-            {
-            }
-            finally
-            {
-                // First lock the 'writer lock' to ensure there are no writers
-                if (Monitor.TryEnter(_sync, millisecondsTimeout))
-                {
-                    // Safe to increment the read counter since there are no writers
-                    Interlocked.Increment(ref _readersCount);
 
-                    // Release the lock, we are done
-                    Monitor.Exit(_sync);
-                    success = true;
-                }
+            // First lock the 'writer lock' to ensure there are no writers
+            if (Monitor.TryEnter(_sync, millisecondsTimeout))
+            {
+                // Safe to increment the read counter since there are no writers
+                Interlocked.Increment(ref _readersCount);
+
+                // Release the lock, we are done
+                Monitor.Exit(_sync);
+                success = true;
             }
+
             return success;
         }
 
@@ -136,21 +132,16 @@ namespace CSharpTest.Net.Synchronization
         public void ReleaseRead()
         {
             if (_sync == null) throw new ObjectDisposedException(GetType().FullName);
-            try
-            {
-            }
-            finally
-            {
-                // Decrement the reader count and, if we are the last, set the wake event for a writer
-                int newCount = Interlocked.Decrement(ref _readersCount);
-                if (_targetReaders == newCount && _event != null)
-                    _event.Set();
 
-                if (newCount < 0)
-                {
-                    Interlocked.Increment(ref newCount);
-                    throw new SynchronizationLockException();
-                }
+            // Decrement the reader count and, if we are the last, set the wake event for a writer
+            int newCount = Interlocked.Decrement(ref _readersCount);
+            if (_targetReaders == newCount)
+                _event?.Set();
+
+            if (newCount < 0)
+            {
+                Interlocked.Increment(ref newCount);
+                throw new SynchronizationLockException();
             }
         }
 
@@ -160,19 +151,17 @@ namespace CSharpTest.Net.Synchronization
         public virtual bool TryWrite(int millisecondsTimeout)
         {
             bool success = false;
-            try
-            {
-            }
-            finally
-            {
-                if (_sync == null) throw new ObjectDisposedException(GetType().FullName);
-                // First obtain the 'writer lock':
-                if (Monitor.TryEnter(_sync, millisecondsTimeout))
-                    if (WaitForExclusive(0, millisecondsTimeout))
-                        success = true;
-                    else
-                        Monitor.Exit(_sync);
-            }
+
+            if (_sync == null)
+                throw new ObjectDisposedException(GetType().FullName);
+
+            // First obtain the 'writer lock':
+            if (Monitor.TryEnter(_sync, millisecondsTimeout))
+                if (WaitForExclusive(0, millisecondsTimeout))
+                    success = true;
+                else
+                    Monitor.Exit(_sync);
+
             return success;
         }
 
@@ -182,20 +171,15 @@ namespace CSharpTest.Net.Synchronization
         public void ReleaseWrite()
         {
             if (_sync == null) throw new ObjectDisposedException(GetType().FullName);
-            try
-            {
-            }
-            finally
-            {
+
 #if SUPPORT_RECURSION
-                // if we are the exclusive thread, and the last ReleaseWrite that will be called, we can then
-                // clear the captured thread id for the exclusive writer.
-                if (_exclusiveThreadId == Thread.CurrentThread.ManagedThreadId && --_writeRecursiveCount == 0)
-                    _exclusiveThreadId = 0;
+            // if we are the exclusive thread, and the last ReleaseWrite that will be called, we can then
+            // clear the captured thread id for the exclusive writer.
+            if (_exclusiveThreadId == Thread.CurrentThread.ManagedThreadId && --_writeRecursiveCount == 0)
+                _exclusiveThreadId = 0;
 #endif
-                // Now just release the lock once (btw, this thread may still have locks on this)
-                Monitor.Exit(_sync);
-            }
+            // Now just release the lock once (btw, this thread may still have locks on this)
+            Monitor.Exit(_sync);
         }
 
         /// <summary>
@@ -280,7 +264,7 @@ namespace CSharpTest.Net.Synchronization
                 if (loop < spinLoops)
                 {
                     loop++;
-                    SpinWait.SpinUntil(null, SpinWaitTime);
+                    SpinWait.SpinUntil(() => false, SpinWaitTime);
                     continue;
                 }
                 // if we are still waiting on readers after spinning for a few loops

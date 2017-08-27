@@ -18,6 +18,7 @@
 using System;
 using System.IO;
 using System.Text;
+using CSharpTest.Net.Collections;
 
 namespace CSharpTest.Net.IO
 {

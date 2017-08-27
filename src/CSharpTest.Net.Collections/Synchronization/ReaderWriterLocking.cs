@@ -27,6 +27,7 @@ namespace CSharpTest.Net.Synchronization
     public class ReaderWriterLocking : ILockStrategy
     {
         private readonly ReaderWriterLockSlim _lock;
+        private int _writeVersion;
 
         /// <summary>
         ///     wraps the reader/writer lock
@@ -48,7 +49,7 @@ namespace CSharpTest.Net.Synchronization
         }
 
         /// <summary> Changes every time a write lock is aquired.  If WriteVersion == 0, no write locks have been issued. </summary>
-        public int WriteVersion => _lock.RecursiveWriteCount;
+        public int WriteVersion => _writeVersion;
 
         /// <summary>
         ///     Returns true if the lock was successfully obtained within the timeout specified
@@ -83,7 +84,9 @@ namespace CSharpTest.Net.Synchronization
         {
             try
             {
-                _lock.TryEnterWriteLock(timeout);
+                if (_lock.TryEnterWriteLock(timeout))
+                    Interlocked.Increment(ref _writeVersion);
+
                 return true;
             }
             catch (Exception)

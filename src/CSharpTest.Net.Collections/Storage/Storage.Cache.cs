@@ -33,8 +33,6 @@ namespace CSharpTest.Net.Collections
 
             private readonly object _flushSync;
             private readonly INodeStorage _store;
-            private readonly ThreadStart _writeBehindFunc;
-            private IAsyncResult _asyncWriteBehind;
 
             private ISerializer<Node> _serializer;
 
@@ -42,8 +40,6 @@ namespace CSharpTest.Net.Collections
             {
                 _flushSync = new object();
                 _asyncThreshold = 50;
-                _writeBehindFunc = Flush;
-                _asyncWriteBehind = null;
 
                 _store = store;
                 _cache = new LurchTable<IStorageHandle, object>(LurchTableOrder.Access, sizeLimit, 1000000,
@@ -114,7 +110,6 @@ namespace CSharpTest.Net.Collections
                 _cache[handle] = tnode;
                 _dirty[handle] = tnode;
 
-                //IAsyncResult completion = _asyncWriteBehind;
                 if (_dirty.Count > _asyncThreshold )//&& (completion == null || completion.IsCompleted))
                 {
                     try
@@ -227,10 +222,6 @@ namespace CSharpTest.Net.Collections
                     }
                     catch (ObjectDisposedException)
                     {
-                    }
-                    finally
-                    {
-                        _asyncWriteBehind = null;
                     }
                 }
             }

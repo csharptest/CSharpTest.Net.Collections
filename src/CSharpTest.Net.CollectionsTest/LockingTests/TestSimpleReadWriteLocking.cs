@@ -22,7 +22,6 @@ using Xunit;
 
 namespace CSharpTest.Net.Collections.Test.LockingTests
 {
-
     public class TestSimpleReadWriteLocking : BaseThreadedReaderWriterTest<LockFactory<SimpleReadWriteLocking>>
     {
         [Fact]

@@ -186,7 +186,7 @@ namespace CSharpTest.Net.Collections.Test.LockingTests
         [Fact]
         public void TestExcessiveReleaseWrite()
         {
-            Assert.Throws<Exception>(() =>
+            Assert.Throws<SynchronizationLockException>(() =>
             {
                 using (ILockStrategy l = LockFactory.Create())
                 {
@@ -198,7 +198,7 @@ namespace CSharpTest.Net.Collections.Test.LockingTests
         [Fact]
         public void TestExcessiveReleaseRead()
         {
-            Assert.Throws<Exception>(() =>
+            Assert.Throws<SynchronizationLockException>(() =>
             {
             using (ILockStrategy l = LockFactory.Create())
             {

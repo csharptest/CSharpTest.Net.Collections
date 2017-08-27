@@ -16,13 +16,15 @@
 #endregion
 
 using System;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading;
+using System.Threading.Tasks;
 using CSharpTest.Net.Utils;
 using Xunit;
 
 namespace CSharpTest.Net.Collections.Test
 {
-    
+
     public class TestObjectKeepAlive
     {
         private static bool _destroyed;
@@ -146,7 +148,7 @@ namespace CSharpTest.Net.Collections.Test
 
             long start = DateTime.UtcNow.Ticks;
             while (start + timeout.Ticks > DateTime.UtcNow.Ticks)
-                SpinWait.SpinUntil(null,100);
+                SpinWait.SpinUntil(() => false, 100);
 
             //Time has elapsed, yet it nothing is added, and Tick() is not called, it remains in memory
             GC.GetTotalMemory(true);

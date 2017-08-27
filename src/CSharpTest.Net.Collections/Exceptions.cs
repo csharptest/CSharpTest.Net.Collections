@@ -20,7 +20,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace CSharpTest.Net
+namespace CSharpTest.Net.Collections
 {
     /// <summary> The base class for BPlutTree runtime assertions </summary>
 
@@ -54,29 +54,6 @@ namespace CSharpTest.Net
             //#else
             return message;
             //#endif
-        }
-    }
-
-    partial class AssertionFailedException
-    {
-        /// <summary>
-        ///     if(condition == false) throws A runtime assertion failed: {0}
-        /// </summary>
-        public static void Assert(bool condition, string format, params object[] args)
-        {
-            if (!condition)
-            {
-                if (args != null && args.Length > 0)
-                    try
-                    {
-                        format = string.Format(format, args);
-                    }
-                    catch (Exception e)
-                    {
-                        format = string.Format("{0} format error: {1}", format, e.Message);
-                    }
-                throw new AssertionFailedException(format ?? Resources.ExceptionStrings.AssertionFailedException);
-            }
         }
     }
 }

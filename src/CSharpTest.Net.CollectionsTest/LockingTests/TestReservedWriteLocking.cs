@@ -20,7 +20,7 @@ using Xunit;
 
 namespace CSharpTest.Net.Collections.Test.LockingTests
 {
-    public class TestReservedWriteLocking<TFactory> : BaseThreadedWriterTest<TFactory>
+    public abstract class TestReservedWriteLocking<TFactory> : BaseThreadedWriterTest<TFactory>
         where TFactory : ILockFactory, new()
     {
         [Fact]

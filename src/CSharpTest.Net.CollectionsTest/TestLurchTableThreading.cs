@@ -19,11 +19,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace CSharpTest.Net.Collections.Test
 {
-    
+
     public class TestLurchTableThreading
     {
         private const int MAXTHREADS = 8;
@@ -38,31 +39,42 @@ namespace CSharpTest.Net.Collections.Test
         private static void Parallel<T>(int loopCount, T[] args, Action<T> task)
         {
             Stopwatch timer = Stopwatch.StartNew();
-            int[] ready = {0};
+            int[] ready = { 0 };
             ManualResetEvent start = new ManualResetEvent(false);
             int nthreads = Math.Min(MAXTHREADS, args.Length);
-            Thread[] threads = new Thread[nthreads];
-            for (int i = 0; i < threads.Length; i++)
-                threads[i] = new Thread(ithread =>
-                {
-                    Interlocked.Increment(ref ready[0]);
-                    start.WaitOne();
-                    for (int loop = 0; loop < loopCount; loop++)
-                    for (int ix = (int) ithread; ix < args.Length; ix += nthreads)
-                        task(args[ix]);
-                });
+            Task[] tasks = new Task[nthreads];
 
-            int threadIx = 0;
-            foreach (Thread t in threads)
-                t.Start(threadIx++);
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                int i1 = i;
+
+                tasks[i] = new Task(() =>
+               {
+                   Interlocked.Increment(ref ready[0]);
+                   start.WaitOne();
+                   for (int loop = 0; loop < loopCount; loop++)
+                   {
+                       for (int ix = i1; ix < args.Length; ix += nthreads)
+                       {
+                           task(args[ix]);
+                       }
+                   }
+               });
+            }
+
+            foreach (Task t in tasks)
+            {
+                t.Start();
+            }
 
             while (Interlocked.CompareExchange(ref ready[0], 0, 0) < nthreads)
-                Thread.Sleep(0);
+            {
+                Task.Delay(0);
+            }
 
             start.Set();
 
-            foreach (Thread t in threads)
-                t.Join();
+            Task.WaitAll(tasks);
 
             Trace.TraceInformation("Execution time: {0}", timer.Elapsed);
         }
@@ -82,7 +94,7 @@ namespace CSharpTest.Net.Collections.Test
 
             // Modify bytes 8 & 9 with random number
             Array.Copy(
-                BitConverter.GetBytes((short) random.Next()),
+                BitConverter.GetBytes((short)random.Next()),
                 0,
                 bytes,
                 8,
@@ -129,30 +141,28 @@ namespace CSharpTest.Net.Collections.Test
         {
             const int size = 1000000;
             int reps = 3;
-            Stopwatch timer;
 
-            IDictionary<Guid, TestValue> dict =
-                new SynchronizedDictionary<Guid, TestValue>(new Dictionary<Guid, TestValue>(size));
+            IDictionary<Guid, TestValue> dict = new SynchronizedDictionary<Guid, TestValue>(new Dictionary<Guid, TestValue>(size));
             IDictionary<Guid, TestValue> test = new LurchTable<Guid, TestValue>(size);
 
             for (int rep = 0; rep < reps; rep++)
             {
                 Guid[] sample = CreateSample(Guid.NewGuid(), size, 1);
 
-                timer = Stopwatch.StartNew();
-                Parallel(1, sample, item => dict.Add(item, new TestValue {Id = item, Count = rep}));
+                Stopwatch timer = Stopwatch.StartNew();
+                Parallel(1, sample, item => dict.Add(item, new TestValue { Id = item, Count = rep }));
                 Trace.TraceInformation("Dict Add: {0}", timer.Elapsed);
 
                 timer = Stopwatch.StartNew();
-                Parallel(1, sample, item => test.Add(item, new TestValue {Id = item, Count = rep}));
+                Parallel(1, sample, item => test.Add(item, new TestValue { Id = item, Count = rep }));
                 Trace.TraceInformation("Test Add: {0}", timer.Elapsed);
 
                 timer = Stopwatch.StartNew();
-                Parallel(1, sample, item => dict[item] = new TestValue {Id = item, Count = rep});
+                Parallel(1, sample, item => dict[item] = new TestValue { Id = item, Count = rep });
                 Trace.TraceInformation("Dict Update: {0}", timer.Elapsed);
 
                 timer = Stopwatch.StartNew();
-                Parallel(1, sample, item => test[item] = new TestValue {Id = item, Count = rep});
+                Parallel(1, sample, item => test[item] = new TestValue { Id = item, Count = rep });
                 Trace.TraceInformation("Test Update: {0}", timer.Elapsed);
 
                 timer = Stopwatch.StartNew();
