@@ -15,6 +15,8 @@
 
 #endregion
 
+using CSharpTest.Net.Collections.Exceptions;
+
 namespace CSharpTest.Net.Collections
 {
     partial class BPlusTree<TKey, TValue>

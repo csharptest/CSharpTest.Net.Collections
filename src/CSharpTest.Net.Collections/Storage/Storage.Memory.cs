@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using CSharpTest.Net.Collections;
+using CSharpTest.Net.Collections.Exceptions;
 using CSharpTest.Net.Serialization;
 
 namespace CSharpTest.Net.Storage

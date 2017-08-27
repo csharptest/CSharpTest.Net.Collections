@@ -25,7 +25,7 @@ namespace CSharpTest.Net.Collections
 {
     partial class BPlusTree<TKey, TValue>
     {
-        private class StorageCache : INodeStorage, ITransactable, INodeStoreWithCount
+        private class StorageCache : INodeStoreWithCount
         {
             private readonly int _asyncThreshold;
             private readonly LurchTable<IStorageHandle, object> _cache, _dirty;

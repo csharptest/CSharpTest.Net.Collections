@@ -19,7 +19,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
-
+using CSharpTest.Net.Collections.Exceptions;
 using CSharpTest.Net.Utils;
 
 // ReSharper disable MemberHidesStaticFromOuterClass

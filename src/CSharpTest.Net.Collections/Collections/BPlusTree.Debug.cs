@@ -18,6 +18,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using CSharpTest.Net.Collections.Exceptions;
 
 namespace CSharpTest.Net.Collections
 {
@@ -56,12 +57,15 @@ namespace CSharpTest.Net.Collections
         {
             //Trace.TraceInformation(format, args);
             if (_debugOut != null)
+            {
                 using (StringWriter tmp = new StringWriter())
                 {
                     Print(tmp, DebugFormat.Compact);
                     tmp.Write("  -  " + format, args);
                     _debugOut.WriteLine(tmp.ToString());
                 }
+            }
+
             if (_validated)
                 Validate();
         }
@@ -140,7 +144,7 @@ namespace CSharpTest.Net.Collections
         ///     Forces a top-down, depth-first, crawl of the entire tree in which every node and
         ///     every link or key is checked for accuracy.  Throws on error.
         /// </summary>
-#if DEBUG
+        [Conditional("DEBUG")]
         public void Validate()
         {
             using (RootLock root = LockRoot(LockType.Read))
@@ -218,6 +222,5 @@ namespace CSharpTest.Net.Collections
             }
             return depth + 1;
         }
-#endif
     }
 }

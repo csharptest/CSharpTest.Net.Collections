@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using CSharpTest.Net.Collections.Exceptions;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.Serialization;
 using CSharpTest.Net.Utils;

@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using CSharpTest.Net.Collections.Exceptions;
 
 namespace CSharpTest.Net.Collections
 {

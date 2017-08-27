@@ -1,6 +1,6 @@
 using System;
 
-namespace CSharpTest.Net.Collections
+namespace CSharpTest.Net.Collections.Exceptions
 {
     public class AssertionFailedException : Exception
     {

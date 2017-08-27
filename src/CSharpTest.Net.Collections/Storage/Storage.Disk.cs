@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using CSharpTest.Net.Collections;
+using CSharpTest.Net.Collections.Exceptions;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
 

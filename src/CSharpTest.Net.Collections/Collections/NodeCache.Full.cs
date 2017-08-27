@@ -16,6 +16,7 @@
 #endregion
 
 
+using CSharpTest.Net.Collections.Exceptions;
 
 namespace CSharpTest.Net.Collections
 {

@@ -21,6 +21,7 @@ using System.IO;
 using System.Threading;
 using CSharpTest.Net.Collections;
 using CSharpTest.Net.Collections.Compatibility;
+using CSharpTest.Net.Collections.Exceptions;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;

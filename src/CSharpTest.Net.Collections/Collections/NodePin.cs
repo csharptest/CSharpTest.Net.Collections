@@ -18,6 +18,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using CSharpTest.Net.Collections.Exceptions;
 
 
 namespace CSharpTest.Net.Collections

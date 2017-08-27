@@ -20,6 +20,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using CSharpTest.Net.Collections.Exceptions;
 using CSharpTest.Net.Interfaces;
 
 
