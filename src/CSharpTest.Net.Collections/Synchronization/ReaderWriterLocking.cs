@@ -59,13 +59,13 @@ namespace CSharpTest.Net.Synchronization
         {
             try
             {
-                _lock.TryEnterReadLock(timeout);
-                return true;
+                return _lock.TryEnterReadLock(timeout);
             }
-            catch (Exception)
+            catch
             {
-                return false;
             }
+
+            return false;
         }
 
         /// <summary>
@@ -85,14 +85,16 @@ namespace CSharpTest.Net.Synchronization
             try
             {
                 if (_lock.TryEnterWriteLock(timeout))
+                {
                     Interlocked.Increment(ref _writeVersion);
-
-                return true;
+                    return true;
+                }
             }
-            catch (Exception)
+            catch
             {
-                return false;
             }
+
+            return false;
         }
 
         /// <summary>

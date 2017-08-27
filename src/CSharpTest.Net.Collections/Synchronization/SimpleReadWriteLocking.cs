@@ -110,6 +110,8 @@ namespace CSharpTest.Net.Synchronization
         public bool TryRead(int millisecondsTimeout)
         {
             if (_sync == null) throw new ObjectDisposedException(GetType().FullName);
+            if (millisecondsTimeout == 0)
+                return false;
             bool success = false;
 
             // First lock the 'writer lock' to ensure there are no writers
@@ -155,6 +157,8 @@ namespace CSharpTest.Net.Synchronization
             if (_sync == null)
                 throw new ObjectDisposedException(GetType().FullName);
 
+            if (millisecondsTimeout == 0)
+                return false;
             // First obtain the 'writer lock':
             if (Monitor.TryEnter(_sync, millisecondsTimeout))
                 if (WaitForExclusive(0, millisecondsTimeout))

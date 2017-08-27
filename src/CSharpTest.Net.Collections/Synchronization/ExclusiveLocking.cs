@@ -37,6 +37,9 @@ namespace CSharpTest.Net.Synchronization
         /// </summary>
         public bool TryRead(int timeout)
         {
+            if (timeout == 0)
+                return false;
+
             return Monitor.TryEnter(this, timeout);
         }
 
@@ -56,6 +59,9 @@ namespace CSharpTest.Net.Synchronization
         /// </summary>
         public bool TryWrite(int timeout)
         {
+            if (timeout == 0)
+                return false;
+
             if (Monitor.TryEnter(this, timeout))
             {
                 _writeVersion++;
