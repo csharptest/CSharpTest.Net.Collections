@@ -113,18 +113,10 @@ namespace CSharpTest.Net.Collections.Test
                 GC.Collect(0, GCCollectionMode.Forced);
                 GC.WaitForPendingFinalizers();
 
-                Thread t = new Thread(
-                    delegate ()
-                    {
-                        using (stream = cache.Open(FileAccess.Read))
-                        {
-                            Assert.Equal(new byte[55], IOStream.ReadAllBytes(stream));
-                        }
-                    }
-                );
-                t.IsBackground = true;
-                t.Start();
-                Assert.True(t.Join(1000));
+                using (stream = cache.Open(FileAccess.Read))
+                {
+                    Assert.Equal(new byte[55], IOStream.ReadAllBytes(stream));
+                }
             }
         }
 

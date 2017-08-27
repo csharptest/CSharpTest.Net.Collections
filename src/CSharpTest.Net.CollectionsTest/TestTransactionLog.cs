@@ -64,25 +64,18 @@ namespace CSharpTest.Net.Collections.Test
             //Write 4,295,032,832 bytes in: 00:00:18.4990581 (in chunks of 65536 bytes)
             //Logged 2,398,000,000 bytes in: 00:00:36.7621027
 
-            string newpath = Path.Combine(@"C:\Temp\LogTest\", Guid.NewGuid() + ".tmp");
+            string folder = @"C:\Temp\LogTest\";
+
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+
+            string newpath = Path.Combine(folder, Guid.NewGuid() + ".tmp");
             using (TempFile tmp = TempFile.Attach(newpath))
             {
                 byte[] bytes;
                 DateTime start;
-                //bytes = new byte[128];
-                //new Random().NextBytes(bytes);
 
-                //start = DateTime.UtcNow;
-                //using (var io = new FileStream(tmp.TempPath, FileMode.Append, FileAccess.Write, FileShare.Read, 8))
-                //{
-                //    for (int i = 0; i <= 16777216; i++)
-                //        io.Write(bytes, 0, 128);
-                //}
-                //Console.WriteLine("Write {0:n0} bytes in: {1}", tmp.Length, DateTime.UtcNow - start);
-                //tmp.Delete();
-
-                TransactionLogOptions<Guid, byte[]> options = new TransactionLogOptions<Guid, byte[]>(
-                    tmp.TempPath, PrimitiveSerializer.Guid, PrimitiveSerializer.Bytes)
+                TransactionLogOptions<Guid, byte[]> options = new TransactionLogOptions<Guid, byte[]>(tmp.TempPath, PrimitiveSerializer.Guid, PrimitiveSerializer.Bytes)
                 {
                     FileBuffer = ushort.MaxValue,
                     FileOptions = FileOptions.None | FileOptions.SequentialScan

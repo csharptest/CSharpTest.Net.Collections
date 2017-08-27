@@ -31,14 +31,12 @@ namespace CSharpTest.Net.Collections
             private readonly int _asyncThreshold;
             private readonly LurchTable<IStorageHandle, object> _cache, _dirty;
 
-            private readonly object _flushSync;
             private readonly INodeStorage _store;
 
             private ISerializer<Node> _serializer;
 
             public StorageCache(INodeStorage store, int sizeLimit)
             {
-                _flushSync = new object();
                 _asyncThreshold = 50;
 
                 _store = store;
@@ -53,23 +51,17 @@ namespace CSharpTest.Net.Collections
             {
                 using (_cache)
                 {
-                    lock (_flushSync) // disallow concurrent async flush
-                    {
-                        _dirty.ItemRemoved -= OnItemRemoved;
-                        ClearCache();
-                        _store.Dispose();
-                    }
+                    _dirty.ItemRemoved -= OnItemRemoved;
+                    ClearCache();
+                    _store.Dispose();
                 }
             }
 
             public void Reset()
             {
-                lock (_flushSync) // disallow concurrent async flush
-                {
-                    _serializer = null;
-                    ClearCache();
-                    _store.Reset();
-                }
+                _serializer = null;
+                ClearCache();
+                _store.Reset();
             }
 
             public IStorageHandle OpenRoot(out bool isNew)
@@ -110,31 +102,9 @@ namespace CSharpTest.Net.Collections
                 _cache[handle] = tnode;
                 _dirty[handle] = tnode;
 
-                if (_dirty.Count > _asyncThreshold )//&& (completion == null || completion.IsCompleted))
+                if (_dirty.Count > _asyncThreshold)//&& (completion == null || completion.IsCompleted))
                 {
-                    try
-                    {
-                    }
-                    finally
-                    {
-                        bool locked = Monitor.TryEnter(_flushSync);
-                        try
-                        {
-                            if (locked)
-                            {
-                                //completion = _asyncWriteBehind;
-                                //if (completion == null || completion.IsCompleted)
-                                //    _asyncWriteBehind = _writeBehindFunc.BeginInvoke(null, null);
-                                Flush();
-                            }
-                        }
-                        finally
-                        {
-                            if (locked)
-                                Monitor.Exit(_flushSync);
-                        }
-                    }
-
+                    Flush();
                 }
             }
 
@@ -173,26 +143,22 @@ namespace CSharpTest.Net.Collections
 
             public void Commit()
             {
-                lock (_flushSync) // disallow concurrent async flush
-                {
-                    Flush();
+                Flush();
 
-                    ITransactable tstore = _store as ITransactable;
-                    if (tstore != null)
-                        tstore.Commit();
-                }
+                ITransactable tstore = _store as ITransactable;
+                if (tstore != null)
+                    tstore.Commit();
             }
 
             public void Rollback()
             {
                 ITransactable tstore = _store as ITransactable;
                 if (tstore != null)
-                    lock (_flushSync) // disallow concurrent async flush
-                    {
-                        _serializer = null;
-                        ClearCache();
-                        tstore.Rollback();
-                    }
+                {
+                    _serializer = null;
+                    ClearCache();
+                    tstore.Rollback();
+                }
             }
 
             // Must SYNC on lock (_flushSync)
@@ -211,18 +177,15 @@ namespace CSharpTest.Net.Collections
 
             private void Flush()
             {
-                lock (_flushSync) // disallow concurrent async flush
+                try
                 {
-                    try
-                    {
-                        KeyValuePair<IStorageHandle, object> value;
-                        while (_dirty.TryDequeue(out value))
-                        {
-                        }
-                    }
-                    catch (ObjectDisposedException)
+                    KeyValuePair<IStorageHandle, object> value;
+                    while (_dirty.TryDequeue(out value))
                     {
                     }
+                }
+                catch (ObjectDisposedException)
+                {
                 }
             }
 

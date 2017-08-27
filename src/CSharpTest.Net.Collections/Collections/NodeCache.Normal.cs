@@ -16,7 +16,7 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 
@@ -34,7 +34,7 @@ namespace CSharpTest.Net.Collections
         /// </summary>
         private sealed class NodeCacheNormal : NodeCacheBase
         {
-            private readonly Dictionary<NodeHandle, Utils.WeakReference<CacheEntry>> _cache;
+            private readonly ConcurrentDictionary<NodeHandle, Utils.WeakReference<CacheEntry>> _cache;
             private readonly IObjectKeepAlive _keepAlive;
             private bool _disposed;
             private CacheEntry _root;
@@ -42,7 +42,7 @@ namespace CSharpTest.Net.Collections
             public NodeCacheNormal(BPlusTreeOptions<TKey, TValue> options) : base(options)
             {
                 _keepAlive = options.CreateCacheKeepAlive();
-                _cache = new Dictionary<NodeHandle, Utils.WeakReference<CacheEntry>>();
+                _cache = new ConcurrentDictionary<NodeHandle, Utils.WeakReference<CacheEntry>>();
             }
 
             protected override NodeHandle RootHandle => _root.Handle;
@@ -98,18 +98,17 @@ namespace CSharpTest.Net.Collections
 
                     if (_cache.TryGetValue(handle, out weakRef))
                         if (!weakRef.TryGetTarget(out entry))
-                            {
-                                if (!weakRef.TryGetTarget(out entry))
-                                    weakRef.Target = entry = new CacheEntry(this, handle);
-                                handle.SetCacheEntry(weakRef);
-                            }
+                        {
+                            if (!weakRef.TryGetTarget(out entry))
+                                weakRef.Target = entry = new CacheEntry(this, handle);
+                            handle.SetCacheEntry(weakRef);
+                        }
                 }
                 if (entry == null)
                 {
                     if (!_cache.TryGetValue(handle, out weakRef))
                     {
-                        _cache.Add(handle,
-                            weakRef = new Utils.WeakReference<CacheEntry>(entry = new CacheEntry(this, handle)));
+                        _cache.TryAdd(handle, weakRef = new Utils.WeakReference<CacheEntry>(entry = new CacheEntry(this, handle)));
                         handle.SetCacheEntry(weakRef);
                     }
                     else
@@ -133,7 +132,7 @@ namespace CSharpTest.Net.Collections
                 refobj = entry;
             }
 
-            protected override NodePin Lock(NodePin parent, LockType ltype, NodeHandle child)
+            protected override NodePin Lock(LockType ltype, NodeHandle child)
             {
                 CacheEntry entry = GetCache(child, false);
 
@@ -200,16 +199,16 @@ namespace CSharpTest.Net.Collections
                 ~CacheEntry()
                 {
                     if (!_owner._disposed)
+                    {
                         try
                         {
-
-                            Utils.WeakReference<CacheEntry> me;
-                            if (_owner._cache.TryGetValue(Handle, out me) && me.IsAlive == false)
-                                _owner._cache.Remove(Handle);
+                            if (_owner._cache.TryGetValue(Handle, out var me) && me.IsAlive == false)
+                                _owner._cache.TryRemove(Handle, out _);
                         }
                         catch (ObjectDisposedException)
                         {
                         }
+                    }
                     Node = null;
                     _owner = null;
                 }

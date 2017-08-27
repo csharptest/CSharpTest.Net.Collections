@@ -180,24 +180,17 @@ namespace CSharpTest.Net.Collections.Test
         [Fact]
         public void TestFinalizer()
         {
-            string filename;
-            try
-            {
-                TempFile file = new TempFile();
-                filename = file.TempPath;
-                Assert.True(File.Exists(file.TempPath));
+            TempFile file = new TempFile();
+            string filename = file.TempPath;
+            Assert.True(File.Exists(file.TempPath));
 
-                IDisposable flock = file.Open();
-                file.Dispose();
+            IDisposable flock = file.Open();
+            file.Dispose();
 
-                Assert.True(File.Exists(file.TempPath)); //dua, it's still open
+            Assert.True(File.Exists(file.TempPath)); //dua, it's still open
 
-                flock.Dispose();
-                file = null;
-            }
-            finally
-            {
-            }
+            flock.Dispose();
+            file = null;
 
             //wait for GC to collect tempfile
             GC.Collect(0, GCCollectionMode.Forced);

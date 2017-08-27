@@ -25,13 +25,11 @@ namespace CSharpTest.Net.Collections
         /// <summary> performs a perfect cache of the entire tree </summary>
         private sealed class NodeCacheNone : NodeCacheBase
         {
-            private readonly HashSet<IStorageHandle> _list;
             private NodeHandle _root;
 
             public NodeCacheNone(BPlusTreeOptions<TKey, TValue> options)
                 : base(Fix(options))
             {
-                _list = new HashSet<IStorageHandle>();
             }
 
             protected override NodeHandle RootHandle => _root;
@@ -43,49 +41,31 @@ namespace CSharpTest.Net.Collections
 
             protected override void LoadStorage()
             {
-                bool isNew;
-                _root = new NodeHandle(Storage.OpenRoot(out isNew));
+                _root = new NodeHandle(Storage.OpenRoot(out var isNew));
                 if (isNew)
                     CreateRoot(_root);
 
-                Node rootNode;
-                Storage.TryGetNode(_root.StoreHandle, out rootNode, NodeSerializer);
+                Storage.TryGetNode(_root.StoreHandle, out var rootNode, NodeSerializer);
 
                 AssertionFailedException.Assert(rootNode != null, "Unable to load storage root.");
             }
 
             public override void ResetCache()
             {
-                _list.Clear();
             }
 
             public override void UpdateNode(NodePin node)
             {
-                if (node.IsDeleted)
-                {
-                    _list.Remove(node.Handle.StoreHandle);
-                }
             }
 
             public override void CreateLock(NodeHandle handle, out object refobj)
             {
-                if (!_list.Contains(handle.StoreHandle))
-                {
-                    _list.Add(handle.StoreHandle);
-                }
-
                 refobj = null;
             }
 
-            protected override NodePin Lock(NodePin parent, LockType ltype, NodeHandle child)
+            protected override NodePin Lock(LockType ltype, NodeHandle child)
             {
-                if (!_list.Contains(child.StoreHandle))
-                {
-                    _list.Add(child.StoreHandle);
-                }
-
-                Node node;
-                var success = Storage.TryGetNode(child.StoreHandle, out node, NodeSerializer);
+                var success = Storage.TryGetNode(child.StoreHandle, out var node, NodeSerializer);
                 AssertionFailedException.Assert(success && node != null);
 
                 return new NodePin(child, ltype, ltype, node, null);

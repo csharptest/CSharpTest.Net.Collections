@@ -35,64 +35,61 @@ namespace CSharpTest.Net.Collections
 
             protected override void LoadStorage()
             {
-                bool isNew;
-                _root = new NodeHandle(Storage.OpenRoot(out isNew));
-                _root.SetCacheEntry(new NodeWithLock(null));
+                _root = new NodeHandle(Storage.OpenRoot(out var isNew));
+                _root.SetCacheEntry(new CacheWrapper());
+
                 if (isNew)
                     CreateRoot(_root);
 
-                Node rootNode;
-                if (Storage.TryGetNode(_root.StoreHandle, out rootNode, NodeSerializer))
-                    _root.SetCacheEntry(new NodeWithLock(rootNode));
+                if (Storage.TryGetNode(_root.StoreHandle, out var rootNode, NodeSerializer))
+                    _root.SetCacheEntry(new CacheWrapper(rootNode));
 
                 AssertionFailedException.Assert(rootNode != null, "Unable to load storage root.");
             }
 
             public override void ResetCache()
             {
-                NodeWithLock nlck;
-                if (_root.TryGetCache(out nlck))
-                    nlck.Node = null;
+                CacheWrapper entry;
+                if (_root.TryGetCache(out entry))
+                    entry.Node = null;
             }
 
             public override void UpdateNode(NodePin node)
             {
                 if (!node.IsDeleted)
                 {
-                    NodeWithLock nlck;
-                    if (!node.Handle.TryGetCache(out nlck))
+                    CacheWrapper entry;
+                    if (!node.Handle.TryGetCache(out entry))
                         throw new AssertionFailedException("Unable to retrieve handle cache.");
-                    nlck.Node = node.Ptr;
+                    entry.Node = node.Ptr;
                 }
             }
 
             public override void CreateLock(NodeHandle handle, out object refobj)
             {
-                NodeWithLock nlck = new NodeWithLock(null);
-                handle.SetCacheEntry(nlck);
-                refobj = nlck;
+                CacheWrapper entry = new CacheWrapper();
+                handle.SetCacheEntry(entry);
+                refobj = entry;
             }
 
-            protected override NodePin Lock(NodePin parent, LockType ltype, NodeHandle child)
+            protected override NodePin Lock(LockType ltype, NodeHandle child)
             {
-                NodeWithLock nlck;
-                if (!child.TryGetCache(out nlck))
-                    child.SetCacheEntry(nlck = new NodeWithLock(null));
+                CacheWrapper entry;
+                if (!child.TryGetCache(out entry))
+                    child.SetCacheEntry(entry = new CacheWrapper());
 
-                if (nlck.Node == null)
-                {
-                    Storage.TryGetNode(child.StoreHandle, out nlck.Node, NodeSerializer);
-                }
+                if (entry.Node == null)
+                    Storage.TryGetNode(child.StoreHandle, out entry.Node, NodeSerializer);
 
-                AssertionFailedException.Assert(nlck.Node != null);
-                return new NodePin(child, ltype, nlck, nlck.Node, null);
+                AssertionFailedException.Assert(entry.Node != null);
+                return new NodePin(child, ltype, entry, entry.Node, null);
             }
 
-            private class NodeWithLock
+            private class CacheWrapper
             {
                 public Node Node;
 
-                public NodeWithLock(Node node)
+                public CacheWrapper(Node node = null)
                 {
                     Node = node;
                 }
