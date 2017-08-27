@@ -89,7 +89,7 @@ namespace CSharpTest.Net.Collections
                 }
                 else
                 {
-                    using (RootLock root = _tree.LockRoot(LockType.Read, "Enumerator"))
+                    using (RootLock root = _tree.LockRoot(LockType.Read))
                     using (NodePin first = SeekFirst(root.Pin, out _nextKey, out _hasMore))
                     {
                         FillFromNode(first.Ptr);
@@ -115,7 +115,7 @@ namespace CSharpTest.Net.Collections
                 }
 
                 bool success = false;
-                using (RootLock root = _tree.LockRoot(LockType.Read, "Enumerator"))
+                using (RootLock root = _tree.LockRoot(LockType.Read))
                 {
                     int offset;
                     NodePin next;

@@ -43,7 +43,7 @@ namespace CSharpTest.Net.Collections
             public NodePin(NodeHandle handle, LockType ltype, object refobj,
                 Node original, Node updated)
             {
-                Assert(original == null || original.IsReadOnly);
+                AssertionFailedException.Assert(original == null || original.IsReadOnly);
                 Handle = handle;
                 LockType = ltype;
                 Original = original;
@@ -70,22 +70,22 @@ namespace CSharpTest.Net.Collections
 
             public void BeginUpdate()
             {
-                Assert(LockType != LockType.Read, "Node is currently read-only");
-                Assert(_temp == null, "Node is already in a transaction");
-                Assert(IsDeleted == false, "Node is already marked for deletion");
+                AssertionFailedException.Assert(LockType != LockType.Read, "Node is currently read-only");
+                AssertionFailedException.Assert(_temp == null, "Node is already in a transaction");
+                AssertionFailedException.Assert(IsDeleted == false, "Node is already marked for deletion");
                 _temp = Original.CloneForWrite(LockType);
             }
 
             public void MarkDeleted()
             {
-                Assert(LockType != LockType.Read, "Node is currently read-only");
+                AssertionFailedException.Assert(LockType != LockType.Read, "Node is currently read-only");
                 IsDeleted = true;
                 _temp = null;
             }
 
             public void CommitChanges()
             {
-                Assert(LockType != LockType.Read, "Node is currently read-only");
+                AssertionFailedException.Assert(LockType != LockType.Read, "Node is currently read-only");
                 if (IsDeleted)
                 {
                     Dispose();
@@ -100,7 +100,7 @@ namespace CSharpTest.Net.Collections
 
             public void CancelChanges()
             {
-                Assert(LockType != LockType.Read, "Node is currently read-only");
+                AssertionFailedException.Assert(LockType != LockType.Read, "Node is currently read-only");
                 //if (_temp == null) throw new InvalidOperationException("Node is not in a transaction");
                 //_temp.Invalidate();
                 _temp = null;

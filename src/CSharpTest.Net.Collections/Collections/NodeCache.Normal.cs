@@ -70,7 +70,7 @@ namespace CSharpTest.Net.Collections
                     _root.Node = CreateRoot(_root.Handle);
 
                 Storage.TryGetNode(rootHandle.StoreHandle, out _root.Node, NodeSerializer);
-                Assert(_root.Node != null, "Unable to load storage root.");
+                AssertionFailedException.Assert(_root.Node != null, "Unable to load storage root.");
             }
 
             public override void ResetCache()
@@ -80,7 +80,7 @@ namespace CSharpTest.Net.Collections
                 _root = GetCache(_root.Handle, true);
 
                 bool isnew;
-                Assert(_root.Handle.StoreHandle.Equals(Storage.OpenRoot(out isnew)));
+                AssertionFailedException.Assert(_root.Handle.StoreHandle.Equals(Storage.OpenRoot(out isnew)));
                 if (isnew)
                     _root.Node = CreateRoot(_root.Handle);
             }
@@ -122,7 +122,7 @@ namespace CSharpTest.Net.Collections
                         }
                     }
                 }
-                Assert(entry != null, "Cache entry is null");
+                AssertionFailedException.Assert(entry != null, "Cache entry is null");
                 _keepAlive.Add(entry);
                 return entry;
             }
@@ -149,7 +149,7 @@ namespace CSharpTest.Net.Collections
                             && node.StorageHandle.Equals(entry.Handle.StoreHandle)
                         );
                         Node old = Interlocked.CompareExchange(ref entry.Node, node, null);
-                        Assert(null == old, "Collision on cache load.");
+                        AssertionFailedException.Assert(null == old, "Collision on cache load.");
                     }
                 }
                 return new NodePin(child, ltype, entry, node, null);
@@ -166,7 +166,7 @@ namespace CSharpTest.Net.Collections
 
                 if (node.IsDeleted)
                 {
-                    Assert(node.LockType != LockType.Read);
+                    AssertionFailedException.Assert(node.LockType != LockType.Read);
                     //With lockless-reads we leave instances in cache until GC collects, otherwise we could remove them.
                     //using (node.Lock.Write(Options.LockTimeout))
                     //    node.Original.Invalidate();
@@ -179,7 +179,7 @@ namespace CSharpTest.Net.Collections
                 else
                 {
                     Node old = Interlocked.CompareExchange(ref entry.Node, node.Ptr, node.Original);
-                    Assert(ReferenceEquals(old, node.Original), "Node was modified without lock");
+                    AssertionFailedException.Assert(ReferenceEquals(old, node.Original), "Node was modified without lock");
                 }
             }
 

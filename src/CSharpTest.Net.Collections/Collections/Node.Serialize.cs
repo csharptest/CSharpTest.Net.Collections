@@ -70,7 +70,7 @@ namespace CSharpTest.Net.Collections
 
                 bool isLeaf = value.IsLeaf;
                 int maximumKeys = value.IsRoot ? 1 : (isLeaf ? _options.MaximumValueNodes : _options.MaximumChildNodes);
-                Assert(value.Size == maximumKeys);
+                AssertionFailedException.Assert(value.Size == maximumKeys);
 
                 _boolSerializer.WriteTo(isLeaf, stream);
                 _boolSerializer.WriteTo(value.IsRoot, stream);
@@ -112,7 +112,7 @@ namespace CSharpTest.Net.Collections
                 }
 
                 int nodeSize = isLeaf ? _options.MaximumValueNodes : _options.MaximumChildNodes;
-                Assert(nodeSize >= count);
+                AssertionFailedException.Assert(nodeSize >= count);
                 Node resurrected = Node.FromElements(handle, isRoot, nodeSize, items);
                 return resurrected;
             }

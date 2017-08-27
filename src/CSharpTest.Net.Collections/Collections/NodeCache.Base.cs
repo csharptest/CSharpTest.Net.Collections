@@ -74,16 +74,16 @@ namespace CSharpTest.Net.Collections
 
             public abstract void UpdateNode(NodePin node);
             public abstract void CreateLock(NodeHandle handle, out object refobj);
-            protected abstract NodePin Lock(NodePin parent, LockType ltype, NodeHandle child);
+            protected abstract NodePin Lock(LockType ltype, NodeHandle child);
 
             public NodePin LockRoot(LockType ltype)
             {
-                return Lock(null, ltype, RootHandle);
+                return Lock(ltype, RootHandle);
             }
 
             public NodePin Lock(NodePin parent, NodeHandle child)
             {
-                return Lock(parent, parent.LockType, child);
+                return Lock(parent.LockType, child);
             }
 
 

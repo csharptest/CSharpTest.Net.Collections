@@ -104,7 +104,7 @@ namespace CSharpTest.Net.Collections
                 if (isRoot)
                 {
                     RootNode root = new RootNode(handle);
-                    Assert(items.Length == 1);
+                    AssertionFailedException.Assert(items.Length == 1);
                     root._list[0] = items[0];
                     return root;
                 }
@@ -125,7 +125,7 @@ namespace CSharpTest.Net.Collections
 
             public Node ToReadOnly()
             {
-                Assert(_ltype != LockType.Read, "Node is already read-only.");
+                AssertionFailedException.Assert(_ltype != LockType.Read, "Node is already read-only.");
                 _ltype = LockType.Read;
                 return this;
             }
@@ -133,7 +133,7 @@ namespace CSharpTest.Net.Collections
             public virtual Node CloneForWrite(LockType ltype)
             {
                 if (_ltype == ltype) return this;
-                Assert(ltype != LockType.Read, "Read lock can not clone for write");
+                AssertionFailedException.Assert(ltype != LockType.Read, "Read lock can not clone for write");
                 return new Node(this, ltype);
             }
 
@@ -161,19 +161,19 @@ namespace CSharpTest.Net.Collections
 
             public void ReplaceKey(int ordinal, TKey minKey, IComparer<TKey> comparer)
             {
-                Assert(!IsRoot, "Invalid operation on root.");
-                Assert(_ltype != LockType.Read, "Node is currently read-only");
-                Assert(ordinal >= 0 && ordinal < _count, "Index out of range.");
+                AssertionFailedException.Assert(!IsRoot, "Invalid operation on root.");
+                AssertionFailedException.Assert(_ltype != LockType.Read, "Node is currently read-only");
+                AssertionFailedException.Assert(ordinal >= 0 && ordinal < _count, "Index out of range.");
                 if (comparer == null || comparer.Compare(minKey, _list[ordinal].Key) != 0)
                     _list[ordinal] = new Element(minKey, _list[ordinal]);
             }
 
             public void ReplaceChild(int ordinal, NodeHandle original, NodeHandle value)
             {
-                Assert(_ltype != LockType.Read, "Node is currently read-only");
-                Assert(ordinal >= 0 && ordinal < _count, "Index out of range.");
+                AssertionFailedException.Assert(_ltype != LockType.Read, "Node is currently read-only");
+                AssertionFailedException.Assert(ordinal >= 0 && ordinal < _count, "Index out of range.");
                 Element replacing = _list[ordinal];
-                Assert(
+                AssertionFailedException.Assert(
                     original == null && replacing.ChildNode == null ||
                     original != null && original.Equals(replacing.ChildNode)
                     , "Incorrect child being replaced.");
@@ -182,17 +182,17 @@ namespace CSharpTest.Net.Collections
 
             public void SetValue(int ordinal, TKey key, TValue value, IComparer<TKey> comparer)
             {
-                Assert(!IsRoot, "Invalid operation on root.");
-                Assert(_ltype != LockType.Read, "Node is currently read-only");
-                Assert(ordinal >= 0 && ordinal < _count, "Index out of range.");
-                Assert(comparer.Compare(_list[ordinal].Key, key) == 0, "Incorrect key for value replacement.");
+                AssertionFailedException.Assert(!IsRoot, "Invalid operation on root.");
+                AssertionFailedException.Assert(_ltype != LockType.Read, "Node is currently read-only");
+                AssertionFailedException.Assert(ordinal >= 0 && ordinal < _count, "Index out of range.");
+                AssertionFailedException.Assert(comparer.Compare(_list[ordinal].Key, key) == 0, "Incorrect key for value replacement.");
                 _list[ordinal] = new Element(key, value);
             }
 
             public void Insert(int ordinal, Element item)
             {
-                Assert(!IsRoot, "Invalid operation on root.");
-                Assert(_ltype != LockType.Read, "Node is currently read-only");
+                AssertionFailedException.Assert(!IsRoot, "Invalid operation on root.");
+                AssertionFailedException.Assert(_ltype != LockType.Read, "Node is currently read-only");
                 if (ordinal < 0 || ordinal > _count || ordinal >= _list.Length)
                     throw new AssertionFailedException();
 
@@ -206,12 +206,12 @@ namespace CSharpTest.Net.Collections
 
             public void Remove(int ordinal, Element item, IComparer<TKey> comparer)
             {
-                Assert(!IsRoot, "Invalid operation on root.");
-                Assert(_ltype != LockType.Read, "Node is currently read-only");
+                AssertionFailedException.Assert(!IsRoot, "Invalid operation on root.");
+                AssertionFailedException.Assert(_ltype != LockType.Read, "Node is currently read-only");
                 if (ordinal < 0 || ordinal >= _count)
                     throw new AssertionFailedException();
 
-                Assert(comparer.Compare(_list[ordinal].Key, item.Key) == 0);
+                AssertionFailedException.Assert(comparer.Compare(_list[ordinal].Key, item.Key) == 0);
 
                 if (ordinal < _count - 1)
                     Array.Copy(_list, ordinal + 1, _list, ordinal, _count - ordinal - 1);

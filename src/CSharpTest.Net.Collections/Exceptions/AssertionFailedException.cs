@@ -17,9 +17,9 @@ namespace CSharpTest.Net.Collections
         {
         }
 
-        public static void Assert(bool condition)
+        public static void Assert(bool condition, string message = null)
         {
-            if (!condition) throw new AssertionFailedException();
+            if (!condition) throw new AssertionFailedException(message);
         }
     }
 }

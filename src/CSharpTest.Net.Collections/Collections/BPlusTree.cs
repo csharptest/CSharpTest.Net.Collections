@@ -30,8 +30,7 @@ namespace CSharpTest.Net.Collections
     /// <summary>
     ///     Implements an IDictionary interface for a simple file-based database
     /// </summary>
-    public partial class BPlusTree<TKey, TValue> : IDisposable, ITransactable, IDictionary<TKey, TValue>,
-        IDictionaryEx<TKey, TValue>, IConcurrentDictionary<TKey, TValue>
+    public partial class BPlusTree<TKey, TValue> : ITransactable, IConcurrentDictionary<TKey, TValue>
     {
         private readonly IComparer<Element> _itemComparer;
         private readonly IComparer<TKey> _keyComparer;
@@ -63,7 +62,7 @@ namespace CSharpTest.Net.Collections
         ///     Constructs a BPlusTree using a Version 2 file format
         /// </summary>
         public BPlusTree(OptionsV2 optionsV2)
-            : this((BPlusTreeOptions<TKey, TValue>) optionsV2)
+            : this((BPlusTreeOptions<TKey, TValue>)optionsV2)
         {
         }
 
@@ -71,7 +70,7 @@ namespace CSharpTest.Net.Collections
         ///     Constructs a BPlusTree using a Version 1 file format
         /// </summary>
         public BPlusTree(Options optionsV1)
-            : this((BPlusTreeOptions<TKey, TValue>) optionsV1)
+            : this((BPlusTreeOptions<TKey, TValue>)optionsV1)
         {
         }
 
@@ -164,9 +163,6 @@ namespace CSharpTest.Net.Collections
             }
         }
 
-        /// <summary> Returns the lock timeout being used by this instance. </summary>
-        private int LockTimeout => _options.LockTimeout;
-
         /// <summary>
         ///     Modify the value associated with the result of the provided update method
         ///     as an atomic operation, Allows for reading/writing a single record within
@@ -178,7 +174,7 @@ namespace CSharpTest.Net.Collections
         {
             UpdateInfo ui = new UpdateInfo(fnUpdate);
             bool result;
-            using (RootLock root = LockRoot(LockType.Update, "Update"))
+            using (RootLock root = LockRoot(LockType.Update))
             {
                 result = Update(root.Pin, key, ref ui);
             }
@@ -299,8 +295,7 @@ namespace CSharpTest.Net.Collections
         /// </summary>
         public bool ContainsKey(TKey key)
         {
-            TValue value;
-            return TryGetValue(key, out value);
+            return TryGetValue(key, out _);
         }
 
         /// <summary>
@@ -310,7 +305,7 @@ namespace CSharpTest.Net.Collections
         {
             bool result;
             value = default(TValue);
-            using (RootLock root = LockRoot(LockType.Read, "TryGetValue"))
+            using (RootLock root = LockRoot(LockType.Read))
             {
                 result = Search(root.Pin, key, ref value);
             }
@@ -376,7 +371,7 @@ namespace CSharpTest.Net.Collections
         {
             UpdateInfo ui = new UpdateInfo(value);
             bool result;
-            using (RootLock root = LockRoot(LockType.Update, "Update"))
+            using (RootLock root = LockRoot(LockType.Update))
             {
                 result = Update(root.Pin, key, ref ui);
             }
@@ -395,7 +390,7 @@ namespace CSharpTest.Net.Collections
         {
             UpdateIfValue ui = new UpdateIfValue(value, comparisonValue);
             bool result;
-            using (RootLock root = LockRoot(LockType.Update, "Update"))
+            using (RootLock root = LockRoot(LockType.Update))
             {
                 result = Update(root.Pin, key, ref ui);
             }
@@ -459,7 +454,7 @@ namespace CSharpTest.Net.Collections
                 {
                     if (!IsReadOnly)
                     {
-                            CommitChanges(false);
+                        CommitChanges();
                     }
                     _storage.Dispose();
                 }
@@ -484,7 +479,7 @@ namespace CSharpTest.Net.Collections
         /// </summary>
         public void Commit()
         {
-            CommitChanges(true);
+            CommitChanges();
         }
 
         /// <summary>
@@ -496,23 +491,23 @@ namespace CSharpTest.Net.Collections
         public void Rollback()
         {
             NotDisposed();
-     
-                if (_storage.Storage is ITransactable)
-                    ((ITransactable) _storage.Storage).Rollback();
-                else
-                    throw new InvalidOperationException();
 
-                if (_options.LogFile != null)
-                    _options.LogFile.TruncateLog();
+            if (_storage.Storage is ITransactable)
+                ((ITransactable)_storage.Storage).Rollback();
+            else
+                throw new InvalidOperationException();
 
-                _storage.ResetCache();
+            if (_options.LogFile != null)
+                _options.LogFile.TruncateLog();
 
-                //Finally we may need to rebuild count
-                if (_hasCount)
-                {
-                    _hasCount = false;
-                    EnableCount();
-                }
+            _storage.ResetCache();
+
+            //Finally we may need to rebuild count
+            if (_hasCount)
+            {
+                _hasCount = false;
+                EnableCount();
+            }
         }
 
         private void NotDisposed()
@@ -520,13 +515,13 @@ namespace CSharpTest.Net.Collections
             if (_disposed) throw new ObjectDisposedException(GetType().FullName);
         }
 
-        private void CommitChanges(bool requiresLock)
+        private void CommitChanges()
         {
             NotDisposed();
             if (_storage.Storage is INodeStoreWithCount)
-                ((INodeStoreWithCount) _storage.Storage).Count = _hasCount ? _count : -1;
+                ((INodeStoreWithCount)_storage.Storage).Count = _hasCount ? _count : -1;
             if (_storage.Storage is ITransactable)
-                ((ITransactable) _storage.Storage).Commit();
+                ((ITransactable)_storage.Storage).Commit();
             if (_options.LogFile != null)
                 _options.LogFile.TruncateLog();
         }
@@ -535,10 +530,10 @@ namespace CSharpTest.Net.Collections
         {
             if (_options.TransactionLogLimit > 0 && _options.LogFile != null)
                 if (_options.LogFile.Size > _options.TransactionLogLimit)
-                    {
-                        if (_options.LogFile.Size > _options.TransactionLogLimit)
-                            CommitChanges(false);
-                    }
+                {
+                    if (_options.LogFile.Size > _options.TransactionLogLimit)
+                        CommitChanges();
+                }
         }
 
         /// <summary>
@@ -553,7 +548,7 @@ namespace CSharpTest.Net.Collections
             if (_hasCount)
                 return;
             _count = 0;
-            using (RootLock root = LockRoot(LockType.Read, "EnableCount", true))
+            using (RootLock root = LockRoot(LockType.Read))
             {
                 _count = CountValues(root.Pin);
             }
@@ -566,15 +561,10 @@ namespace CSharpTest.Net.Collections
         public void UnloadCache()
         {
             NotDisposed();
-                _storage.ResetCache();
-            }
-
-        private RootLock LockRoot(LockType ltype, string methodName)
-        {
-            return new RootLock(this, ltype);
+            _storage.ResetCache();
         }
 
-        private RootLock LockRoot(LockType ltype, string methodName, bool exclusive)
+        private RootLock LockRoot(LockType ltype)
         {
             return new RootLock(this, ltype);
         }
@@ -653,7 +643,7 @@ namespace CSharpTest.Net.Collections
                 while (!bulk.IsComplete)
                 {
                     KeyRange range = new KeyRange(_keyComparer);
-                    using (RootLock root = LockRoot(LockType.Insert, "BulkInsert"))
+                    using (RootLock root = LockRoot(LockType.Insert))
                     {
                         result += AddRange(root.Pin, ref range, bulk, null, int.MinValue);
                     }
@@ -663,20 +653,10 @@ namespace CSharpTest.Net.Collections
             return result;
         }
 
-        /// <summary>
-        ///     Adds or modifies an element with the provided key and value.
-        /// </summary>
-        [Obsolete("Just use this[key] = value instead.")]
-        public void AddOrUpdate(TKey key, TValue value)
-        {
-            InsertValue ii = new InsertValue(value, true);
-            AddEntry(key, ref ii);
-        }
-
         private InsertResult AddEntry<T>(TKey key, ref T info) where T : ICreateOrUpdateValue<TKey, TValue>
         {
             InsertResult result;
-            using (RootLock root = LockRoot(LockType.Insert, "AddOrUpdate"))
+            using (RootLock root = LockRoot(LockType.Insert))
             {
                 result = Insert(root.Pin, key, ref info, null, int.MinValue);
             }
@@ -689,7 +669,7 @@ namespace CSharpTest.Net.Collections
         private RemoveResult RemoveEntry<T>(TKey key, ref T removeValue) where T : IRemoveValue<TKey, TValue>
         {
             RemoveResult result;
-            using (RootLock root = LockRoot(LockType.Delete, "Remove"))
+            using (RootLock root = LockRoot(LockType.Delete))
             {
                 result = Delete(root.Pin, key, ref removeValue, null, int.MinValue);
             }
@@ -704,8 +684,7 @@ namespace CSharpTest.Net.Collections
         /// </summary>
         public KeyValuePair<TKey, TValue> First()
         {
-            KeyValuePair<TKey, TValue> result;
-            if (!TryGetFirst(out result))
+            if (!TryGetFirst(out KeyValuePair<TKey, TValue> result))
                 throw new InvalidOperationException();
             return result;
         }
@@ -715,7 +694,7 @@ namespace CSharpTest.Net.Collections
         /// </summary>
         public bool TryGetFirst(out KeyValuePair<TKey, TValue> item)
         {
-            using (RootLock root = LockRoot(LockType.Read, "TryGetFirst"))
+            using (RootLock root = LockRoot(LockType.Read))
             {
                 return TryGetEdge(root.Pin, true, out item);
             }
@@ -726,8 +705,7 @@ namespace CSharpTest.Net.Collections
         /// </summary>
         public KeyValuePair<TKey, TValue> Last()
         {
-            KeyValuePair<TKey, TValue> result;
-            if (!TryGetLast(out result))
+            if (!TryGetLast(out KeyValuePair<TKey, TValue> result))
                 throw new InvalidOperationException();
             return result;
         }
@@ -737,7 +715,7 @@ namespace CSharpTest.Net.Collections
         /// </summary>
         public bool TryGetLast(out KeyValuePair<TKey, TValue> item)
         {
-            using (RootLock root = LockRoot(LockType.Read, "TryGetLast"))
+            using (RootLock root = LockRoot(LockType.Read))
             {
                 return TryGetEdge(root.Pin, false, out item);
             }
@@ -757,20 +735,6 @@ namespace CSharpTest.Net.Collections
         public IEnumerable<KeyValuePair<TKey, TValue>> EnumerateRange(TKey start, TKey end)
         {
             return new Enumerator(this, start, x => _keyComparer.Compare(x.Key, end) <= 0);
-        }
-
-        [DebuggerNonUserCode]
-        private static void Assert(bool condition)
-        {
-            if (!condition)
-                throw new AssertionFailedException();
-        }
-
-        [DebuggerNonUserCode]
-        private static void Assert(bool condition, string message)
-        {
-            if (!condition)
-                throw new AssertionFailedException(message);
         }
 
         private struct RootLock : IDisposable
@@ -1023,10 +987,10 @@ namespace CSharpTest.Net.Collections
         public void Clear()
         {
             NotDisposed();
-                _storage.DeleteAll();
-                _count = 0;
-                //Since transaction logs do not deal with Clear(), we need to commit our current state
-                CommitChanges(false);
+            _storage.DeleteAll();
+            _count = 0;
+            //Since transaction logs do not deal with Clear(), we need to commit our current state
+            CommitChanges();
             DebugComplete("Clear()");
         }
 

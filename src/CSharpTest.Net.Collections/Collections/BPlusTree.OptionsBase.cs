@@ -153,13 +153,9 @@ namespace CSharpTest.Net.Collections
 
         private IComparer<TKey> _keyComparer;
 
-        private int _lockTimeout = 120000;
+        private int _maximumChildNodes = 32; // (assumes a key size of apx 100 bytes: (FileBlockSize - StoreageOverhead) / (AvgKeyBytes + ChildLinkSize)
 
-        private int _maximumChildNodes = 32
-            ; // (assumes a key size of apx 100 bytes: (FileBlockSize - StoreageOverhead) / (AvgKeyBytes + ChildLinkSize)
-
-        private int _maximumValueNodes = 8
-            ; // (assumes a value size of apx 500 bytes: (FileBlockSize - StoreageOverhead) / (AvgValueBytes + AvgKeyBytes)
+        private int _maximumValueNodes = 8; // (assumes a value size of apx 500 bytes: (FileBlockSize - StoreageOverhead) / (AvgValueBytes + AvgKeyBytes)
 
         private int _minimumChildNodes = 12;
         private int _minimumValueNodes = 3;
@@ -309,21 +305,6 @@ namespace CSharpTest.Net.Collections
                 InvalidConfigurationValueException.Assert(value >= 512 && value <= 0x10000, "FileBlockSize",
                     "The valid range is from 512 bytes to 64 kilobytes in powers of 2.");
                 _fileBlockSize = value;
-            }
-        }
-
-        /// <summary>
-        ///     Gets or sets the number of milliseconds to wait before failing a lock request, the default
-        ///     of two minutes should be more than adequate.
-        /// </summary>
-        public int LockTimeout
-        {
-            get => _lockTimeout;
-            set
-            {
-                InvalidConfigurationValueException.Assert(value >= -1 && value <= int.MaxValue, "LockTimeout",
-                    "The valid range is from -1 to MaxValue.");
-                _lockTimeout = value;
             }
         }
 

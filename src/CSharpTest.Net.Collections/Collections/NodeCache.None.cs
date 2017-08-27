@@ -51,7 +51,7 @@ namespace CSharpTest.Net.Collections
                 Node rootNode;
                 Storage.TryGetNode(_root.StoreHandle, out rootNode, NodeSerializer);
 
-                Assert(rootNode != null, "Unable to load storage root.");
+                AssertionFailedException.Assert(rootNode != null, "Unable to load storage root.");
             }
 
             public override void ResetCache()
@@ -86,7 +86,7 @@ namespace CSharpTest.Net.Collections
 
                 Node node;
                 var success = Storage.TryGetNode(child.StoreHandle, out node, NodeSerializer);
-                Assert(success && node != null);
+                AssertionFailedException.Assert(success && node != null);
 
                 return new NodePin(child, ltype, ltype, node, null);
             }

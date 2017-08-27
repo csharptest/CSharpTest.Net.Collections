@@ -26,7 +26,6 @@ using Xunit;
 
 namespace CSharpTest.Net.Collections.Test
 {
-    
     public class TestBTreeDictionary : TestDictionary<BTreeDictionary<int, string>, TestBTreeDictionary.BTreeFactory,
         int, string>
     {

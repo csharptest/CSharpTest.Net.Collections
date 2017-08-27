@@ -85,7 +85,7 @@ namespace CSharpTest.Net.Collections
         [Conditional("DEBUG")]
         public void Print(TextWriter output, DebugFormat format)
         {
-            using (RootLock root = LockRoot(LockType.Read, "Print", true))
+            using (RootLock root = LockRoot(LockType.Read))
             {
                 Print(root.Pin, output, 0, format);
             }
@@ -140,23 +140,20 @@ namespace CSharpTest.Net.Collections
         ///     Forces a top-down, depth-first, crawl of the entire tree in which every node and
         ///     every link or key is checked for accuracy.  Throws on error.
         /// </summary>
-        [Conditional("DEBUG")]
+#if DEBUG
         public void Validate()
         {
-#if DEBUG
-            using (RootLock root = LockRoot(LockType.Read, "Validate", true))
+            using (RootLock root = LockRoot(LockType.Read))
             {
                 Validate(root.Pin, null, int.MinValue, int.MaxValue);
             }
-#endif
         }
-#if DEBUG
 
         private int Validate(NodePin thisLock, NodePin parent, int parentIx, int depthToValidate)
         {
-            Assert(thisLock != null, "Null node lock encountered.");
+            AssertionFailedException.Assert(thisLock != null, "Null node lock encountered.");
             Node me = thisLock.Ptr;
-            Assert(me != null, "Null node reference encountered.");
+            AssertionFailedException.Assert(me != null, "Null node reference encountered.");
 
             if (parent == null || parent.Ptr.IsRoot)
             {
@@ -165,18 +162,18 @@ namespace CSharpTest.Net.Collections
             {
                 if (me.IsLeaf)
                 {
-                    Assert(me.Count >= _options.MinimumValueNodes, "Not enough child nodes.");
-                    Assert(me.Count <= _options.MaximumValueNodes, "Too many child nodes.");
+                    AssertionFailedException.Assert(me.Count >= _options.MinimumValueNodes, "Not enough child nodes.");
+                    AssertionFailedException.Assert(me.Count <= _options.MaximumValueNodes, "Too many child nodes.");
                 }
                 else
                 {
-                    Assert(me.Count >= _options.MinimumChildNodes, "Not enough child nodes.");
-                    Assert(me.Count <= _options.MaximumChildNodes, "Too many child nodes.");
+                    AssertionFailedException.Assert(me.Count >= _options.MinimumChildNodes, "Not enough child nodes.");
+                    AssertionFailedException.Assert(me.Count <= _options.MaximumChildNodes, "Too many child nodes.");
                 }
 
-                Assert(parent.Ptr[parentIx].ChildNode.Equals(thisLock.Handle), "Parent index is incorrect.");
+                AssertionFailedException.Assert(parent.Ptr[parentIx].ChildNode.Equals(thisLock.Handle), "Parent index is incorrect.");
                 //Invalid assumption, the meaning of Key as [0] is undefined except in leaf nodes.
-                //Assert(parent.Ptr[parentIx].Key.CompareTo(List[0].Key) == 0, "My first key not in parent.");
+                //AssertionFailedException.Assert(parent.Ptr[parentIx].Key.CompareTo(List[0].Key) == 0, "My first key not in parent.");
             }
 
             int depth = 0;
@@ -188,16 +185,16 @@ namespace CSharpTest.Net.Collections
                     if (me.IsLeaf || i > 0)
                     {
                         parent.Ptr.BinarySearch(_itemComparer, me[i], out ordinal);
-                        Assert(ordinal == parentIx, "My child is not within parent range.");
+                        AssertionFailedException.Assert(ordinal == parentIx, "My child is not within parent range.");
                     }
                     else
                     {
-                        Assert(_keyComparer.Compare(me[i].Key, default(TKey)) == 0, "First key non-empty?");
+                        AssertionFailedException.Assert(_keyComparer.Compare(me[i].Key, default(TKey)) == 0, "First key non-empty?");
                     }
                 }
 
-                Assert(me.IsLeaf == !me[i].IsNode, "Child container in leaf node.");
-                Assert(me.IsLeaf == me[i].IsValue, "Leaf child is not a value.");
+                AssertionFailedException.Assert(me.IsLeaf == !me[i].IsNode, "Child container in leaf node.");
+                AssertionFailedException.Assert(me.IsLeaf == me[i].IsValue, "Leaf child is not a value.");
                 if (!me.IsLeaf && depthToValidate > 0)
                 {
                     int testDepth;
@@ -208,14 +205,14 @@ namespace CSharpTest.Net.Collections
                     if (i == 0)
                         depth = testDepth;
                     else
-                        Assert(depth == testDepth, "Expected each node to have the same depth");
+                        AssertionFailedException.Assert(depth == testDepth, "Expected each node to have the same depth");
                 }
             }
             for (int i = me.Count; i < me.Size && !me.IsRoot; i++)
             {
-                Assert(me[i].IsEmpty, "Non-cleared element value.");
+                AssertionFailedException.Assert(me[i].IsEmpty, "Non-cleared element value.");
                 bool isKeyClass = ReferenceEquals(default(TKey), null);
-                Assert(isKeyClass
+                AssertionFailedException.Assert(isKeyClass
                     ? ReferenceEquals(me[i].Key, null)
                     : _keyComparer.Compare(me[i].Key, default(TKey)) == 0, "Non-cleared element key.");
             }

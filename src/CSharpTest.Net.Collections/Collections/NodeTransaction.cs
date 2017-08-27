@@ -55,7 +55,7 @@ namespace CSharpTest.Net.Collections
 
             public void Commit()
             {
-                Assert(_committed == false, "Transaction has already been committed.");
+                AssertionFailedException.Assert(_committed == false, "Transaction has already been committed.");
                 //Assert(_parentItem != null || (_created != null && _created.Ptr.IsRoot), "The parent was not updated.");
                 PerformCommit();
             }
@@ -154,15 +154,15 @@ namespace CSharpTest.Net.Collections
 
             public void Destroy(NodePin pin)
             {
-                Assert(pin.LockType != LockType.Read, "Node is not locked for update");
+                AssertionFailedException.Assert(pin.LockType != LockType.Read, "Node is not locked for update");
                 NodePin.Append(ref _deleted, pin);
                 pin.MarkDeleted();
             }
 
             public Node BeginUpdate(NodePin pin)
             {
-                Assert(pin.LockType != LockType.Read, "Node is not locked for update");
-                Assert(_parentItem == null, "An update is already in this operation");
+                AssertionFailedException.Assert(pin.LockType != LockType.Read, "Node is not locked for update");
+                AssertionFailedException.Assert(_parentItem == null, "An update is already in this operation");
                 _parentItem = pin;
                 pin.BeginUpdate();
                 return pin.Ptr;

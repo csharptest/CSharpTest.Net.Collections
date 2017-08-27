@@ -48,7 +48,7 @@ namespace CSharpTest.Net.Collections
                     thisLock.Dispose();
                     return Delete(parent, key, ref condition, null, int.MinValue);
                 }
-                Assert(false, "Failed to join node before delete.");
+                AssertionFailedException.Assert(false, "Failed to join node before delete.");
             }
             else if (parent != null && parent.Ptr.IsRoot && me.Count == 1 && !me.IsLeaf)
             {
@@ -116,9 +116,9 @@ namespace CSharpTest.Net.Collections
             using (NodeTransaction trans = _storage.BeginTransaction())
             {
                 int parentBigIndex = parentSmallIndex + 1;
-                Assert(small.Handle.Equals(parent.Ptr[parentSmallIndex].ChildNode),
+                AssertionFailedException.Assert(small.Handle.Equals(parent.Ptr[parentSmallIndex].ChildNode),
                     "Incorrect parent ordinal for left.");
-                Assert(big.Handle.Equals(parent.Ptr[parentBigIndex].ChildNode), "Incorrect parent ordinal for right.");
+                AssertionFailedException.Assert(big.Handle.Equals(parent.Ptr[parentBigIndex].ChildNode), "Incorrect parent ordinal for right.");
 
                 TKey bigZeroKey = parent.Ptr[parentBigIndex].Key;
 
@@ -129,7 +129,7 @@ namespace CSharpTest.Net.Collections
                     using (NodePin joinNode = trans.Create(parent, small.Ptr.IsLeaf))
                     {
                         Element removeItem = parent.Ptr[parentBigIndex];
-                        Assert(removeItem.IsNode && removeItem.ChildNode.Equals(big.Handle),
+                        AssertionFailedException.Assert(removeItem.IsNode && removeItem.ChildNode.Equals(big.Handle),
                             "Invalid parent index in join.");
                         parent.Ptr.Remove(parentBigIndex, removeItem, _keyComparer);
 

@@ -187,7 +187,7 @@ namespace CSharpTest.Net.Collections
             try
             {
                 int counter = 0;
-                using (RootLock root = LockRoot(LockType.Insert, "Merge", false))
+                using (RootLock root = LockRoot(LockType.Insert))
                 {
                     if (root.Pin.Ptr.Count != 1)
                         throw new InvalidDataException();
