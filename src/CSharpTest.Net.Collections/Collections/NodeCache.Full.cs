@@ -15,7 +15,7 @@
 
 #endregion
 
-using CSharpTest.Net.Synchronization;
+
 
 namespace CSharpTest.Net.Collections
 {
@@ -37,13 +37,13 @@ namespace CSharpTest.Net.Collections
             {
                 bool isNew;
                 _root = new NodeHandle(Storage.OpenRoot(out isNew));
-                _root.SetCacheEntry(new NodeWithLock(null, LockFactory.Create()));
+                _root.SetCacheEntry(new NodeWithLock(null));
                 if (isNew)
                     CreateRoot(_root);
 
                 Node rootNode;
                 if (Storage.TryGetNode(_root.StoreHandle, out rootNode, NodeSerializer))
-                    _root.SetCacheEntry(new NodeWithLock(rootNode, LockFactory.Create()));
+                    _root.SetCacheEntry(new NodeWithLock(rootNode));
 
                 Assert(rootNode != null, "Unable to load storage root.");
             }
@@ -66,58 +66,35 @@ namespace CSharpTest.Net.Collections
                 }
             }
 
-            public override ILockStrategy CreateLock(NodeHandle handle, out object refobj)
+            public override void CreateLock(NodeHandle handle, out object refobj)
             {
-                NodeWithLock nlck = new NodeWithLock(null, LockFactory.Create());
+                NodeWithLock nlck = new NodeWithLock(null);
                 handle.SetCacheEntry(nlck);
                 refobj = nlck;
-                bool acquired = nlck.Lock.TryWrite(Options.LockTimeout);
-                DeadlockException.Assert(acquired);
-                return nlck.Lock;
             }
 
             protected override NodePin Lock(NodePin parent, LockType ltype, NodeHandle child)
             {
                 NodeWithLock nlck;
                 if (!child.TryGetCache(out nlck))
-                    child.SetCacheEntry(nlck = new NodeWithLock(null, LockFactory.Create()));
+                    child.SetCacheEntry(nlck = new NodeWithLock(null));
 
-                bool acquired;
-                if (ltype == LockType.Read)
-                    acquired = nlck.Lock.TryRead(Options.LockTimeout);
-                else
-                    acquired = nlck.Lock.TryWrite(Options.LockTimeout);
-                DeadlockException.Assert(acquired);
-                try
+                if (nlck.Node == null)
                 {
-                    if (nlck.Node == null)
-                        using (new SafeLock<DeadlockException>(nlck, Options.LockTimeout))
-                        {
-                            Storage.TryGetNode(child.StoreHandle, out nlck.Node, NodeSerializer);
-                        }
+                    Storage.TryGetNode(child.StoreHandle, out nlck.Node, NodeSerializer);
+                }
 
-                    Assert(nlck.Node != null);
-                    return new NodePin(child, nlck.Lock, ltype, ltype, nlck, nlck.Node, null);
-                }
-                catch
-                {
-                    if (ltype == LockType.Read)
-                        nlck.Lock.ReleaseRead();
-                    else
-                        nlck.Lock.ReleaseWrite();
-                    throw;
-                }
+                Assert(nlck.Node != null);
+                return new NodePin(child, ltype, nlck, nlck.Node, null);
             }
 
             private class NodeWithLock
             {
-                public readonly ILockStrategy Lock;
                 public Node Node;
 
-                public NodeWithLock(Node node, ILockStrategy lck)
+                public NodeWithLock(Node node)
                 {
                     Node = node;
-                    Lock = lck;
                 }
             }
         }

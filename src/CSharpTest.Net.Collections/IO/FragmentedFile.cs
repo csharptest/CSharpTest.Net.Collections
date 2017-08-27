@@ -21,7 +21,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using CSharpTest.Net.Interfaces;
-using CSharpTest.Net.Synchronization;
+
 
 namespace CSharpTest.Net.IO
 {
@@ -452,13 +452,10 @@ namespace CSharpTest.Net.IO
                         ReadBlock(last.NextBlockId, last, FileBlock.HeaderSize, BlockFlags.InternalBlock);
                     }
 
-                    using (new SafeLock(_syncFreeBlock))
-                    {
                         last.Flags = BlockFlags.BlockDeleted;
                         last.NextBlockId = _nextFree;
                         WriteBlock(last.BlockId, last, FileBlock.HeaderSize);
                         _nextFree = first.BlockId;
-                    }
                     return true;
                 }
             }
@@ -504,8 +501,7 @@ namespace CSharpTest.Net.IO
 
         private long AllocBlock(FileBlock block, BlockFlags type)
         {
-            using (new SafeLock(_syncFreeBlock))
-            {
+          
                 long blockId = _nextFree;
                 if (blockId == 0 && _reallocSize > 0)
                 {
@@ -539,7 +535,6 @@ namespace CSharpTest.Net.IO
                 block.Length = 0;
                 WriteBlock(block.BlockId, block, FileBlock.HeaderSize);
                 return block.BlockId;
-            }
         }
 
         private void ReadBlock(long ordinal, FileBlock block, int length, BlockFlags type)

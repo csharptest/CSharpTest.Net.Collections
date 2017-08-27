@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.IO;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.Serialization;
-using CSharpTest.Net.Synchronization;
 using CSharpTest.Net.Utils;
 
 namespace CSharpTest.Net.Collections
@@ -143,7 +142,6 @@ namespace CSharpTest.Net.Collections
     public abstract class BPlusTreeOptions<TKey, TValue> : ICloneable<BPlusTreeOptions<TKey, TValue>>
     {
         private CachePolicy _cachePolicy = CachePolicy.Recent;
-        private ILockStrategy _callLevelLock = IgnoreLocking.Instance;
         private CreatePolicy _createFile = CreatePolicy.Never;
 
         private int _fileBlockSize = 4096;
@@ -155,7 +153,6 @@ namespace CSharpTest.Net.Collections
 
         private IComparer<TKey> _keyComparer;
 
-        private ILockFactory _lockingFactory = new LockFactory<WriterOnlyLocking>();
         private int _lockTimeout = 120000;
 
         private int _maximumChildNodes = 32
@@ -328,36 +325,6 @@ namespace CSharpTest.Net.Collections
                     "The valid range is from -1 to MaxValue.");
                 _lockTimeout = value;
             }
-        }
-
-        /// <summary>
-        ///     Gets or sets the locking factory to use for accessing shared data. The default is WriterOnlyLocking()
-        ///     which does not perform read locks, rather it will rely on the cache of the btree and may preform dirty
-        ///     reads.  You can use any implementation of ILockFactory; however, the SimpleReadWriteLocking seems to
-        ///     perform the most efficiently for both reader/writer locks.  Additionally wrapping that instance in a
-        ///     ReserveredWriterLocking() instance will allow reads to continue up until a writer begins the commit
-        ///     process.  If you are only accessing the BTree instance from a single thread this can be set to
-        ///     IgnoreLocking. Be careful of using ReaderWriterLocking as the write-intesive nature of the BTree will
-        ///     suffer extreme performance penalties with this lock.
-        /// </summary>
-        public ILockFactory LockingFactory
-        {
-            get => _lockingFactory;
-            set => _lockingFactory = Check.NotNull(value);
-        }
-
-        /// <summary>
-        ///     Defines a reader/writer lock that used to control exclusive tree access when needed.  The public
-        ///     methods for EnableCount(), Clear(), and UnloadCache() each acquire an exclusive (write) lock while
-        ///     all other public methods acquire a shared (read) lock.  By default this lock is non-operational
-        ///     (an instance of IgnoreLocking) so if you need the above methods to work while multiple threads are
-        ///     accessing the tree, or if you exclusive access to the tree, specify a lock instance.  Since this
-        ///     lock is primarily a read-heavy lock consider using the ReaderWriterLocking or SimpleReadWriteLocking.
-        /// </summary>
-        public virtual ILockStrategy CallLevelLock
-        {
-            get => _callLevelLock;
-            set => _callLevelLock = Check.NotNull(value);
         }
 
         /// <summary>

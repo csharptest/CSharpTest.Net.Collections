@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using CSharpTest.Net.Serialization;
-using CSharpTest.Net.Synchronization;
+
 using Xunit;
 
 namespace CSharpTest.Net.Collections.Test
@@ -36,7 +36,6 @@ namespace CSharpTest.Net.Collections.Test
                     BTreeOrder = 4
                 };
                 options.CalcBTreeOrder(4, 4);
-                options.LockingFactory = new IgnoreLockFactory();
                 return options;
             }
         }

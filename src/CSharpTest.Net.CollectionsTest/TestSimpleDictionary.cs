@@ -18,7 +18,7 @@
 using System.Collections.Generic;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.Serialization;
-using CSharpTest.Net.Synchronization;
+
 
 namespace CSharpTest.Net.Collections.Test
 {
@@ -34,7 +34,6 @@ namespace CSharpTest.Net.Collections.Test
                     new BPlusTree<int, string>.Options(PrimitiveSerializer.Instance, PrimitiveSerializer.Instance)
                     {
                         BTreeOrder = 4,
-                        LockingFactory = new IgnoreLockFactory()
                     }
                 );
                 tree.EnableCount();

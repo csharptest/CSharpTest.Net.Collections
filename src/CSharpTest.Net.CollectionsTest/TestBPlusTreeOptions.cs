@@ -18,7 +18,7 @@
 using System;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using CSharpTest.Net.Synchronization;
+
 using Xunit;
 
 namespace CSharpTest.Net.Collections.Test
@@ -27,7 +27,7 @@ namespace CSharpTest.Net.Collections.Test
     public class TestBPlusTreeOptions
     {
         [Fact]
-        public void TestCloneWithCallLockV1()
+        public void TestCloneV1()
         {
             BPlusTree<int, int>.Options options = new BPlusTree<int, int>.Options(PrimitiveSerializer.Int32, PrimitiveSerializer.Int32)
             {
@@ -37,18 +37,15 @@ namespace CSharpTest.Net.Collections.Test
             BPlusTree<int, int>.Options copy = options.Clone();
 
             Assert.False(ReferenceEquals(options, copy));
-            Assert.True(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
 
             //If we get/set the lock prior to clone we will have the same lock instance.
-            options.CallLevelLock = new SimpleReadWriteLocking();
             copy = options.Clone();
 
             Assert.False(ReferenceEquals(options, copy));
-            Assert.True(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
         }
 
         [Fact]
-        public void TestCloneWithCallLockV2()
+        public void TestCloneV2()
         {
             BPlusTree<int, int>.OptionsV2 options = new BPlusTree<int, int>.OptionsV2(PrimitiveSerializer.Int32, PrimitiveSerializer.Int32)
             {
@@ -58,14 +55,11 @@ namespace CSharpTest.Net.Collections.Test
             BPlusTree<int, int>.OptionsV2 copy = options.Clone();
 
             Assert.False(ReferenceEquals(options, copy));
-            Assert.False(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
 
             //If we get/set the lock prior to clone we will have the same lock instance.
-            options.CallLevelLock = new SimpleReadWriteLocking();
             copy = options.Clone();
 
             Assert.False(ReferenceEquals(options, copy));
-            Assert.True(ReferenceEquals(options.CallLevelLock, copy.CallLevelLock));
         }
 
         [Fact]

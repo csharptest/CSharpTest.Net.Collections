@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Storage;
-using CSharpTest.Net.Synchronization;
+
 
 namespace CSharpTest.Net.Collections
 {
@@ -110,7 +110,6 @@ namespace CSharpTest.Net.Collections
                 BPlusTreeOptions<TKey, TValue> tmpoptions = options.Clone();
                 tmpoptions.CreateFile = CreatePolicy.Always;
                 tmpoptions.FileName = tmpfilename;
-                tmpoptions.LockingFactory = new LockFactory<IgnoreLocking>();
 
                 using (BPlusTree<TKey, TValue> tmpFile = new BPlusTree<TKey, TValue>(tmpoptions))
                 {

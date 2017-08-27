@@ -23,7 +23,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using CSharpTest.Net.Interfaces;
-using CSharpTest.Net.Synchronization;
+
 
 namespace CSharpTest.Net.Collections
 {
@@ -36,7 +36,6 @@ namespace CSharpTest.Net.Collections
         private readonly IComparer<Element> _itemComparer;
         private readonly IComparer<TKey> _keyComparer;
         private readonly BPlusTreeOptions<TKey, TValue> _options;
-        private readonly ILockStrategy _selfLock;
         private readonly NodeCacheBase _storage;
         private int _count;
 
@@ -88,7 +87,6 @@ namespace CSharpTest.Net.Collections
                 new FileInfo(ioptions.FileName).Length > 0;
 
             _options = ioptions.Clone();
-            _selfLock = _options.CallLevelLock;
             _keyComparer = _options.KeyComparer;
             _itemComparer = new ElementComparer(_keyComparer);
 
@@ -163,28 +161,6 @@ namespace CSharpTest.Net.Collections
             {
                 _count = nodeStoreWithCount.Count;
                 _hasCount = _count >= 0;
-            }
-        }
-
-        /// <summary>
-        ///     Defines the lock used to provide tree-level exclusive operations.  This should be set at the time of construction,
-        ///     or not at all since
-        ///     operations depending on this (Clear, EnableCount, and UnloadCache) may behave poorly if operations that started
-        ///     prior to setting this
-        ///     value are still being processed.  Out of the locks I've tested the ReaderWriterLocking implementation performs best
-        ///     here since it is
-        ///     a highly read-intensive lock.  All public APIs that access tree content will aquire this lock as a reader except
-        ///     the tree exclusive
-        ///     operations.  This also allows you, by way of aquiring a write lock, to gain exclusive access and perform mass
-        ///     updates, atomic
-        ///     enumeration, etc.
-        /// </summary>
-        public ILockStrategy CallLevelLock
-        {
-            get
-            {
-                NotDisposed();
-                return _selfLock;
             }
         }
 
@@ -479,31 +455,18 @@ namespace CSharpTest.Net.Collections
             if (_disposed) return;
             try
             {
-                bool locked = false;
                 try
                 {
                     if (!IsReadOnly)
                     {
-                        locked = _selfLock.TryWrite(Math.Max(1000, LockTimeout));
-                        if (locked)
                             CommitChanges(false);
                     }
                     _storage.Dispose();
                 }
                 finally
                 {
-                    try
-                    {
-                        if (_options.LogFile != null)
-                            _options.LogFile.Dispose();
-                    }
-                    finally
-                    {
-                        if (locked)
-                            _selfLock.ReleaseWrite();
-                        //Do not dispose, this may be a shared lock:
-                        //_selfLock.Dispose();
-                    }
+                    if (_options.LogFile != null)
+                        _options.LogFile.Dispose();
                 }
             }
             finally
@@ -533,8 +496,7 @@ namespace CSharpTest.Net.Collections
         public void Rollback()
         {
             NotDisposed();
-            using (_selfLock.Write(LockTimeout))
-            {
+     
                 if (_storage.Storage is ITransactable)
                     ((ITransactable) _storage.Storage).Rollback();
                 else
@@ -551,7 +513,6 @@ namespace CSharpTest.Net.Collections
                     _hasCount = false;
                     EnableCount();
                 }
-            }
         }
 
         private void NotDisposed()
@@ -562,28 +523,18 @@ namespace CSharpTest.Net.Collections
         private void CommitChanges(bool requiresLock)
         {
             NotDisposed();
-            bool locked = requiresLock && _selfLock.TryWrite(LockTimeout);
-            try
-            {
-                if (_storage.Storage is INodeStoreWithCount)
-                    ((INodeStoreWithCount) _storage.Storage).Count = _hasCount ? _count : -1;
-                if (_storage.Storage is ITransactable)
-                    ((ITransactable) _storage.Storage).Commit();
-                if (_options.LogFile != null)
-                    _options.LogFile.TruncateLog();
-            }
-            finally
-            {
-                if (locked)
-                    _selfLock.ReleaseWrite();
-            }
+            if (_storage.Storage is INodeStoreWithCount)
+                ((INodeStoreWithCount) _storage.Storage).Count = _hasCount ? _count : -1;
+            if (_storage.Storage is ITransactable)
+                ((ITransactable) _storage.Storage).Commit();
+            if (_options.LogFile != null)
+                _options.LogFile.TruncateLog();
         }
 
         private void OnChanged()
         {
             if (_options.TransactionLogLimit > 0 && _options.LogFile != null)
                 if (_options.LogFile.Size > _options.TransactionLogLimit)
-                    using (_selfLock.Write(LockTimeout))
                     {
                         if (_options.LogFile.Size > _options.TransactionLogLimit)
                             CommitChanges(false);
@@ -615,20 +566,17 @@ namespace CSharpTest.Net.Collections
         public void UnloadCache()
         {
             NotDisposed();
-            using (_selfLock.Write(LockTimeout))
-            {
                 _storage.ResetCache();
             }
-        }
 
         private RootLock LockRoot(LockType ltype, string methodName)
         {
-            return new RootLock(this, ltype, false, methodName);
+            return new RootLock(this, ltype);
         }
 
         private RootLock LockRoot(LockType ltype, string methodName, bool exclusive)
         {
-            return new RootLock(this, ltype, exclusive, methodName);
+            return new RootLock(this, ltype);
         }
 
         /// <summary>
@@ -829,48 +777,22 @@ namespace CSharpTest.Net.Collections
         {
             private readonly BPlusTree<TKey, TValue> _tree;
             private readonly LockType _type;
-            private readonly string _methodName;
-            private bool _locked;
-            private readonly bool _exclusive;
             private NodeVersion _version;
             public readonly NodePin Pin;
 
-            public RootLock(BPlusTree<TKey, TValue> tree, LockType type, bool exclusiveTreeAccess, string methodName)
+            public RootLock(BPlusTree<TKey, TValue> tree, LockType type)
             {
                 tree.NotDisposed();
                 _tree = tree;
                 _type = type;
                 _version = type == LockType.Read ? tree._storage.CurrentVersion : null;
-                _methodName = methodName;
-                _exclusive = exclusiveTreeAccess;
-                _locked = _exclusive
-                    ? _tree._selfLock.TryWrite(tree._options.LockTimeout)
-                    : _tree._selfLock.TryRead(tree._options.LockTimeout);
-                LockTimeoutException.Assert(_locked);
-                try
-                {
-                    Pin = _tree._storage.LockRoot(type);
-                }
-                catch
-                {
-                    if (_exclusive)
-                        _tree._selfLock.ReleaseWrite();
-                    else
-                        _tree._selfLock.ReleaseRead();
-                    throw;
-                }
+                Pin = _tree._storage.LockRoot(type);
             }
 
             void IDisposable.Dispose()
             {
                 Pin.Dispose();
 
-                if (_locked && _exclusive)
-                    _tree._selfLock.ReleaseWrite();
-                else if (_locked && !_exclusive)
-                    _tree._selfLock.ReleaseRead();
-
-                _locked = false;
                 _tree._storage.ReturnVersion(ref _version);
 
                 if (_type != LockType.Read)
@@ -1101,13 +1023,10 @@ namespace CSharpTest.Net.Collections
         public void Clear()
         {
             NotDisposed();
-            using (_selfLock.Write(LockTimeout))
-            {
                 _storage.DeleteAll();
                 _count = 0;
                 //Since transaction logs do not deal with Clear(), we need to commit our current state
                 CommitChanges(false);
-            }
             DebugComplete("Clear()");
         }
 

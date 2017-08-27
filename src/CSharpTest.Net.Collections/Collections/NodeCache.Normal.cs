@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using CSharpTest.Net.Synchronization;
+
 using CSharpTest.Net.Utils;
 
 // ReSharper disable MemberHidesStaticFromOuterClass
@@ -36,7 +36,6 @@ namespace CSharpTest.Net.Collections
         {
             private readonly Dictionary<NodeHandle, Utils.WeakReference<CacheEntry>> _cache;
             private readonly IObjectKeepAlive _keepAlive;
-            private ILockStrategy _cacheLock;
             private bool _disposed;
             private CacheEntry _root;
 
@@ -44,7 +43,6 @@ namespace CSharpTest.Net.Collections
             {
                 _keepAlive = options.CreateCacheKeepAlive();
                 _cache = new Dictionary<NodeHandle, Utils.WeakReference<CacheEntry>>();
-                _cacheLock = new ReaderWriterLocking();
             }
 
             protected override NodeHandle RootHandle => _root.Handle;
@@ -79,7 +77,6 @@ namespace CSharpTest.Net.Collections
             {
                 _keepAlive.Clear();
                 _cache.Clear();
-                _cacheLock = new ReaderWriterLocking();
                 _root = GetCache(_root.Handle, true);
 
                 bool isnew;
@@ -98,50 +95,42 @@ namespace CSharpTest.Net.Collections
                     if (handle.TryGetCache(out weakRef) && weakRef != null && weakRef.TryGetTarget(out entry))
                         return entry;
 
-                    using (_cacheLock.Read(Options.LockTimeout))
-                    {
-                        if (_cache.TryGetValue(handle, out weakRef))
-                            if (!weakRef.TryGetTarget(out entry))
-                                using (new SafeLock<DeadlockException>(weakRef))
-                                {
-                                    if (!weakRef.TryGetTarget(out entry))
-                                        weakRef.Target = entry = new CacheEntry(this, handle);
-                                    handle.SetCacheEntry(weakRef);
-                                }
-                    }
+
+                    if (_cache.TryGetValue(handle, out weakRef))
+                        if (!weakRef.TryGetTarget(out entry))
+                            {
+                                if (!weakRef.TryGetTarget(out entry))
+                                    weakRef.Target = entry = new CacheEntry(this, handle);
+                                handle.SetCacheEntry(weakRef);
+                            }
                 }
                 if (entry == null)
-                    using (_cacheLock.Write(Options.LockTimeout))
+                {
+                    if (!_cache.TryGetValue(handle, out weakRef))
                     {
-                        if (!_cache.TryGetValue(handle, out weakRef))
-                        {
-                            _cache.Add(handle,
-                                weakRef = new Utils.WeakReference<CacheEntry>(entry = new CacheEntry(this, handle)));
-                            handle.SetCacheEntry(weakRef);
-                        }
-                        else
+                        _cache.Add(handle,
+                            weakRef = new Utils.WeakReference<CacheEntry>(entry = new CacheEntry(this, handle)));
+                        handle.SetCacheEntry(weakRef);
+                    }
+                    else
+                    {
+                        if (!weakRef.TryGetTarget(out entry))
                         {
                             if (!weakRef.TryGetTarget(out entry))
-                                using (new SafeLock<DeadlockException>(weakRef))
-                                {
-                                    if (!weakRef.TryGetTarget(out entry))
-                                        weakRef.Target = entry = new CacheEntry(this, handle);
-                                    handle.SetCacheEntry(weakRef);
-                                }
+                                weakRef.Target = entry = new CacheEntry(this, handle);
+                            handle.SetCacheEntry(weakRef);
                         }
                     }
+                }
                 Assert(entry != null, "Cache entry is null");
                 _keepAlive.Add(entry);
                 return entry;
             }
 
-            public override ILockStrategy CreateLock(NodeHandle handle, out object refobj)
+            public override void CreateLock(NodeHandle handle, out object refobj)
             {
                 CacheEntry entry = GetCache(handle, true);
-                bool locked = entry.Lock.TryWrite(Options.LockTimeout);
-                Assert(locked);
                 refobj = entry;
-                return entry.Lock;
             }
 
             protected override NodePin Lock(NodePin parent, LockType ltype, NodeHandle child)
@@ -149,40 +138,28 @@ namespace CSharpTest.Net.Collections
                 CacheEntry entry = GetCache(child, false);
 
                 LockType locked = NoLock;
-                if (ltype == LockType.Read && entry.Lock.TryRead(Options.LockTimeout))
+                if (ltype == LockType.Read)
                     locked = LockType.Read;
-                if (ltype != LockType.Read && entry.Lock.TryWrite(Options.LockTimeout))
+                if (ltype != LockType.Read)
                     locked = ltype;
 
                 DeadlockException.Assert(locked != NoLock);
-                try
+                Node node = entry.Node;
+                if (node == null)
                 {
-                    Node node = entry.Node;
+                    node = entry.Node;
                     if (node == null)
-                        using (new SafeLock<DeadlockException>(entry))
-                        {
-                            node = entry.Node;
-                            if (node == null)
-                            {
-                                InvalidNodeHandleException.Assert(
-                                    Storage.TryGetNode(child.StoreHandle, out node, NodeSerializer)
-                                    && node != null
-                                    && node.StorageHandle.Equals(entry.Handle.StoreHandle)
-                                );
-                                Node old = Interlocked.CompareExchange(ref entry.Node, node, null);
-                                Assert(null == old, "Collision on cache load.");
-                            }
-                        }
-                    return new NodePin(child, entry.Lock, ltype, locked, entry, node, null);
+                    {
+                        InvalidNodeHandleException.Assert(
+                            Storage.TryGetNode(child.StoreHandle, out node, NodeSerializer)
+                            && node != null
+                            && node.StorageHandle.Equals(entry.Handle.StoreHandle)
+                        );
+                        Node old = Interlocked.CompareExchange(ref entry.Node, node, null);
+                        Assert(null == old, "Collision on cache load.");
+                    }
                 }
-                catch
-                {
-                    if (locked == LockType.Read)
-                        entry.Lock.ReleaseRead();
-                    else if (locked != NoLock)
-                        entry.Lock.ReleaseWrite();
-                    throw;
-                }
+                return new NodePin(child, ltype, entry, node, null);
             }
 
             public override void UpdateNode(NodePin node)
@@ -218,29 +195,24 @@ namespace CSharpTest.Net.Collections
             {
                 public readonly NodeHandle Handle;
 
-                public readonly ILockStrategy Lock;
                 private NodeCacheNormal _owner;
                 public Node Node;
 
                 public CacheEntry(NodeCacheNormal owner, NodeHandle handle)
                 {
-                    Lock = owner.LockFactory.Create();
                     Handle = handle;
                     _owner = owner;
                 }
 
                 ~CacheEntry()
                 {
-                    Lock.Dispose();
                     if (!_owner._disposed)
                         try
                         {
-                            using (_owner._cacheLock.Write(_owner.Options.LockTimeout))
-                            {
-                                Utils.WeakReference<CacheEntry> me;
-                                if (_owner._cache.TryGetValue(Handle, out me) && me.IsAlive == false)
-                                    _owner._cache.Remove(Handle);
-                            }
+
+                            Utils.WeakReference<CacheEntry> me;
+                            if (_owner._cache.TryGetValue(Handle, out me) && me.IsAlive == false)
+                                _owner._cache.Remove(Handle);
                         }
                         catch (ObjectDisposedException)
                         {

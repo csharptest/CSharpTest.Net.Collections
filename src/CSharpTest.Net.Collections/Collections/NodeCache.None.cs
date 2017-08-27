@@ -16,7 +16,7 @@
 #endregion
 
 using System.Collections.Generic;
-using CSharpTest.Net.Synchronization;
+
 
 namespace CSharpTest.Net.Collections
 {
@@ -25,15 +25,13 @@ namespace CSharpTest.Net.Collections
         /// <summary> performs a perfect cache of the entire tree </summary>
         private sealed class NodeCacheNone : NodeCacheBase
         {
-            private readonly Dictionary<IStorageHandle, ILockStrategy> _list;
-            private readonly ILockStrategy _lock;
+            private readonly HashSet<IStorageHandle> _list;
             private NodeHandle _root;
 
             public NodeCacheNone(BPlusTreeOptions<TKey, TValue> options)
                 : base(Fix(options))
             {
-                _lock = new ReaderWriterLocking();
-                _list = new Dictionary<IStorageHandle, ILockStrategy>();
+                _list = new HashSet<IStorageHandle>();
             }
 
             protected override NodeHandle RootHandle => _root;
@@ -47,13 +45,11 @@ namespace CSharpTest.Net.Collections
             {
                 bool isNew;
                 _root = new NodeHandle(Storage.OpenRoot(out isNew));
-                _root.SetCacheEntry(LockFactory.Create());
                 if (isNew)
                     CreateRoot(_root);
 
                 Node rootNode;
-                if (Storage.TryGetNode(_root.StoreHandle, out rootNode, NodeSerializer))
-                    _root.SetCacheEntry(LockFactory.Create());
+                Storage.TryGetNode(_root.StoreHandle, out rootNode, NodeSerializer);
 
                 Assert(rootNode != null, "Unable to load storage root.");
             }
@@ -66,65 +62,33 @@ namespace CSharpTest.Net.Collections
             public override void UpdateNode(NodePin node)
             {
                 if (node.IsDeleted)
-                    using (_lock.Write(Options.LockTimeout))
-                    {
-                        _list.Remove(node.Handle.StoreHandle);
-                    }
+                {
+                    _list.Remove(node.Handle.StoreHandle);
+                }
             }
 
-            public override ILockStrategy CreateLock(NodeHandle handle, out object refobj)
+            public override void CreateLock(NodeHandle handle, out object refobj)
             {
-                ILockStrategy lck;
-                using (_lock.Write(Options.LockTimeout))
+                if (!_list.Contains(handle.StoreHandle))
                 {
-                    if (!_list.TryGetValue(handle.StoreHandle, out lck))
-                    {
-                        _list.Add(handle.StoreHandle, lck = LockFactory.Create());
-                        handle.SetCacheEntry(lck);
-                    }
+                    _list.Add(handle.StoreHandle);
                 }
 
                 refobj = null;
-                bool acquired = lck.TryWrite(Options.LockTimeout);
-                DeadlockException.Assert(acquired);
-                return lck;
             }
 
             protected override NodePin Lock(NodePin parent, LockType ltype, NodeHandle child)
             {
-                ILockStrategy lck;
-                if (!child.TryGetCache(out lck))
-                    using (_lock.Write(Options.LockTimeout))
-                    {
-                        if (!_list.TryGetValue(child.StoreHandle, out lck))
-                        {
-                            _list.Add(child.StoreHandle, lck = LockFactory.Create());
-                            child.SetCacheEntry(lck);
-                        }
-                    }
-
-                bool success;
-                if (ltype == LockType.Read)
-                    success = lck.TryRead(Options.LockTimeout);
-                else
-                    success = lck.TryWrite(Options.LockTimeout);
-                DeadlockException.Assert(success);
-                try
+                if (!_list.Contains(child.StoreHandle))
                 {
-                    Node node;
-                    success = Storage.TryGetNode(child.StoreHandle, out node, NodeSerializer);
-                    Assert(success && node != null);
+                    _list.Add(child.StoreHandle);
+                }
 
-                    return new NodePin(child, lck, ltype, ltype, lck, node, null);
-                }
-                catch
-                {
-                    if (ltype == LockType.Read)
-                        lck.ReleaseRead();
-                    else
-                        lck.ReleaseWrite();
-                    throw;
-                }
+                Node node;
+                var success = Storage.TryGetNode(child.StoreHandle, out node, NodeSerializer);
+                Assert(success && node != null);
+
+                return new NodePin(child, ltype, ltype, node, null);
             }
         }
     }

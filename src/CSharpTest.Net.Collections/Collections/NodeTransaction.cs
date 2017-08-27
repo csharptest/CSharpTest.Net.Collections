@@ -17,7 +17,7 @@
 
 using System;
 using CSharpTest.Net.Interfaces;
-using CSharpTest.Net.Synchronization;
+
 
 namespace CSharpTest.Net.Collections
 {
@@ -80,7 +80,7 @@ namespace CSharpTest.Net.Collections
                     _cache.UpdateNode(pin);
                     _cache.Storage.Destroy(pin.Handle.StoreHandle);
                     pin.Dispose();
-                    pin = (NodePin) pin.Next;
+                    pin = (NodePin)pin.Next;
                 }
 
                 pin = _deleted;
@@ -89,7 +89,7 @@ namespace CSharpTest.Net.Collections
                     pin.CancelChanges();
                     _cache.UpdateNode(pin);
                     pin.Dispose();
-                    pin = (NodePin) pin.Next;
+                    pin = (NodePin)pin.Next;
                 }
 
                 if (_hasLogToken)
@@ -143,10 +143,10 @@ namespace CSharpTest.Net.Collections
                 IStorageHandle storeHandle = _cache.Storage.Create();
                 NodeHandle handle = new NodeHandle(storeHandle);
                 object refobj;
-                ILockStrategy lck = _cache.CreateLock(handle, out refobj);
+                _cache.CreateLock(handle, out refobj);
 
                 int size = isLeaf ? _cache.Options.MaximumValueNodes : _cache.Options.MaximumChildNodes;
-                NodePin pin = new NodePin(handle, lck, ltype, LockType.Insert, refobj, null,
+                NodePin pin = new NodePin(handle, ltype, refobj, null,
                     new Node(handle.StoreHandle, size));
                 NodePin.Append(ref _created, pin);
                 return pin;
@@ -179,21 +179,20 @@ namespace CSharpTest.Net.Collections
                     {
                         pin.Ptr.ToReadOnly();
                         _cache.SaveChanges(pin);
-                        pin = (NodePin) pin.Next;
+                        pin = (NodePin)pin.Next;
                     }
 
                     if (_parentItem != null)
-                        using (_parentItem.Lock.Write(_cache.Options.LockTimeout))
-                        {
-                            _parentItem.Ptr.ToReadOnly();
-                            _cache.SaveChanges(_parentItem);
-                        }
+                    {
+                        _parentItem.Ptr.ToReadOnly();
+                        _cache.SaveChanges(_parentItem);
+                    }
 
                     pin = _deleted;
                     while (pin != null)
                     {
                         _cache.SaveChanges(pin);
-                        pin = (NodePin) pin.Next;
+                        pin = (NodePin)pin.Next;
                     }
 
                     _committed = true;
@@ -212,7 +211,7 @@ namespace CSharpTest.Net.Collections
                 while (pin != null)
                 {
                     pin.CommitChanges();
-                    pin = (NodePin) pin.Next;
+                    pin = (NodePin)pin.Next;
                 }
 
                 if (_parentItem != null)
@@ -222,7 +221,7 @@ namespace CSharpTest.Net.Collections
                 while (pin != null)
                 {
                     pin.CommitChanges();
-                    pin = (NodePin) pin.Next;
+                    pin = (NodePin)pin.Next;
                 }
 
                 if (_deleted != null)

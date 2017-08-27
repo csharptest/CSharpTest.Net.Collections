@@ -24,7 +24,7 @@ using System.Diagnostics;
 using System.IO;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using CSharpTest.Net.Synchronization;
+
 using Xunit;
 
 namespace CSharpTest.Net.Collections.Test
@@ -114,7 +114,6 @@ namespace CSharpTest.Net.Collections.Test
         {
             List<int> keysAdded = new List<int>(250000);
             BPlusTreeOptions<int, string> options = Options;
-            options.LockingFactory = new IgnoreLockFactory();
 
             Dictionary<int, string> keys = new Dictionary<int, string>();
 

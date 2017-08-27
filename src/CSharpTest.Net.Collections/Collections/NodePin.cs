@@ -18,7 +18,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using CSharpTest.Net.Synchronization;
+
 
 namespace CSharpTest.Net.Collections
 {
@@ -38,17 +38,14 @@ namespace CSharpTest.Net.Collections
         [DebuggerDisplay("{Ptr._list}")]
         private class NodePin : NodeVersion, IDisposable
         {
-            private LockType _lockHeld;
             private Node _temp;
 
-            public NodePin(NodeHandle handle, ILockStrategy lck, LockType ltype, LockType lockHeld, object refobj,
+            public NodePin(NodeHandle handle, LockType ltype, object refobj,
                 Node original, Node updated)
             {
                 Assert(original == null || original.IsReadOnly);
                 Handle = handle;
-                Lock = lck;
                 LockType = ltype;
-                _lockHeld = lockHeld;
                 Original = original;
                 _temp = updated;
                 Reference = refobj;
@@ -59,7 +56,6 @@ namespace CSharpTest.Net.Collections
             public Node Original { get; private set; }
 
             public Node Ptr => IsDeleted ? null : (_temp ?? Original);
-            public ILockStrategy Lock { get; }
 
             public LockType LockType { get; }
 
@@ -69,14 +65,6 @@ namespace CSharpTest.Net.Collections
 
             public void Dispose()
             {
-                if (_lockHeld == LockType.Read)
-                    Lock.ReleaseRead();
-                else if (_lockHeld != NoLock)
-                    Lock.ReleaseWrite();
-
-                _lockHeld = NoLock;
-                //if (_temp != null)
-                //    _temp.Invalidate();
                 _temp = null;
             }
 
@@ -92,8 +80,6 @@ namespace CSharpTest.Net.Collections
             {
                 Assert(LockType != LockType.Read, "Node is currently read-only");
                 IsDeleted = true;
-                //if (_temp != null)
-                //  _temp.Invalidate();
                 _temp = null;
             }
 

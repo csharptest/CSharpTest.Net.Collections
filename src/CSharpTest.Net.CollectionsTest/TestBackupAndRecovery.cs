@@ -21,15 +21,14 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using CSharpTest.Net.Collections.Test.Reflection;
-using CSharpTest.Net.Collections.Test.Threading;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using CSharpTest.Net.Synchronization;
+
 using Xunit;
 
 namespace CSharpTest.Net.Collections.Test
 {
-    
+
     public class TestBackupAndRecovery
     {
         private BPlusTree<Guid, TestInfo>.OptionsV2 GetOptions(TempFile temp)
@@ -41,22 +40,15 @@ namespace CSharpTest.Net.Collections.Test
             options.FileName = temp.TempPath;
 
             // The following three options allow for automatic commit/recovery:
-            options.CallLevelLock = new ReaderWriterLocking();
             options.TransactionLogFileName = Path.ChangeExtension(options.FileName, ".tlog");
             return options;
         }
 
-        private static void Insert(BPlusTree<Guid, TestInfo> tree, IDictionary<Guid, TestInfo> testdata, int threads,
-            int count, TimeSpan wait)
+        private static void Insert(BPlusTree<Guid, TestInfo> tree, IDictionary<Guid, TestInfo> testdata, int threads, int count)
         {
-            using (WorkQueue<IEnumerable<KeyValuePair<Guid, TestInfo>>> work = new WorkQueue<IEnumerable<KeyValuePair<Guid, TestInfo>>>(tree.AddRange, threads))
+            foreach (IEnumerable<KeyValuePair<Guid, TestInfo>> set in TestInfo.CreateSets(threads, count, testdata))
             {
-                foreach (IEnumerable<KeyValuePair<Guid, TestInfo>> set in TestInfo.CreateSets(threads, count, testdata))
-                    work.Enqueue(set);
-                work.Complete(true,
-                    wait == TimeSpan.MaxValue
-                        ? Timeout.Infinite
-                        : (int) Math.Min(int.MaxValue, wait.TotalMilliseconds));
+                tree.AddRange(set);
             }
         }
 
@@ -72,9 +64,9 @@ namespace CSharpTest.Net.Collections.Test
                 tree = new BPlusTree<Guid, TestInfo>(options);
                 using (ITransactionLog<Guid, TestInfo> log = options.TransactionLog)
                 {
-                    using ((IDisposable) new PropertyValue(tree, "_storage").Value)
+                    using ((IDisposable)new PropertyValue(tree, "_storage").Value)
                     {
-                        Insert(tree, data, Environment.ProcessorCount, count, TimeSpan.MaxValue);
+                        Insert(tree, data, Environment.ProcessorCount, count);
                     }
                     //Add extra data...
                     AppendToLog(log, TestInfo.Create(added, data));
@@ -121,7 +113,7 @@ namespace CSharpTest.Net.Collections.Test
 
                 using (tree = new BPlusTree<Guid, TestInfo>(options))
                 {
-                    Insert(tree, data, 1, 100, TimeSpan.MaxValue);
+                    Insert(tree, data, 1, 100);
                     TestInfo.AssertEquals(data, tree);
                 }
                 tree = null;
@@ -137,9 +129,9 @@ namespace CSharpTest.Net.Collections.Test
                 tree = new BPlusTree<Guid, TestInfo>(options);
                 using (ITransactionLog<Guid, TestInfo> log = options.TransactionLog)
                 {
-                    using ((IDisposable) new PropertyValue(tree, "_storage").Value)
+                    using ((IDisposable)new PropertyValue(tree, "_storage").Value)
                     {
-                        Insert(tree, data, Environment.ProcessorCount, count, TimeSpan.MaxValue);
+                        Insert(tree, data, Environment.ProcessorCount, count);
                     }
                     //Add extra data...
                     AppendToLog(log, TestInfo.Create(added, data));
@@ -208,7 +200,8 @@ namespace CSharpTest.Net.Collections.Test
                         options.TransactionLogFileName,
                         options.KeySerializer,
                         options.ValueSerializer
-                    ) {FileOptions = FileOptions.None} /* no-write through */
+                    )
+                    { FileOptions = FileOptions.None } /* no-write through */
                 );
                 TestRecoveryOnExisting(options, 100, ushort.MaxValue);
             }
@@ -225,7 +218,8 @@ namespace CSharpTest.Net.Collections.Test
                         options.TransactionLogFileName,
                         options.KeySerializer,
                         options.ValueSerializer
-                    ) {FileOptions = FileOptions.Asynchronous}
+                    )
+                    { FileOptions = FileOptions.Asynchronous }
                 );
                 TestRecoveryOnExisting(options, 100, 0);
             }
@@ -255,7 +249,8 @@ namespace CSharpTest.Net.Collections.Test
                         options.TransactionLogFileName,
                         options.KeySerializer,
                         options.ValueSerializer
-                    ) {FileOptions = FileOptions.None} /* no-write through */
+                    )
+                    { FileOptions = FileOptions.None } /* no-write through */
                 );
                 TestRecoveryOnNew(options, 100, 10000);
             }
@@ -303,13 +298,13 @@ namespace CSharpTest.Net.Collections.Test
                 using (BPlusTree<Guid, TestInfo> tree = new BPlusTree<Guid, TestInfo>(options))
                 {
                     tree.EnableCount();
-                    Insert(tree, first, 1, 100, TimeSpan.FromMinutes(1));
+                    Insert(tree, first, 1, 100);
                     tree.Commit();
 
                     Assert.Equal(100, tree.Count);
 
                     sample = new Dictionary<Guid, TestInfo>(first);
-                    Insert(tree, sample, 7, 5000, TimeSpan.FromMinutes(1));
+                    Insert(tree, sample, 7, 5000);
 
                     Assert.Equal(35100, tree.Count);
 

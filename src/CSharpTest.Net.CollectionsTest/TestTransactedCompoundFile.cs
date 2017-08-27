@@ -21,7 +21,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
-using CSharpTest.Net.Collections.Test.Threading;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.IO;
 using Xunit;
@@ -135,63 +134,6 @@ namespace CSharpTest.Net.Collections.Test
                     if (stop.WaitOne(0))
                         return;
                 }
-            }
-        }
-
-        [Fact]
-        public void ConcurrencyTest()
-        {
-            using (TempFile temp = new TempFile())
-            using (ManualResetEvent stop = new ManualResetEvent(false))
-            using (TempFile copy = new TempFile())
-            using (TransactedCompoundFile test = new TransactedCompoundFile(
-                new TransactedCompoundFile.Options(temp.TempPath) {BlockSize = 512, CreateNew = true}))
-            using (WorkQueue workers = new WorkQueue(5))
-            {
-                bool failed = false;
-                workers.OnError += (o, e) => failed = true;
-                for (int i = 0; i < 5; i++)
-                    workers.Enqueue(() => ExersizeFile(stop, test));
-
-                do
-                {
-                    Thread.Sleep(1000);
-                    test.Commit();
-                    File.Copy(temp.TempPath, copy.TempPath, true);
-                    Assert.Equal(0, copy.Length % 512);
-                    int hcount = (int) (copy.Length / 512);
-
-                    using (TransactedCompoundFile verify = new TransactedCompoundFile(
-                        new TransactedCompoundFile.Options(copy.TempPath) {BlockSize = 512, CreateNew = false}))
-                    {
-                        OrdinalList free = new OrdinalList();
-                        free.Ceiling = hcount;
-                        for (int i = 0; i < hcount; i++)
-                        {
-                            uint h = verify.Create();
-                            free.Add((int) h);
-                            if (h >= hcount)
-                                break;
-                        }
-
-                        int verifiedCount = 0;
-                        OrdinalList used = free.Invert(hcount);
-                        foreach (uint h in used)
-                        {
-                            // skip reserved offsets.
-                            if (h % (512 / 4) == 0 || (h + 1) % (512 / 4) == 0)
-                                continue;
-
-                            IOStream.ReadAllBytes(verify.Read(h));
-                            verifiedCount++;
-                        }
-                        Trace.WriteLine("Verified handle count: " + verifiedCount);
-                    }
-                } while (!failed && Debugger.IsAttached);
-
-                stop.Set();
-                workers.Complete(false, 1000);
-                Assert.False(failed);
             }
         }
 

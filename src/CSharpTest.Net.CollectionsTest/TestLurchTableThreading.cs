@@ -16,6 +16,7 @@
 #endregion
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -148,7 +149,7 @@ namespace CSharpTest.Net.Collections.Test
             const int size = 1000000;
             int reps = 3;
 
-            IDictionary<Guid, TestValue> dict = new SynchronizedDictionary<Guid, TestValue>(new Dictionary<Guid, TestValue>(size));
+            IDictionary<Guid, TestValue> dict = new ConcurrentDictionary<Guid, TestValue>();
             IDictionary<Guid, TestValue> test = new LurchTable<Guid, TestValue>(size);
 
             for (int rep = 0; rep < reps; rep++)

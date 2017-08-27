@@ -22,7 +22,7 @@ using System.Threading;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using CSharpTest.Net.Synchronization;
+
 using Xunit;
 
 namespace CSharpTest.Net.Collections.Test
@@ -36,7 +36,6 @@ namespace CSharpTest.Net.Collections.Test
             new BPlusTree<int, string>.Options(new PrimitiveSerializer(), new PrimitiveSerializer())
             {
                 BTreeOrder = 4,
-                LockingFactory = new IgnoreLockFactory(),
                 CachePolicy = CachePolicy.All,
                 CreateFile = CreatePolicy.Always,
                 FileName = TempFile.TempPath
@@ -166,7 +165,6 @@ namespace CSharpTest.Net.Collections.Test
                     new BPlusTree<int, string>.Options(PrimitiveSerializer.Instance, PrimitiveSerializer.Instance)
                     {
                         BTreeOrder = 16,
-                        LockingFactory = new IgnoreLockFactory(),
                         FileName = TempFile.TempPath,
                         CreateFile = CreatePolicy.Always
                     }

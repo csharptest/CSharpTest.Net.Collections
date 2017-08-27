@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
-using CSharpTest.Net.Synchronization;
+
 using Xunit;
 
 namespace CSharpTest.Net.Collections.Test
@@ -33,8 +33,7 @@ namespace CSharpTest.Net.Collections.Test
         protected BPlusTree<int, string>.Options Options =>
             new BPlusTree<int, string>.Options(new PrimitiveSerializer(), new PrimitiveSerializer())
             {
-                BTreeOrder = 4,
-                LockingFactory = new IgnoreLockFactory()
+                BTreeOrder = 4
             };
 
         private static IEnumerable<KeyValuePair<int, string>> Set(IEnumerable<int> l, string v)

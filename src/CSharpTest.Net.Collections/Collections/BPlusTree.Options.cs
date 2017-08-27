@@ -22,7 +22,7 @@ using System.IO;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
 using CSharpTest.Net.Storage;
-using CSharpTest.Net.Synchronization;
+
 
 namespace CSharpTest.Net.Collections
 {
@@ -35,8 +35,6 @@ namespace CSharpTest.Net.Collections
         /// </summary>
         public sealed class OptionsV2 : BPlusTreeOptions<TKey, TValue>
         {
-            private ILockStrategy _callLevelLock;
-
             /// <summary>
             ///     Constructs the options configuration to initialize a BPlusTree instance using the default Comparer for TKey
             /// </summary>
@@ -54,24 +52,6 @@ namespace CSharpTest.Net.Collections
             {
                 CacheKeepAliveMinimumHistory = 128;
                 CacheKeepAliveMaximumHistory = 1024;
-            }
-
-            /// <summary>
-            ///     Defines a reader/writer lock that used to control exclusive tree access when needed.
-            ///     Version2 files using trasacation logs will use this to gain exclusive access to the tree
-            ///     during calls to Commit, Rollback, etc.  The default is to use a SimpleReadWriteLocking
-            ///     class.  If you are accessing the tree from a single thread, consider using the IgnoreLocking
-            ///     class for better performance.
-            /// </summary>
-            public override ILockStrategy CallLevelLock
-            {
-                get
-                {
-                    if (_callLevelLock == null)
-                        _callLevelLock = new ReaderWriterLocking();
-                    return _callLevelLock;
-                }
-                set => _callLevelLock = value;
             }
 
             /// <summary>

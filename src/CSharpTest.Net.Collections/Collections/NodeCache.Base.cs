@@ -18,7 +18,7 @@
 using System;
 using System.Diagnostics;
 using CSharpTest.Net.Serialization;
-using CSharpTest.Net.Synchronization;
+
 
 namespace CSharpTest.Net.Collections
 {
@@ -27,8 +27,6 @@ namespace CSharpTest.Net.Collections
         /// <summary> Provides base functionality of a node cache, not much exciting here </summary>
         private abstract class NodeCacheBase : IDisposable
         {
-            public readonly ILockFactory LockFactory;
-
             public readonly ISerializer<Node> NodeSerializer;
             public readonly BPlusTreeOptions<TKey, TValue> Options;
             public readonly INodeStorage Storage;
@@ -37,7 +35,6 @@ namespace CSharpTest.Net.Collections
             public NodeCacheBase(BPlusTreeOptions<TKey, TValue> options)
             {
                 Options = options;
-                LockFactory = Options.LockingFactory;
                 Storage = Options.CreateStorage();
                 if (Options.UseStorageCache)
                     Storage = new StorageCache(Storage, Options.CacheKeepAliveMaximumHistory);
@@ -76,7 +73,7 @@ namespace CSharpTest.Net.Collections
             public abstract void ResetCache();
 
             public abstract void UpdateNode(NodePin node);
-            public abstract ILockStrategy CreateLock(NodeHandle handle, out object refobj);
+            public abstract void CreateLock(NodeHandle handle, out object refobj);
             protected abstract NodePin Lock(NodePin parent, LockType ltype, NodeHandle child);
 
             public NodePin LockRoot(LockType ltype)
@@ -105,10 +102,9 @@ namespace CSharpTest.Net.Collections
                 object refobj;
                 RootNode rootNode = new RootNode(rootHandle.StoreHandle);
 
-                ILockStrategy lck = CreateLock(rootHandle, out refobj);
-                using (lck.Write(Options.LockTimeout))
-                {
-                    using (NodePin rootPin = new NodePin(rootHandle, lck, LockType.Insert, LockType.Insert, refobj,
+                 CreateLock(rootHandle, out refobj);
+              
+                    using (NodePin rootPin = new NodePin(rootHandle, LockType.Insert, refobj,
                         rootNode, null))
                     using (NodeTransaction t = BeginTransaction())
                     {
@@ -116,7 +112,6 @@ namespace CSharpTest.Net.Collections
                         rootNode.ReplaceChild(0, null, hChild);
                         t.Commit();
                     }
-                }
 
                 return rootNode;
             }
