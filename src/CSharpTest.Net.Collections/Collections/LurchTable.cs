@@ -113,9 +113,9 @@ namespace CSharpTest.Net.Collections
             IEqualityComparer<TKey> comparer)
         {
             if (limit <= 0)
-                throw new ArgumentOutOfRangeException("limit");
+                throw new ArgumentOutOfRangeException(nameof(limit));
             if (ordering == LurchTableOrder.None && limit < int.MaxValue)
-                throw new ArgumentOutOfRangeException("ordering");
+                throw new ArgumentOutOfRangeException(nameof(ordering));
 
             Limit = limit <= 0 ? int.MaxValue : limit;
             Comparer = comparer;

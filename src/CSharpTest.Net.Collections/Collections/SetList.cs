@@ -24,7 +24,7 @@ using CSharpTest.Net.Interfaces;
 namespace CSharpTest.Net.Collections
 {
     /// <summary> Represents an immutable collection of unique items that can be manipulated as a set, intersect/union/etc. </summary>
-    [DebuggerDisplay("{ToArray()}")]
+    [DebuggerDisplay("{" + nameof(ToArray) + "()}")]
     public class SetList<T> : IList<T>, ICollection<T>, IEnumerable<T>, IList, ICollection, IEnumerable,
         ICloneable<SetList<T>>
     {
@@ -75,9 +75,9 @@ namespace CSharpTest.Net.Collections
 
         private SetList(int capacity, IEnumerable<T> items, IComparer<T> comparer)
         {
-            if (capacity < 0) throw new ArgumentOutOfRangeException("capacity");
-            if (items == null) throw new ArgumentNullException("items");
-            if (comparer == null) throw new ArgumentNullException("comparer");
+            if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity));
+            if (items == null) throw new ArgumentNullException(nameof(items));
+            if (comparer == null) throw new ArgumentNullException(nameof(comparer));
 
             _comparer = comparer;
             _list = new List<T>(capacity);

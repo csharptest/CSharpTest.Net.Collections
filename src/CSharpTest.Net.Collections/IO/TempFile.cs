@@ -25,7 +25,7 @@ namespace CSharpTest.Net.IO
     /// <summary>
     ///     Provides a class for managing a temporary file and making reasonable a attempt to remove it upon disposal.
     /// </summary>
-    [DebuggerDisplay("{TempPath}")]
+    [DebuggerDisplay("{" + nameof(TempPath) + "}")]
     public class TempFile : IDisposable
     {
         private string _filename;

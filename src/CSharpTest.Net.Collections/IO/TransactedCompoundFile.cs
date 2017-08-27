@@ -639,13 +639,13 @@ namespace CSharpTest.Net.IO
         {
             HandleRef href = new HandleRef(handle, BlockSize);
             if (handle == 0 || href.Section >= _sections.Length || _freeHandles.Contains((int) handle))
-                throw new ArgumentOutOfRangeException("handle");
+                throw new ArgumentOutOfRangeException(nameof(handle));
 
             uint oldblockId = _sections[href.Section][href.Offset];
 
             int blocksNeeded = Math.Max(1, (length + BlockHeaderSize + BlockSize - 1) / BlockSize);
             if (blocksNeeded > BlocksPerSection - 2)
-                throw new ArgumentOutOfRangeException("length");
+                throw new ArgumentOutOfRangeException(nameof(length));
 
             uint blockId = TakeBlocks(blocksNeeded);
             BlockRef block = new BlockRef(blockId, BlockSize, blocksNeeded);
@@ -666,7 +666,7 @@ namespace CSharpTest.Net.IO
         {
             HandleRef href = new HandleRef(handle, BlockSize);
             if (handle == 0 || href.Section >= _sections.Length || _freeHandles.Contains((int) handle))
-                throw new ArgumentOutOfRangeException("handle");
+                throw new ArgumentOutOfRangeException(nameof(handle));
 
             uint blockId = _sections[href.Section][href.Offset];
             if (blockId == 0) return new MemoryStream(new byte[0], false);
@@ -685,7 +685,7 @@ namespace CSharpTest.Net.IO
         {
             HandleRef href = new HandleRef(handle, BlockSize);
             if (handle == 0 || href.Section >= _sections.Length || _freeHandles.Contains((int) handle))
-                throw new ArgumentOutOfRangeException("handle");
+                throw new ArgumentOutOfRangeException(nameof(handle));
 
             uint oldblockId = _sections[href.Section][href.Offset];
             lock (_sync)
@@ -729,7 +729,7 @@ namespace CSharpTest.Net.IO
                 Offset = (int) handle % blocksPerSection;
 
                 if (Section < 0 || Section >= 0x10000000 || Offset <= 0 || Offset >= blocksPerSection - 1)
-                    throw new ArgumentOutOfRangeException("handle");
+                    throw new ArgumentOutOfRangeException(nameof(handle));
             }
         }
 
@@ -751,7 +751,7 @@ namespace CSharpTest.Net.IO
                 Offset = (int) block % blocksPerSection;
 
                 if (Section < 0 || Section >= 0x10000000 || Offset <= 0 || Offset + Count - 1 >= blocksPerSection - 1)
-                    throw new ArgumentOutOfRangeException("block");
+                    throw new ArgumentOutOfRangeException(nameof(block));
             }
 
             public BlockRef(uint blockId, int blockSize, int actualBlocks)

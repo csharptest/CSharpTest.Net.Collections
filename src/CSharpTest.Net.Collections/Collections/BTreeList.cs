@@ -26,7 +26,7 @@ namespace CSharpTest.Net.Collections
     /// <summary>
     ///     Implements an IList interface for an in-memory B+Tree of unique values
     /// </summary>
-    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class BTreeList<T> : IList<T>, ICloneable<BTreeList<T>>, IDisposable
     {
         /// <summary>The default `order` of the B+Tree structure.</summary>
@@ -191,7 +191,7 @@ namespace CSharpTest.Net.Collections
 
         #region class Node
 
-        [DebuggerDisplay("Count = {Count}")]
+        [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
         private class Node
         {
             public Node Next, Prev;
@@ -396,7 +396,7 @@ namespace CSharpTest.Net.Collections
                         parent = parent.Next;
                     }
                 }
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             set => throw new NotSupportedException();
         }

@@ -151,7 +151,7 @@ namespace CSharpTest.Net.Storage
                 throw new InvalidNodeHandleException();
         }
 
-        [DebuggerDisplay("{Id}[{Unique:x8}]")]
+        [DebuggerDisplay("{" + nameof(Id) + "}[{Unique:x8}]")]
         private class FileId : IStorageHandle
         {
             public readonly long Id;

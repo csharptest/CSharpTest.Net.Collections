@@ -136,7 +136,7 @@ namespace CSharpTest.Net.IO
 
                     _nextFree = _header.NextBlockId;
                     SetBlockSize(_header.Length, out _blockSize, out _maskVersion, out _maskOffset);
-                    if (blockSize != _blockSize) throw new ArgumentOutOfRangeException("blockSize");
+                    if (blockSize != _blockSize) throw new ArgumentOutOfRangeException(nameof(blockSize));
                     fallocated = LastAllocated(s);
                     _reallocSize = growthRate * _blockSize;
 
@@ -294,7 +294,7 @@ namespace CSharpTest.Net.IO
         public Stream Open(long identity, FileAccess access)
         {
             if (identity < FirstIdentity)
-                throw new ArgumentOutOfRangeException("identity");
+                throw new ArgumentOutOfRangeException(nameof(identity));
 
             if (access == FileAccess.Read)
                 return new BlockStreamReader(this, identity);
@@ -302,7 +302,7 @@ namespace CSharpTest.Net.IO
             if (access == FileAccess.Write)
                 return new BlockStreamWriter(this, identity);
 
-            throw new ArgumentOutOfRangeException("access");
+            throw new ArgumentOutOfRangeException(nameof(access));
         }
 
         /// <summary>
@@ -312,10 +312,10 @@ namespace CSharpTest.Net.IO
         public void Delete(long identity)
         {
             if (identity < FirstIdentity)
-                throw new ArgumentOutOfRangeException("identity");
+                throw new ArgumentOutOfRangeException(nameof(identity));
 
             if (!FreeBlock(identity, BlockFlags.ExternalBlock))
-                throw new ArgumentOutOfRangeException("identity");
+                throw new ArgumentOutOfRangeException(nameof(identity));
         }
 
         private Stream OpenBlock(FileAccess access, long identity)
@@ -324,7 +324,7 @@ namespace CSharpTest.Net.IO
             try
             {
                 if ((identity & _maskOffset) > LastAllocated(stream))
-                    throw new ArgumentOutOfRangeException("identity");
+                    throw new ArgumentOutOfRangeException(nameof(identity));
 
                 long offset = identity & _maskOffset;
                 stream.Position = offset;
@@ -355,7 +355,7 @@ namespace CSharpTest.Net.IO
                     break;
                 maskVersion |= bit;
                 if (++ix >= 32)
-                    throw new ArgumentOutOfRangeException("blockSize", "The block size must be a power of 2.");
+                    throw new ArgumentOutOfRangeException(nameof(blockSize), "The block size must be a power of 2.");
             }
 
             maskOffset = ~maskVersion;

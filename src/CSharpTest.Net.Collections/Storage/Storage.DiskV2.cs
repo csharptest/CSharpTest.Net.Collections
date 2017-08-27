@@ -146,7 +146,7 @@ namespace CSharpTest.Net.Storage
             file.Commit();
         }
 
-        [DebuggerDisplay("{Id}")]
+        [DebuggerDisplay("{" + nameof(Id) + "}")]
         private struct FileId : IStorageHandle
         {
             private static int _uniqueCounter = new Random().Next();

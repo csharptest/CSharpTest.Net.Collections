@@ -101,7 +101,7 @@ namespace CSharpTest.Net.Storage
             handle.Node = node;
         }
 
-        [DebuggerDisplay("{_id}")]
+        [DebuggerDisplay("{" + nameof(_id) + "}")]
         private class MyStorageHandle : IStorageHandle
         {
             private static int _counter;

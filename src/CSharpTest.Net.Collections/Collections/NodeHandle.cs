@@ -24,7 +24,7 @@ namespace CSharpTest.Net.Collections
 {
     partial class BPlusTree<TKey, TValue>
     {
-        [DebuggerDisplay("Handle({StoreHandle})")]
+        [DebuggerDisplay("Handle({" + nameof(StoreHandle) + "})")]
         private class NodeHandle : Equatable<NodeHandle>
         {
             private object _cacheEntry;

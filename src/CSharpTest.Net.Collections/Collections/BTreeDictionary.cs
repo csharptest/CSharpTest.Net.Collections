@@ -26,7 +26,7 @@ namespace CSharpTest.Net.Collections
     /// <summary>
     ///     Implements an IDictionary interface for an in-memory B+Tree
     /// </summary>
-    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class BTreeDictionary<TKey, TValue> : IDictionaryEx<TKey, TValue>, ICloneable<BTreeDictionary<TKey, TValue>>
     {
         /// <summary>The default `order` of the B+Tree structure.</summary>
@@ -54,9 +54,9 @@ namespace CSharpTest.Net.Collections
         public BTreeDictionary(int order, IComparer<TKey> comparer)
         {
             if (order < 4)
-                throw new ArgumentOutOfRangeException("order");
+                throw new ArgumentOutOfRangeException(nameof(order));
             if (comparer == null)
-                throw new ArgumentNullException("comparer");
+                throw new ArgumentNullException(nameof(comparer));
 
             IsReadOnly = false;
             _order = order;
@@ -82,7 +82,7 @@ namespace CSharpTest.Net.Collections
             : this(order, comparer)
         {
             if (copyFrom == null)
-                throw new ArgumentNullException("copyFrom");
+                throw new ArgumentNullException(nameof(copyFrom));
             AddRange(copyFrom);
         }
 
@@ -486,7 +486,7 @@ namespace CSharpTest.Net.Collections
 
         #region class Node
 
-        [DebuggerDisplay("Count = {Count}")]
+        [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
         private class Node
         {
             public Node Next, Prev;
