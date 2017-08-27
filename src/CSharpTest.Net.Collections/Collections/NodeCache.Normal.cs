@@ -137,13 +137,6 @@ namespace CSharpTest.Net.Collections
             {
                 CacheEntry entry = GetCache(child, false);
 
-                LockType locked = NoLock;
-                if (ltype == LockType.Read)
-                    locked = LockType.Read;
-                if (ltype != LockType.Read)
-                    locked = ltype;
-
-                DeadlockException.Assert(locked != NoLock);
                 Node node = entry.Node;
                 if (node == null)
                 {
