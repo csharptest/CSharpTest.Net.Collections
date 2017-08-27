@@ -15,8 +15,6 @@
 
 #endregion
 
-using System;
-
 namespace CSharpTest.Net.Interfaces
 {
     /// <summary>

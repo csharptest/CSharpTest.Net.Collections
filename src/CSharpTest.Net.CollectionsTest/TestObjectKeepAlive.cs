@@ -16,9 +16,7 @@
 #endregion
 
 using System;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading;
-using System.Threading.Tasks;
 using CSharpTest.Net.Utils;
 using Xunit;
 

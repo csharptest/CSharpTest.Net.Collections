@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
 using CSharpTest.Net.Collections.Test.Reflection;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;

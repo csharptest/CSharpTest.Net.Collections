@@ -17,13 +17,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using CSharpTest.Net.Collections;
 using CSharpTest.Net.Interfaces;
-using Microsoft.Win32.SafeHandles;
 
 // ReSharper disable InconsistentNaming
 namespace CSharpTest.Net.IO

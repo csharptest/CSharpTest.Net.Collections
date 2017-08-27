@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
