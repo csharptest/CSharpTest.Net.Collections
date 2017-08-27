@@ -25,51 +25,50 @@ namespace CSharpTest.Net.Collections
 {
     /// <summary> Represents an immutable collection of unique items that can be manipulated as a set, intersect/union/etc. </summary>
     [DebuggerDisplay("{" + nameof(ToArray) + "()}")]
-    public class SetList<T> : IList<T>, ICollection<T>, IEnumerable<T>, IList, ICollection, IEnumerable,
-        ICloneable<SetList<T>>
+    public class SetList<T> : IList<T>, IList, ICloneable<SetList<T>>
     {
-        private static SetList<T> __empty;
+        private static SetList<T> _empty;
         private readonly IComparer<T> _comparer;
 
         private readonly List<T> _list;
 
         /// <summary> Constructs a SetList </summary>
-        public SetList() /*												*/ : this(0, EmptySet, Comparer<T>.Default)
+        public SetList() : this(0, EmptySet, Comparer<T>.Default)
         {
         }
 
         /// <summary> Constructs a SetList </summary>
-        public SetList(IComparer<T> comparer) /*						*/ : this(0, EmptySet, comparer)
+        public SetList(IComparer<T> comparer) : this(0, EmptySet, comparer)
         {
         }
 
         /// <summary> Constructs a SetList </summary>
-        public SetList(int capacity) /*									*/ : this(capacity, EmptySet, Comparer<T>.Default)
+        public SetList(int capacity) : this(capacity, EmptySet, Comparer<T>.Default)
         {
         }
 
         /// <summary> Constructs a SetList </summary>
-        public SetList(int capacity, IComparer<T> comparer) /*			*/ : this(capacity, EmptySet, comparer)
+        public SetList(int capacity, IComparer<T> comparer) : this(capacity, EmptySet, comparer)
         {
         }
 
         /// <summary> Constructs a SetList </summary>
-        public SetList(IEnumerable<T> items) /*							*/ : this(0, items, Comparer<T>.Default)
+        public SetList(IEnumerable<T> items) : this(0, items, Comparer<T>.Default)
         {
         }
 
         /// <summary> Constructs a SetList </summary>
-        public SetList(ICollection<T> items) /*							*/ : this(items.Count, items, Comparer<T>.Default)
+        public SetList(ICollection<T> items) : this(items.Count, items, Comparer<T>.Default)
         {
         }
 
         /// <summary> Constructs a SetList </summary>
-        public SetList(IEnumerable<T> items, IComparer<T> comparer) /*	*/ : this(0, items, comparer)
+        public SetList(IEnumerable<T> items, IComparer<T> comparer) : this(0, items, comparer)
         {
         }
 
         /// <summary> Constructs a SetList </summary>
-        public SetList(ICollection<T> items, IComparer<T> comparer) /*	*/ : this(items.Count, items, comparer)
+        public SetList(ICollection<T> items, IComparer<T> comparer) : this(items.Count, items, comparer)
         {
         }
 
@@ -91,7 +90,7 @@ namespace CSharpTest.Net.Collections
         }
 
         /// <summary> Provides an empty set </summary>
-        public static SetList<T> EmptySet => __empty ?? (__empty = new SetList<T>(0, new T[0], Comparer<T>.Default));
+        public static SetList<T> EmptySet => _empty ?? (_empty = new SetList<T>(0, new T[0], Comparer<T>.Default));
 
         #region IList<T> like members...
 
@@ -386,7 +385,7 @@ namespace CSharpTest.Net.Collections
         /// <summary> Returns an enumerator </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _list).GetEnumerator();
+            return ((IEnumerable)_list).GetEnumerator();
         }
 
         /// <summary> Returns a typed enumerator </summary>
@@ -404,7 +403,7 @@ namespace CSharpTest.Net.Collections
             if (value is T)
             {
                 int pos;
-                Add((T) value, out pos);
+                Add((T)value, out pos);
                 return pos;
             }
             throw new ArgumentException();
@@ -413,14 +412,14 @@ namespace CSharpTest.Net.Collections
         bool IList.Contains(object value)
         {
             if (value is T)
-                return Contains((T) value);
+                return Contains((T)value);
             return false;
         }
 
         int IList.IndexOf(object value)
         {
             if (value is T)
-                return IndexOf((T) value);
+                return IndexOf((T)value);
             return -1;
         }
 
@@ -434,7 +433,7 @@ namespace CSharpTest.Net.Collections
         void IList.Remove(object value)
         {
             if (value is T)
-                Remove((T) value);
+                Remove((T)value);
             else
                 throw new ArgumentException();
         }
