@@ -24,6 +24,25 @@ using Xunit;
 
 namespace CSharpTest.Net.Collections.Test
 {
+    public class CollisionComparer : IEqualityComparer<Guid>
+    {
+        public bool Equals(Guid x, Guid y)
+        {
+            return x.Equals(y);
+        }
+
+        public int GetHashCode(Guid obj)
+        {
+            byte[] bytes = obj.ToByteArray();
+            int a = BitConverter.ToInt32(bytes, 0);
+            short b = BitConverter.ToInt16(bytes, 4);
+            short c = BitConverter.ToInt16(bytes, 6);
+            byte f = bytes[10];
+            byte k = bytes[15];
+
+            return a ^ (((int)b << 16) | (int)(ushort)c) ^ (((int)f << 24) | k);
+        }
+    }
 
     public class TestLurchTableThreading
     {
@@ -87,34 +106,21 @@ namespace CSharpTest.Net.Collections.Test
 
         private static readonly Random random = new Random();
         private static int iCounter = 0x01010101;
+        private static readonly CollisionComparer comp = new CollisionComparer();
 
         public static Guid NextHashCollision(Guid guid)
         {
             byte[] bytes = guid.ToByteArray();
 
             // Modify bytes 8 & 9 with random number
-            Array.Copy(
-                BitConverter.GetBytes((short)random.Next()),
-                0,
-                bytes,
-                8,
-                2
-            );
+            Array.Copy(BitConverter.GetBytes((short)random.Next()), 0, bytes, 8, 2);
 
             // Increment bytes 11, 12, 13, & 14
-            Array.Copy(
-                BitConverter.GetBytes(
-                    BitConverter.ToInt32(bytes, 11) +
-                    Interlocked.Increment(ref iCounter)
-                ),
-                0,
-                bytes,
-                11,
-                4
-            );
+            Array.Copy(BitConverter.GetBytes(BitConverter.ToInt32(bytes, 11) + Interlocked.Increment(ref iCounter)), 0, bytes, 11, 4);
+
 
             Guid result = new Guid(bytes);
-            Assert.Equal(guid.GetHashCode(), result.GetHashCode());
+            Assert.Equal(comp.GetHashCode(guid), comp.GetHashCode(guid));
             return result;
         }
 
@@ -205,7 +211,7 @@ namespace CSharpTest.Net.Collections.Test
             Guid id2 = NextHashCollision(id1);
 
             Assert.NotEqual(id1, id2);
-            Assert.Equal(id1.GetHashCode(), id2.GetHashCode());
+            Assert.Equal(comp.GetHashCode(id1), comp.GetHashCode(id2));
         }
 
         [Fact]
