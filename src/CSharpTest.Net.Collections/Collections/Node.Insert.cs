@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,113 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 using System.Collections.Generic;
+using CSharpTest.Net.Collections.Exceptions;
 
 namespace CSharpTest.Net.Collections
 {
     partial class BPlusTree<TKey, TValue>
     {
-        static readonly KeyValueUpdate<TKey, TValue> IgnoreUpdate = (k, v) => v;
-        enum InsertResult { Inserted = 1, Updated = 2, Exists = 3, NotFound = 4 }
-
-        private struct FetchValue : ICreateOrUpdateValue<TKey, TValue>
-        {
-            private TValue _value;
-            public FetchValue(TValue value)
-            {
-                _value = value;
-            }
-            public TValue Value { get { return _value; } }
-            public bool CreateValue(TKey key, out TValue value)
-            {
-                value = _value;
-                return true;
-            }
-            public bool UpdateValue(TKey key, ref TValue value)
-            {
-                _value = value;
-                return false;
-            }
-        }
-        private struct InsertValue : ICreateOrUpdateValue<TKey, TValue>
-        {
-            private TValue _value;
-            private readonly bool _canUpdate;
-            public InsertValue(TValue value, bool canUpdate)
-            {
-                _value = value;
-                _canUpdate = canUpdate;
-            }
-
-            public bool CreateValue(TKey key, out TValue value)
-            {
-                value = _value;
-                return true;
-            }
-            public bool UpdateValue(TKey key, ref TValue value)
-            {
-                if(!_canUpdate)
-                    throw new DuplicateKeyException();
-                if (EqualityComparer<TValue>.Default.Equals(value, _value))
-                    return false;
-                value = _value;
-                return true;
-            }
-        }
-        private struct InsertionInfo : ICreateOrUpdateValue<TKey, TValue>
-        {
-            private TValue _value;
-            private readonly Converter<TKey, TValue> _factory;
-            private readonly KeyValueUpdate<TKey, TValue> _updater;
-            private readonly bool _canUpdate;
-            public TValue Value { get { return _value; } }
-            public bool CreateValue(TKey key, out TValue value)
-            {
-                if (_factory != null)
-                {
-                    value = _value = _factory(key);
-                    return true;
-                }
-                value = _value;
-                return true;
-            }
-            public bool UpdateValue(TKey key, ref TValue value)
-            {
-                if (!_canUpdate)
-                    throw new DuplicateKeyException();
-
-                if(_updater != null)
-                    _value = _updater(key, value);
-                if (EqualityComparer<TValue>.Default.Equals(value, _value))
-                    return false;
-                
-                value = _value;
-                return true;
-            }
-            public InsertionInfo(Converter<TKey, TValue> factory, KeyValueUpdate<TKey, TValue> updater)
-                : this()
-            {
-                _factory = Check.NotNull(factory);
-                _updater = updater;
-                _canUpdate = updater != null;
-            }
-            public InsertionInfo(TValue addValue, KeyValueUpdate<TKey, TValue> updater)
-                : this()
-            {
-                _value = addValue;
-                _updater = updater;
-                _canUpdate = updater != null;
-            }
-        }
+        private static readonly KeyValueUpdate<TKey, TValue> IgnoreUpdate = (k, v) => v;
 
         private InsertResult Insert<T>(NodePin thisLock, TKey key, ref T value, NodePin parent, int parentIx)
-             where T : ICreateOrUpdateValue<TKey, TValue>
+            where T : ICreateOrUpdateValue<TKey, TValue>
         {
             Node me = thisLock.Ptr;
             if (me.Count == me.Size && parent != null)
-            {
                 using (NodeTransaction trans = _storage.BeginTransaction())
                 {
                     TKey splitAt;
@@ -156,16 +68,14 @@ namespace CSharpTest.Net.Collections
                         return Insert(thisLock, key, ref value, parent, parentIx);
                     }
                 }
-            }
             if (parent != null)
-                parent.Dispose();//done with the parent lock.
+                parent.Dispose(); //done with the parent lock.
 
             int ordinal;
             if (me.BinarySearch(_itemComparer, new Element(key), out ordinal) && me.IsLeaf)
             {
                 TValue updatedValue = me[ordinal].Payload;
                 if (value.UpdateValue(key, ref updatedValue))
-                {
                     using (NodeTransaction trans = _storage.BeginTransaction())
                     {
                         me = trans.BeginUpdate(thisLock);
@@ -174,7 +84,6 @@ namespace CSharpTest.Net.Collections
                         trans.Commit();
                         return InsertResult.Updated;
                     }
-                }
                 return InsertResult.Exists;
             }
 
@@ -182,7 +91,6 @@ namespace CSharpTest.Net.Collections
             {
                 TValue newValue;
                 if (value.CreateValue(key, out newValue))
-                {
                     using (NodeTransaction trans = _storage.BeginTransaction())
                     {
                         me = trans.BeginUpdate(thisLock);
@@ -191,16 +99,18 @@ namespace CSharpTest.Net.Collections
                         trans.Commit();
                         return InsertResult.Inserted;
                     }
-                }
                 return InsertResult.NotFound;
             }
 
             if (ordinal >= me.Count) ordinal = me.Count - 1;
             using (NodePin child = _storage.Lock(thisLock, me[ordinal].ChildNode))
+            {
                 return Insert(child, key, ref value, thisLock, ordinal);
+            }
         }
 
-        private NodePin Split(NodeTransaction trans, ref NodePin thisLock, NodePin parentLock, int parentIx, out TKey splitKey, bool leftHeavy)
+        private NodePin Split(NodeTransaction trans, ref NodePin thisLock, NodePin parentLock, int parentIx,
+            out TKey splitKey, bool leftHeavy)
         {
             Node me = thisLock.Ptr;
 
@@ -238,6 +148,113 @@ namespace CSharpTest.Net.Collections
                 prev.Dispose();
                 next.Dispose();
                 throw;
+            }
+        }
+
+        private enum InsertResult
+        {
+            Inserted = 1,
+            Updated = 2,
+            Exists = 3,
+            NotFound = 4
+        }
+
+        private struct FetchValue : ICreateOrUpdateValue<TKey, TValue>
+        {
+            public FetchValue(TValue value)
+            {
+                Value = value;
+            }
+
+            public TValue Value { get; private set; }
+
+            public bool CreateValue(TKey key, out TValue value)
+            {
+                value = Value;
+                return true;
+            }
+
+            public bool UpdateValue(TKey key, ref TValue value)
+            {
+                Value = value;
+                return false;
+            }
+        }
+
+        private struct InsertValue : ICreateOrUpdateValue<TKey, TValue>
+        {
+            private readonly TValue _value;
+            private readonly bool _canUpdate;
+
+            public InsertValue(TValue value, bool canUpdate)
+            {
+                _value = value;
+                _canUpdate = canUpdate;
+            }
+
+            public bool CreateValue(TKey key, out TValue value)
+            {
+                value = _value;
+                return true;
+            }
+
+            public bool UpdateValue(TKey key, ref TValue value)
+            {
+                if (!_canUpdate)
+                    throw new DuplicateKeyException();
+                if (EqualityComparer<TValue>.Default.Equals(value, _value))
+                    return false;
+                value = _value;
+                return true;
+            }
+        }
+
+        private struct InsertionInfo : ICreateOrUpdateValue<TKey, TValue>
+        {
+            private readonly Func<TKey, TValue> _factory;
+            private readonly KeyValueUpdate<TKey, TValue> _updater;
+            private readonly bool _canUpdate;
+            public TValue Value { get; private set; }
+
+            public bool CreateValue(TKey key, out TValue value)
+            {
+                if (_factory != null)
+                {
+                    value = Value = _factory(key);
+                    return true;
+                }
+                value = Value;
+                return true;
+            }
+
+            public bool UpdateValue(TKey key, ref TValue value)
+            {
+                if (!_canUpdate)
+                    throw new DuplicateKeyException();
+
+                if (_updater != null)
+                    Value = _updater(key, value);
+                if (EqualityComparer<TValue>.Default.Equals(value, Value))
+                    return false;
+
+                value = Value;
+                return true;
+            }
+
+            public InsertionInfo(Func<TKey, TValue> factory, KeyValueUpdate<TKey, TValue> updater)
+                : this()
+            {
+                _factory = Check.NotNull(factory);
+                _updater = updater;
+                _canUpdate = updater != null;
+            }
+
+            public InsertionInfo(TValue addValue, KeyValueUpdate<TKey, TValue> updater)
+                : this()
+            {
+                Value = addValue;
+                _updater = updater;
+                _canUpdate = updater != null;
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,16 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using CSharpTest.Net.Serialization;
-using NUnit.Framework;
+using Xunit;
 
-namespace CSharpTest.Net.Library.Test
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestPrimitiveSerializer
     {
         private readonly Random _random = new Random();
@@ -28,7 +31,7 @@ namespace CSharpTest.Net.Library.Test
 
         private void ReadWrite<T>(T value)
         {
-            ISerializer<T> ser = (ISerializer<T>)_serializer;
+            ISerializer<T> ser = (ISerializer<T>) _serializer;
             using (MemoryStream ms = new MemoryStream())
             {
                 ser.WriteTo(value, ms);
@@ -38,11 +41,11 @@ namespace CSharpTest.Net.Library.Test
                 ms.Write(bytes, 0, bytes.Length);
                 // seek begin and read.
                 ms.Position = 0;
-                Assert.AreEqual(value, ser.ReadFrom(ms));
+                Assert.Equal(value, ser.ReadFrom(ms));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBytesSerializer()
         {
             byte[] bytes = new byte[256];
@@ -52,26 +55,18 @@ namespace CSharpTest.Net.Library.Test
             {
                 BytesSerializer.RawBytes.WriteTo(bytes, ms);
                 ms.Position = 0;
-                Assert.AreEqual(bytes, BytesSerializer.RawBytes.ReadFrom(ms));
+                Assert.Equal(bytes, BytesSerializer.RawBytes.ReadFrom(ms));
             }
         }
 
-        [Test]
-        public void TestSerializeString()
-        {
-            ReadWrite<string>(null);
-            ReadWrite(String.Empty);
-            ReadWrite(GetType().ToString());
-        }
-
-        [Test]
+        [Fact]
         public void TestSerializeBool()
         {
             ReadWrite(true);
             ReadWrite(false);
         }
 
-        [Test]
+        [Fact]
         public void TestSerializeByte()
         {
             ReadWrite(byte.MinValue);
@@ -80,35 +75,26 @@ namespace CSharpTest.Net.Library.Test
                 ReadWrite(i);
         }
 
-        [Test]
-        public void TestSerializeSByte()
-        {
-            ReadWrite(sbyte.MinValue);
-            ReadWrite(sbyte.MaxValue);
-            for (sbyte i = 1; i != 0; i *= 2)
-                ReadWrite(i);
-        }
-
-        [Test]
+        [Fact]
         public void TestSerializeByteArray()
         {
             ReadWrite<byte[]>(null);
             ReadWrite(new byte[0]);
-            ReadWrite(new byte[] { 0, 123, byte.MaxValue });
+            ReadWrite(new byte[] {0, 123, byte.MaxValue});
         }
 
-        [Test]
+        [Fact]
         public void TestSerializeChar()
         {
             ReadWrite(char.MinValue);
             ReadWrite(char.MaxValue);
             for (short i = 1; i != 0; i *= 2)
-                ReadWrite((char)i);
-            for (char ch = (char)0; ch < 256; ch++)
+                ReadWrite((char) i);
+            for (char ch = (char) 0; ch < 256; ch++)
                 ReadWrite(ch);
         }
 
-        [Test]
+        [Fact]
         public void TestSerializeDateTime()
         {
             ReadWrite(DateTime.MinValue);
@@ -118,72 +104,7 @@ namespace CSharpTest.Net.Library.Test
             ReadWrite(DateTime.Today);
         }
 
-        [Test]
-        public void TestSerializeTimeSpan()
-        {
-            ReadWrite(TimeSpan.MinValue);
-            ReadWrite(TimeSpan.MaxValue);
-            ReadWrite(TimeSpan.Zero);
-            ReadWrite(TimeSpan.FromTicks(DateTime.UtcNow.Ticks));
-            ReadWrite(TimeSpan.FromTicks(1));
-            ReadWrite(TimeSpan.FromTicks(long.MaxValue));
-        }
-
-        [Test]
-        public void TestSerializeShort()
-        {
-            ReadWrite(short.MinValue);
-            ReadWrite(short.MaxValue);
-            for (short i = 1; i != 0; i *= 2)
-                ReadWrite(i);
-        }
-
-        [Test]
-        public void TestSerializeUShort()
-        {
-            ReadWrite(ushort.MinValue);
-            ReadWrite(ushort.MaxValue);
-            for (ushort i = 1; i != 0; i *= 2)
-                ReadWrite(i);
-        }
-
-        [Test]
-        public void TestSerializeInt()
-        {
-            ReadWrite(int.MinValue);
-            ReadWrite(int.MaxValue);
-            for (int i = 1; i != 0; i *= 2)
-                ReadWrite(i);
-        }
-
-        [Test]
-        public void TestSerializeUInt()
-        {
-            ReadWrite(uint.MinValue);
-            ReadWrite(uint.MaxValue);
-            for (uint i = 1; i != 0; i *= 2)
-                ReadWrite(i);
-        }
-
-        [Test]
-        public void TestSerializeLong()
-        {
-            ReadWrite(long.MinValue);
-            ReadWrite(long.MaxValue);
-            for (long i = 1; i != 0; i *= 2)
-                ReadWrite(i);
-        }
-
-        [Test]
-        public void TestSerializeULong()
-        {
-            ReadWrite(ulong.MinValue);
-            ReadWrite(ulong.MaxValue);
-            for (ulong i = 1; i != 0; i *= 2)
-                ReadWrite(i);
-        }
-
-        [Test]
+        [Fact]
         public void TestSerializeDouble()
         {
             ReadWrite(double.MinValue);
@@ -198,7 +119,7 @@ namespace CSharpTest.Net.Library.Test
                 ReadWrite(i);
         }
 
-        [Test]
+        [Fact]
         public void TestSerializeFloat()
         {
             ReadWrite(float.MinValue);
@@ -213,61 +134,49 @@ namespace CSharpTest.Net.Library.Test
                 ReadWrite(i);
         }
 
-        [Test]
+        [Fact]
         public void TestSerializeGuid()
         {
             ReadWrite(Guid.Empty);
             ReadWrite(Guid.NewGuid());
         }
 
-        [Test]
+        [Fact]
+        public void TestSerializeInt()
+        {
+            ReadWrite(int.MinValue);
+            ReadWrite(int.MaxValue);
+            for (int i = 1; i != 0; i *= 2)
+                ReadWrite(i);
+        }
+
+        [Fact]
         public void TestSerializeIntPtr()
         {
             ReadWrite(IntPtr.Zero);
 
             if (IntPtr.Size == 4)
-            {
                 for (int i = 1; i != 0; i *= 2)
                     ReadWrite(new IntPtr(i));
-            }
             else
-            {
                 for (long i = 1; i != 0; i *= 2)
                     ReadWrite(new IntPtr(i));
-            }
         }
 
-        [Test]
-        public void TestSerializeUIntPtr()
-        {
-            ReadWrite(UIntPtr.Zero);
-
-            if (UIntPtr.Size == 4)
-            {
-                for (uint i = 1; i != 0; i *= 2)
-                    ReadWrite(new UIntPtr(i));
-            }
-            else
-            {
-                for (ulong i = 1; i != 0; i *= 2)
-                    ReadWrite(new UIntPtr(i));
-            }
-        }
-
-        [Test]
+        [Fact]
         public void TestSerializeKeyValuePair()
         {
-            ISerializer<KeyValuePair<int, Guid>> ser = new KeyValueSerializer<int, Guid>(PrimitiveSerializer.Int32, PrimitiveSerializer.Guid);
+            ISerializer<KeyValuePair<int, Guid>> ser =
+                new KeyValueSerializer<int, Guid>(PrimitiveSerializer.Int32, PrimitiveSerializer.Guid);
             Dictionary<int, Guid> values = new Dictionary<int, Guid>
             {
-                { -1, Guid.NewGuid() },
-                { 0, Guid.NewGuid() },
-                { 1, Guid.NewGuid() },
-                { int.MaxValue, Guid.NewGuid() },
+                {-1, Guid.NewGuid()},
+                {0, Guid.NewGuid()},
+                {1, Guid.NewGuid()},
+                {int.MaxValue, Guid.NewGuid()}
             };
 
             foreach (KeyValuePair<int, Guid> value in values)
-            {
                 using (MemoryStream ms = new MemoryStream())
                 {
                     ser.WriteTo(value, ms);
@@ -277,9 +186,94 @@ namespace CSharpTest.Net.Library.Test
                     ms.Write(bytes, 0, bytes.Length);
                     // seek begin and read.
                     ms.Position = 0;
-                    Assert.AreEqual(value, ser.ReadFrom(ms));
+                    Assert.Equal(value, ser.ReadFrom(ms));
                 }
-            }
+        }
+
+        [Fact]
+        public void TestSerializeLong()
+        {
+            ReadWrite(long.MinValue);
+            ReadWrite(long.MaxValue);
+            for (long i = 1; i != 0; i *= 2)
+                ReadWrite(i);
+        }
+
+        [Fact]
+        public void TestSerializeSByte()
+        {
+            ReadWrite(sbyte.MinValue);
+            ReadWrite(sbyte.MaxValue);
+            for (sbyte i = 1; i != 0; i *= 2)
+                ReadWrite(i);
+        }
+
+        [Fact]
+        public void TestSerializeShort()
+        {
+            ReadWrite(short.MinValue);
+            ReadWrite(short.MaxValue);
+            for (short i = 1; i != 0; i *= 2)
+                ReadWrite(i);
+        }
+
+        [Fact]
+        public void TestSerializeString()
+        {
+            ReadWrite<string>(null);
+            ReadWrite(string.Empty);
+            ReadWrite(GetType().ToString());
+        }
+
+        [Fact]
+        public void TestSerializeTimeSpan()
+        {
+            ReadWrite(TimeSpan.MinValue);
+            ReadWrite(TimeSpan.MaxValue);
+            ReadWrite(TimeSpan.Zero);
+            ReadWrite(TimeSpan.FromTicks(DateTime.UtcNow.Ticks));
+            ReadWrite(TimeSpan.FromTicks(1));
+            ReadWrite(TimeSpan.FromTicks(long.MaxValue));
+        }
+
+        [Fact]
+        public void TestSerializeUInt()
+        {
+            ReadWrite(uint.MinValue);
+            ReadWrite(uint.MaxValue);
+            for (uint i = 1; i != 0; i *= 2)
+                ReadWrite(i);
+        }
+
+        [Fact]
+        public void TestSerializeUIntPtr()
+        {
+            ReadWrite(UIntPtr.Zero);
+
+            if (UIntPtr.Size == 4)
+                for (uint i = 1; i != 0; i *= 2)
+                    ReadWrite(new UIntPtr(i));
+            else
+                for (ulong i = 1; i != 0; i *= 2)
+                    ReadWrite(new UIntPtr(i));
+        }
+
+        [Fact]
+        public void TestSerializeULong()
+        {
+            ReadWrite(ulong.MinValue);
+            ReadWrite(ulong.MaxValue);
+            for (ulong i = 1; i != 0; i *= 2)
+                ReadWrite(i);
+        }
+
+        [Fact]
+        public void TestSerializeUShort()
+        {
+            ReadWrite(ushort.MinValue);
+            ReadWrite(ushort.MaxValue);
+            for (ushort i = 1; i != 0; i *= 2)
+                ReadWrite(i);
         }
     }
 }

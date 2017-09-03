@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,8 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System.Diagnostics;
+using System.IO;
 using CSharpTest.Net.Bases;
 using CSharpTest.Net.Serialization;
 
@@ -20,18 +24,19 @@ namespace CSharpTest.Net.Collections
 {
     partial class BPlusTree<TKey, TValue>
     {
-        [DebuggerDisplay("Handle({_storeHandle})")]
-        class NodeHandle : Equatable<NodeHandle>
+        [DebuggerDisplay("Handle({" + nameof(StoreHandle) + "})")]
+        private class NodeHandle : Equatable<NodeHandle>
         {
-            private readonly IStorageHandle _storeHandle;
             private object _cacheEntry;
 
             public NodeHandle(IStorageHandle storeHandle)
             {
-                _storeHandle = storeHandle;
+                StoreHandle = storeHandle;
             }
 
-            public IStorageHandle StoreHandle { get { return _storeHandle; } }
+            public IStorageHandle StoreHandle { get; }
+
+            protected override int HashCode => StoreHandle.GetHashCode();
 
             public bool TryGetCache<T>(out T cacheEntry) where T : class
             {
@@ -40,13 +45,17 @@ namespace CSharpTest.Net.Collections
             }
 
             public void SetCacheEntry(object cacheEntry)
-            { _cacheEntry = cacheEntry; }
+            {
+                _cacheEntry = cacheEntry;
+            }
 
-            protected override int HashCode { get { return _storeHandle.GetHashCode(); } }
-            public override bool Equals(NodeHandle other) { return _storeHandle.Equals(other._storeHandle); }
+            public override bool Equals(NodeHandle other)
+            {
+                return StoreHandle.Equals(other.StoreHandle);
+            }
         }
 
-        class NodeHandleSerializer : ISerializer<NodeHandle>, ISerializer<IStorageHandle>
+        private class NodeHandleSerializer : ISerializer<NodeHandle>, ISerializer<IStorageHandle>
         {
             private readonly ISerializer<IStorageHandle> _handleSerializer;
 
@@ -55,17 +64,25 @@ namespace CSharpTest.Net.Collections
                 _handleSerializer = handleSerializer;
             }
 
-            public void WriteTo(NodeHandle value, System.IO.Stream stream)
-            { _handleSerializer.WriteTo(value.StoreHandle, stream); }
+            public void WriteTo(NodeHandle value, Stream stream)
+            {
+                _handleSerializer.WriteTo(value.StoreHandle, stream);
+            }
 
-            public NodeHandle ReadFrom(System.IO.Stream stream)
-            { return new NodeHandle(_handleSerializer.ReadFrom(stream)); }
+            public NodeHandle ReadFrom(Stream stream)
+            {
+                return new NodeHandle(_handleSerializer.ReadFrom(stream));
+            }
 
-            public void WriteTo(IStorageHandle value, System.IO.Stream stream)
-            { _handleSerializer.WriteTo(value, stream); }
+            public void WriteTo(IStorageHandle value, Stream stream)
+            {
+                _handleSerializer.WriteTo(value, stream);
+            }
 
-            IStorageHandle ISerializer<IStorageHandle>.ReadFrom(System.IO.Stream stream)
-            { return _handleSerializer.ReadFrom(stream); }
+            IStorageHandle ISerializer<IStorageHandle>.ReadFrom(Stream stream)
+            {
+                return _handleSerializer.ReadFrom(stream);
+            }
         }
     }
 }

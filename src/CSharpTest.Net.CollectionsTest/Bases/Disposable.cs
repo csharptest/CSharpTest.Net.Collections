@@ -12,11 +12,10 @@
  * limitations under the License.
  */
 #endregion
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 
-namespace CSharpTest.Net.Bases
+using System;
+
+namespace CSharpTest.Net.Collections.Test.Bases
 {
 	/// <summary>
 	/// Wraps the IDisposable object interface for classes that desire to be sure of being called 

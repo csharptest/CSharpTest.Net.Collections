@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,15 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
+using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.Serialization;
 
 namespace CSharpTest.Net.Collections
 {
     /// <summary> Identifies a class as a reference to a node instance </summary>
     public interface IStorageHandle : IEquatable<IStorageHandle>
-    { }
+    {
+    }
 
     /// <summary> Represents a persistance mechanic for node data </summary>
     public interface INodeStorage : ISerializer<IStorageHandle>, IDisposable
@@ -44,11 +49,11 @@ namespace CSharpTest.Net.Collections
     }
 
     /// <summary> An optional interface that allows storage provides to persist the record count </summary>
-    public interface INodeStoreWithCount : INodeStorage, Interfaces.ITransactable
+    public interface INodeStoreWithCount : INodeStorage, ITransactable
     {
         /// <summary>
-        /// Used to retrieve the current record count after opening a store, -1 indicates an invalid entry.
-        /// Prior to Commit() the count will be set to the actual record count.
+        ///     Used to retrieve the current record count after opening a store, -1 indicates an invalid entry.
+        ///     Prior to Commit() the count will be set to the actual record count.
         /// </summary>
         int Count { get; set; }
     }

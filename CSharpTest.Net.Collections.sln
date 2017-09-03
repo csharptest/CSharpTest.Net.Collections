@@ -1,16 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest.Net.Collections", "src\CSharpTest.Net.Collections\CSharpTest.Net.Collections.csproj", "{FBD5EDD1-445C-46D1-A0B2-4B68CB51EADB}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpTest.Net.Collections", "src\CSharpTest.Net.Collections\CSharpTest.Net.Collections.csproj", "{FBD5EDD1-445C-46D1-A0B2-4B68CB51EADB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest.Net.BPlusTree.Test", "src\CSharpTest.Net.BPlusTreeTest\CSharpTest.Net.BPlusTree.Test.csproj", "{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpTest.Net.Collections.Test", "src\CSharpTest.Net.CollectionsTest\CSharpTest.Net.Collections.Test.csproj", "{097601FB-7E62-47DA-8E48-B56C9AD5DF20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTest.Net.Collections.Test", "src\CSharpTest.Net.CollectionsTest\CSharpTest.Net.Collections.Test.csproj", "{097601FB-7E62-47DA-8E48-B56C9AD5DF20}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{794876C0-9497-427F-922C-26B92DA08A73}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\packages.config = .nuget\packages.config
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpTest.Net.Benchmark", "src\CSharpTest.Net.Benchmark\CSharpTest.Net.Benchmark.csproj", "{D14CBE96-6BC0-4354-A920-E385321C4F38}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,16 +19,19 @@ Global
 		{FBD5EDD1-445C-46D1-A0B2-4B68CB51EADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBD5EDD1-445C-46D1-A0B2-4B68CB51EADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBD5EDD1-445C-46D1-A0B2-4B68CB51EADB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F97601FB-7E62-47DA-8E48-B56C9AD5DF20}.Release|Any CPU.Build.0 = Release|Any CPU
 		{097601FB-7E62-47DA-8E48-B56C9AD5DF20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{097601FB-7E62-47DA-8E48-B56C9AD5DF20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{097601FB-7E62-47DA-8E48-B56C9AD5DF20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{097601FB-7E62-47DA-8E48-B56C9AD5DF20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D14CBE96-6BC0-4354-A920-E385321C4F38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D14CBE96-6BC0-4354-A920-E385321C4F38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D14CBE96-6BC0-4354-A920-E385321C4F38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D14CBE96-6BC0-4354-A920-E385321C4F38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FF393186-9D78-47CD-8B98-04077B7D5A27}
 	EndGlobalSection
 EndGlobal

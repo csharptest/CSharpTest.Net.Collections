@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,24 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using CSharpTest.Net.Collections;
+using CSharpTest.Net.Collections.Exceptions;
 using CSharpTest.Net.Serialization;
 
 namespace CSharpTest.Net.Storage
 {
     /// <summary>
-    /// Provides an in-memory implementation of the storage services for BPlusTree, useful when testing :)
+    ///     Provides an in-memory implementation of the storage services for BPlusTree, useful when testing :)
     /// </summary>
-    class BTreeMemoryStore : INodeStorage
+    internal class BTreeMemoryStore : INodeStorage
     {
-        readonly ISerializer<string> _stringSerializer;
-        MyStorageHandle _root;
+        private readonly ISerializer<string> _stringSerializer;
+        private MyStorageHandle _root;
 
         /// <summary> Default in-memory storage </summary>
         public BTreeMemoryStore()
@@ -40,7 +43,7 @@ namespace CSharpTest.Net.Storage
         {
             _root = null;
         }
-        
+
         public IStorageHandle OpenRoot(out bool isNew)
         {
             isNew = _root == null;
@@ -56,10 +59,10 @@ namespace CSharpTest.Net.Storage
         public bool TryGetNode<TNode>(IStorageHandle handleIn, out TNode node, ISerializer<TNode> serializer)
         {
             InvalidNodeHandleException.Assert(handleIn is MyStorageHandle);
-            MyStorageHandle handle = (MyStorageHandle)handleIn;
+            MyStorageHandle handle = (MyStorageHandle) handleIn;
             if (handle.Node != null)
             {
-                node = (TNode)handle.Node;
+                node = (TNode) handle.Node;
                 return true;
             }
             node = default(TNode);
@@ -68,11 +71,15 @@ namespace CSharpTest.Net.Storage
 
         [Obsolete("Not supported", true)]
         void ISerializer<IStorageHandle>.WriteTo(IStorageHandle value, Stream stream)
-        { throw new NotSupportedException(); }
+        {
+            throw new NotSupportedException();
+        }
 
         [Obsolete("Not supported", true)]
         IStorageHandle ISerializer<IStorageHandle>.ReadFrom(Stream stream)
-        { throw new NotSupportedException(); }
+        {
+            throw new NotSupportedException();
+        }
 
         public IStorageHandle Create()
         {
@@ -83,7 +90,7 @@ namespace CSharpTest.Net.Storage
         public void Destroy(IStorageHandle handleIn)
         {
             InvalidNodeHandleException.Assert(handleIn is MyStorageHandle);
-            MyStorageHandle handle = (MyStorageHandle)handleIn;
+            MyStorageHandle handle = (MyStorageHandle) handleIn;
 
             handle.Clear();
         }
@@ -91,27 +98,37 @@ namespace CSharpTest.Net.Storage
         public void Update<T>(IStorageHandle handleIn, ISerializer<T> serializer, T node)
         {
             InvalidNodeHandleException.Assert(handleIn is MyStorageHandle);
-            MyStorageHandle handle = (MyStorageHandle)handleIn;
+            MyStorageHandle handle = (MyStorageHandle) handleIn;
             handle.Node = node;
         }
-        [System.Diagnostics.DebuggerDisplay("{_id}")]
-        class MyStorageHandle : IStorageHandle
+
+        [DebuggerDisplay("{" + nameof(_id) + "}")]
+        private class MyStorageHandle : IStorageHandle
         {
-            static int _counter;
-            readonly string _id;
-            public MyStorageHandle() 
-                : this(Interlocked.Increment(ref _counter).ToString())
-            { }
-            public MyStorageHandle(string id)
-            { _id = id; }
+            private static int _counter;
+            private readonly string _id;
 
             internal object Node;
 
-            public void Clear()
-            { Node = null; }
+            public MyStorageHandle()
+                : this(Interlocked.Increment(ref _counter).ToString())
+            {
+            }
+
+            public MyStorageHandle(string id)
+            {
+                _id = id;
+            }
 
             public bool Equals(IStorageHandle other)
-            { return base.Equals(other); }
+            {
+                return base.Equals(other);
+            }
+
+            public void Clear()
+            {
+                Node = null;
+            }
         }
     }
 }

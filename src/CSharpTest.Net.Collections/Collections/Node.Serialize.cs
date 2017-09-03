@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,34 +12,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
+using CSharpTest.Net.Collections.Exceptions;
 using CSharpTest.Net.Serialization;
 
 namespace CSharpTest.Net.Collections
 {
     partial class BPlusTree<TKey, TValue>
     {
-        class InvalidSerializer<T> : ISerializer<T>
+        private class InvalidSerializer<T> : ISerializer<T>
         {
-            private InvalidSerializer() { }
             internal static readonly ISerializer<T> Instance = new InvalidSerializer<T>();
 
-            [Obsolete] T ISerializer<T>.ReadFrom(Stream stream) { throw new NotSupportedException(); }
-            [Obsolete] void ISerializer<T>.WriteTo(T value, Stream stream) { throw new NotSupportedException(); }
+            private InvalidSerializer()
+            {
+            }
+
+            [Obsolete]
+            T ISerializer<T>.ReadFrom(Stream stream)
+            {
+                throw new NotSupportedException();
+            }
+
+            [Obsolete]
+            void ISerializer<T>.WriteTo(T value, Stream stream)
+            {
+                throw new NotSupportedException();
+            }
         }
 
-        class NodeSerializer : ISerializer<Node>
+        private class NodeSerializer : ISerializer<Node>
         {
-            readonly ISerializer<int> _intSerializer = VariantNumberSerializer.Instance;
-            readonly ISerializer<bool> _boolSerializer = PrimitiveSerializer.Instance;
-            private readonly ISerializer<IStorageHandle> _storageHandleSerializer;
+            private readonly ISerializer<bool> _boolSerializer = PrimitiveSerializer.Instance;
             private readonly NodeHandleSerializer _handleSerializer;
-            private readonly BPlusTreeOptions<TKey, TValue> _options;
+            private readonly ISerializer<int> _intSerializer = VariantNumberSerializer.Instance;
             private readonly ISerializer<TKey> _keySerializer;
+            private readonly BPlusTreeOptions<TKey, TValue> _options;
+            private readonly ISerializer<IStorageHandle> _storageHandleSerializer;
             private readonly ISerializer<TValue> _valueSerializer;
 
             public NodeSerializer(BPlusTreeOptions<TKey, TValue> options, NodeHandleSerializer handleSerializer)
@@ -56,7 +71,7 @@ namespace CSharpTest.Net.Collections
 
                 bool isLeaf = value.IsLeaf;
                 int maximumKeys = value.IsRoot ? 1 : (isLeaf ? _options.MaximumValueNodes : _options.MaximumChildNodes);
-                Assert(value.Size == maximumKeys);
+                AssertionFailedException.Assert(value.Size == maximumKeys);
 
                 _boolSerializer.WriteTo(isLeaf, stream);
                 _boolSerializer.WriteTo(value.IsRoot, stream);
@@ -67,35 +82,11 @@ namespace CSharpTest.Net.Collections
                     Element item = value[i];
 
                     if (i > 0 || isLeaf)
-                    {
                         _keySerializer.WriteTo(item.Key, stream);
-                    }
                     if (isLeaf)
-                    {
                         _valueSerializer.WriteTo(item.Payload, stream);
-                    }
                     else
-                    {
                         _handleSerializer.WriteTo(item.ChildNode, stream);
-                    }
-                }
-            }
-
-            public IEnumerable<KeyValuePair<TKey, TValue>> RecoverLeaf(Stream stream)
-            {
-                _storageHandleSerializer.ReadFrom(stream);
-                bool isLeaf = _boolSerializer.ReadFrom(stream);
-                if (isLeaf)
-                {
-                    /* isRoot */_boolSerializer.ReadFrom(stream);
-                    int count = _intSerializer.ReadFrom(stream);
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        TKey key = _keySerializer.ReadFrom(stream);
-                        TValue value = _valueSerializer.ReadFrom(stream);
-                        yield return new KeyValuePair<TKey, TValue>(key, value);
-                    }
                 }
             }
 
@@ -122,9 +113,28 @@ namespace CSharpTest.Net.Collections
                 }
 
                 int nodeSize = isLeaf ? _options.MaximumValueNodes : _options.MaximumChildNodes;
-                Assert(nodeSize >= count);
+                AssertionFailedException.Assert(nodeSize >= count);
                 Node resurrected = Node.FromElements(handle, isRoot, nodeSize, items);
                 return resurrected;
+            }
+
+            public IEnumerable<KeyValuePair<TKey, TValue>> RecoverLeaf(Stream stream)
+            {
+                _storageHandleSerializer.ReadFrom(stream);
+                bool isLeaf = _boolSerializer.ReadFrom(stream);
+                if (isLeaf)
+                {
+                    /* isRoot */
+                    _boolSerializer.ReadFrom(stream);
+                    int count = _intSerializer.ReadFrom(stream);
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        TKey key = _keySerializer.ReadFrom(stream);
+                        TValue value = _valueSerializer.ReadFrom(stream);
+                        yield return new KeyValuePair<TKey, TValue>(key, value);
+                    }
+                }
             }
         }
     }

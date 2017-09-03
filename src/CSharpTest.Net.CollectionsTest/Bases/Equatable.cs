@@ -12,10 +12,11 @@
  * limitations under the License.
  */
 #endregion
+
 using System;
 using System.Collections.Generic;
 
-namespace CSharpTest.Net.Bases
+namespace CSharpTest.Net.Collections.Test.Bases
 {
     /// <summary> Provides a base-class for non-reference equality objects </summary>
     [System.Diagnostics.DebuggerNonUserCode]

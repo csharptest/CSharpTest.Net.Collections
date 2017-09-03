@@ -1,4 +1,5 @@
 ﻿#region Copyright 2010-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,14 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace CSharpTest.Net.Bases
 {
     /// <summary> Provides a base-class for non-reference equality objects </summary>
-    [System.Diagnostics.DebuggerNonUserCode]
+    [DebuggerNonUserCode]
     public abstract class Equatable<T> : IEquatable<T>
         where T : Equatable<T>
     {
@@ -48,6 +52,7 @@ namespace CSharpTest.Net.Bases
         {
             return Comparer.Equals(x, y);
         }
+
         /// <summary> Compares the two objects for non-reference equality </summary>
         public static int GetHashCode(T obj)
         {
@@ -59,6 +64,7 @@ namespace CSharpTest.Net.Bases
         {
             return Comparer.Equals(x as T, y as T);
         }
+
         /// <summary> Compares the two objects for non-reference equality </summary>
         public static bool operator !=(Equatable<T> x, Equatable<T> y)
         {
@@ -66,20 +72,21 @@ namespace CSharpTest.Net.Bases
         }
 
         /// <summary> Implements the equality comparer </summary>
-        [System.Diagnostics.DebuggerNonUserCode]
+        [DebuggerNonUserCode]
         public sealed class EqualityComparer : EqualityComparer<T>, IEqualityComparer<T>
         {
             /// <summary> Compares the two objects for non-reference equality </summary>
-            public override bool Equals(T x, T y) 
+            public override bool Equals(T x, T y)
             {
-                if (((object)x) == null) return ((object)y) == null;
-                if (((object)y) == null) return false;
+                if ((object) x == null) return (object) y == null;
+                if ((object) y == null) return false;
                 return x.Equals(y);
             }
+
             /// <summary> Extracts the correct hash code </summary>
-            public override int GetHashCode(T obj) 
-            { 
-                return ((object)obj) == null ? 0 : obj.HashCode;
+            public override int GetHashCode(T obj)
+            {
+                return (object) obj == null ? 0 : obj.HashCode;
             }
         }
     }

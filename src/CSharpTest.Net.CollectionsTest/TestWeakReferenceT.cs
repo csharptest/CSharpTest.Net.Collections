@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,18 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#endregion
-using System;
-using CSharpTest.Net.Utils;
-using NUnit.Framework;
 
-namespace CSharpTest.Net.Library.Test
+#endregion
+
+using System;
+using Xunit;
+
+namespace CSharpTest.Net.Collections.Test
 {
-    [TestFixture]
+    
     public class TestWeakReferenceT
     {
-        static bool _destroyed;
-        class MyObject
+        private static bool _destroyed;
+
+        private class MyObject
         {
             ~MyObject()
             {
@@ -30,7 +33,7 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test]
+        [Fact]
         public void TestDestoryed()
         {
             Utils.WeakReference<MyObject> r;
@@ -39,11 +42,11 @@ namespace CSharpTest.Net.Library.Test
                 MyObject obj = new MyObject();
 
                 r = new Utils.WeakReference<MyObject>(obj);
-                Assert.IsTrue(r.IsAlive);
-                Assert.IsNotNull(r.Target);
+                Assert.True(r.IsAlive);
+                Assert.NotNull(r.Target);
                 MyObject test;
-                Assert.IsTrue(r.TryGetTarget(out test));
-                Assert.IsTrue(ReferenceEquals(obj, test));
+                Assert.True(r.TryGetTarget(out test));
+                Assert.True(ReferenceEquals(obj, test));
                 test = null;
                 _destroyed = false;
 
@@ -54,29 +57,15 @@ namespace CSharpTest.Net.Library.Test
             GC.GetTotalMemory(true);
             GC.WaitForPendingFinalizers();
 
-            Assert.IsTrue(_destroyed);
+            Assert.True(_destroyed);
 
             MyObject tmp;
-            Assert.IsFalse(r.IsAlive);
-            Assert.IsNull(r.Target);
-            Assert.IsFalse(r.TryGetTarget(out tmp));
+            Assert.False(r.IsAlive);
+            Assert.Null(r.Target);
+            Assert.False(r.TryGetTarget(out tmp));
         }
 
-        [Test]
-        public void TestReplaceTarget()
-        {
-            string value1 = "Testing Value - 1";
-            string value2 = "Testing Value - 2";
-            Utils.WeakReference<string> r = new Utils.WeakReference<string>(value1);
-
-            string tmp;
-            Assert.IsTrue(r.TryGetTarget(out tmp) && tmp == value1);
-
-            r.Target = value2;
-            Assert.IsTrue(r.TryGetTarget(out tmp) && tmp == value2);
-        }
-
-        [Test]
+        [Fact]
         public void TestReplaceBadTypeTarget()
         {
             string value1 = "Testing Value - 1";
@@ -84,14 +73,28 @@ namespace CSharpTest.Net.Library.Test
             Utils.WeakReference<string> r = new Utils.WeakReference<string>(value1);
 
             string tmp;
-            Assert.IsTrue(r.TryGetTarget(out tmp) && tmp == value1);
+            Assert.True(r.TryGetTarget(out tmp) && tmp == value1);
 
-            ((WeakReference)r).Target = value2; //incorrect type...
-            Assert.IsFalse(r.IsAlive);
-            Assert.IsNull(r.Target);
-            Assert.IsFalse(r.TryGetTarget(out tmp));
+            ((WeakReference) r).Target = value2; //incorrect type...
+            Assert.False(r.IsAlive);
+            Assert.Null(r.Target);
+            Assert.False(r.TryGetTarget(out tmp));
 
-            Assert.IsTrue(ReferenceEquals(value2, ((WeakReference)r).Target));
+            Assert.True(ReferenceEquals(value2, ((WeakReference) r).Target));
+        }
+
+        [Fact]
+        public void TestReplaceTarget()
+        {
+            string value1 = "Testing Value - 1";
+            string value2 = "Testing Value - 2";
+            Utils.WeakReference<string> r = new Utils.WeakReference<string>(value1);
+
+            string tmp;
+            Assert.True(r.TryGetTarget(out tmp) && tmp == value1);
+
+            r.Target = value2;
+            Assert.True(r.TryGetTarget(out tmp) && tmp == value2);
         }
     }
 }

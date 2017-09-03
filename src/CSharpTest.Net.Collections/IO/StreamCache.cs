@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
 using System.IO;
 using System.Threading;
@@ -21,25 +24,26 @@ using CSharpTest.Net.Interfaces;
 namespace CSharpTest.Net.IO
 {
     /// <summary>
-    /// Provides a simple means of caching several streams on a single file and for a thread 
-    /// to  quickly exclusive access to one of those streams.  This class provides the base
-    /// implementation used by FileStreamCache and FragmentedFile.
+    ///     Provides a simple means of caching several streams on a single file and for a thread
+    ///     to  quickly exclusive access to one of those streams.  This class provides the base
+    ///     implementation used by FileStreamCache and FragmentedFile.
     /// </summary>
     public class StreamCache : Disposable, IFactory<Stream>
     {
-        readonly IFactory<Stream> _streamFactory;
-        readonly Stream[] _streams;
-        readonly Mutex[] _handles;
+        private readonly Mutex[] _handles;
+        private readonly IFactory<Stream> _streamFactory;
+        private readonly Stream[] _streams;
 
         /// <summary>
-        /// Constructs the stream cache allowing one stream per thread
+        ///     Constructs the stream cache allowing one stream per thread
         /// </summary>
         public StreamCache(IFactory<Stream> streamFactory)
             : this(streamFactory, Environment.ProcessorCount)
-        { }
+        {
+        }
 
         /// <summary>
-        /// Constructs the stream cache with the maximum allowed stream items
+        ///     Constructs the stream cache with the maximum allowed stream items
         /// </summary>
         public StreamCache(IFactory<Stream> streamFactory, int maxItem)
         {
@@ -51,11 +55,16 @@ namespace CSharpTest.Net.IO
                 _handles[i] = new Mutex();
         }
 
+        Stream IFactory<Stream>.Create()
+        {
+            return Open(FileAccess.ReadWrite);
+        }
+
         /// <summary></summary>
         protected override void Dispose(bool disposing)
         {
             for (int i = 0; i < _handles.Length; i++)
-                _handles[i].Close();
+                _handles[i].Dispose();
             for (int i = 0; i < _streams.Length; i++)
                 if (_streams[i] != null)
                     _streams[i].Dispose();
@@ -65,41 +74,45 @@ namespace CSharpTest.Net.IO
         private void InvalidHandle(Mutex ownerHandle)
         {
             for (int i = 0; i < _handles.Length; i++)
-            {
-                if(ReferenceEquals(_handles[i], ownerHandle))
+                if (ReferenceEquals(_handles[i], ownerHandle))
                     _handles[i] = new Mutex();
-            }
         }
-        
-        /// <summary>
-        /// Waits for a stream to become available and returns a wrapper on that stream. Just dispose like
-        /// any other stream to return the resource to the stream pool.
-        /// </summary>
-        public Stream Open() { return Open(FileAccess.ReadWrite); }
-        
-        Stream IFactory<Stream>.Create() { return Open(FileAccess.ReadWrite); }
 
         /// <summary>
-        /// Waits for a stream to become available and returns a wrapper on that stream. Just dispose like
-        /// any other stream to return the resource to the stream pool.
+        ///     Waits for a stream to become available and returns a wrapper on that stream. Just dispose like
+        ///     any other stream to return the resource to the stream pool.
+        /// </summary>
+        public Stream Open()
+        {
+            return Open(FileAccess.ReadWrite);
+        }
+
+        /// <summary>
+        ///     Waits for a stream to become available and returns a wrapper on that stream. Just dispose like
+        ///     any other stream to return the resource to the stream pool.
         /// </summary>
         public Stream Open(FileAccess access)
         {
             int handle;
 
-            try { handle = WaitHandle.WaitAny(_handles); }
+            try
+            {
+                handle = WaitHandle.WaitAny(_handles);
+            }
             catch (AbandonedMutexException ae)
-            { handle = ae.MutexIndex; }
+            {
+                handle = ae.MutexIndex;
+            }
 
             Stream stream = _streams[handle];
             if (stream == null || !stream.CanRead)
-            {
-                try { } 
-                finally 
+                try
                 {
-                    _streams[handle] = stream = _streamFactory.Create(); 
                 }
-            }
+                finally
+                {
+                    _streams[handle] = stream = _streamFactory.Create();
+                }
 
             if (stream.CanSeek)
                 stream.Seek(0, SeekOrigin.Begin);
@@ -114,16 +127,24 @@ namespace CSharpTest.Net.IO
             private readonly Mutex _ownerHandle;
             private FileAccess _fileAccess;
 
-            public CachedStream(StreamCache cache, Stream rawStream, FileAccess access, Mutex ownerHandle) : base(rawStream)
+            public CachedStream(StreamCache cache, Stream rawStream, FileAccess access, Mutex ownerHandle) : base(
+                rawStream)
             {
                 _cache = cache;
                 _ownerHandle = ownerHandle;
                 _fileAccess = access;
             }
 
-            ~CachedStream() { GC.SuppressFinalize(this); Dispose(false); }
+            public override bool CanRead => (_fileAccess & FileAccess.Read) == FileAccess.Read && Stream.CanRead;
+            public override bool CanSeek => _fileAccess != NoAccess && Stream.CanSeek;
+            public override bool CanWrite => (_fileAccess & FileAccess.Write) == FileAccess.Write && Stream.CanWrite;
 
-            public override void Close() { Dispose(true); }
+            ~CachedStream()
+            {
+                GC.SuppressFinalize(this);
+                Dispose(false);
+            }
+
             protected override void Dispose(bool disposing)
             {
                 if (_fileAccess != NoAccess)
@@ -133,11 +154,17 @@ namespace CSharpTest.Net.IO
                     _fileAccess = NoAccess;
 
                     if (disposing)
-                        try { _ownerHandle.ReleaseMutex(); } catch (ObjectDisposedException) { }
+                        try
+                        {
+                            _ownerHandle.ReleaseMutex();
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                        }
                     else
                         _cache.InvalidHandle(_ownerHandle);
 
-                    base.Stream = null;
+                    Stream = null;
                 }
             }
 
@@ -146,10 +173,6 @@ namespace CSharpTest.Net.IO
                 if (_fileAccess == NoAccess)
                     throw new ObjectDisposedException(GetType().FullName);
             }
-
-            public override bool CanRead { get { return (_fileAccess & FileAccess.Read) == FileAccess.Read && Stream.CanRead; } }
-            public override bool CanSeek { get { return _fileAccess != NoAccess && Stream.CanSeek; } }
-            public override bool CanWrite { get { return (_fileAccess & FileAccess.Write) == FileAccess.Write && Stream.CanWrite; } }
 
             public override void SetLength(long value)
             {

@@ -1,4 +1,5 @@
 ﻿#region Copyright 2011-2014 by Roger Knapp, Licensed under the Apache License, Version 2.0
+
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,24 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #endregion
+
 using System;
+using CSharpTest.Net.Collections.Exceptions;
 using CSharpTest.Net.Interfaces;
-using CSharpTest.Net.Synchronization;
+
 
 namespace CSharpTest.Net.Collections
 {
     partial class BPlusTree<TKey, TValue>
     {
-        class NodeTransaction : IDisposable, ITransactable
+        private class NodeTransaction : IDisposable, ITransactable
         {
-            readonly NodeCacheBase _cache;
+            private readonly NodeCacheBase _cache;
             private NodePin _created, _deleted;
-            private NodePin _parentItem;
-            bool _disposed, _committed, _reverted;
+            private bool _disposed, _committed, _reverted;
 
             private bool _hasLogToken;
             private TransactionToken _logToken;
+            private NodePin _parentItem;
 
             public NodeTransaction(NodeCacheBase cache)
             {
@@ -37,9 +41,68 @@ namespace CSharpTest.Net.Collections
                 _logToken = new TransactionToken();
             }
 
+            public void Dispose()
+            {
+                try
+                {
+                    if (!_committed)
+                        Rollback();
+                }
+                finally
+                {
+                    _disposed = true;
+                }
+            }
+
+            public void Commit()
+            {
+                AssertionFailedException.Assert(_committed == false, "Transaction has already been committed.");
+                //Assert(_parentItem != null || (_created != null && _created.Ptr.IsRoot), "The parent was not updated.");
+                PerformCommit();
+            }
+
+            public void Rollback()
+            {
+                if (_disposed) throw new ObjectDisposedException(GetType().FullName);
+                if (_reverted) return;
+                _reverted = true;
+
+                if (_parentItem != null)
+                {
+                    _parentItem.CancelChanges();
+                    _cache.UpdateNode(_parentItem);
+                    _parentItem.Dispose();
+                }
+
+                NodePin pin = _created;
+                while (pin != null)
+                {
+                    pin.CancelChanges();
+                    _cache.UpdateNode(pin);
+                    _cache.Storage.Destroy(pin.Handle.StoreHandle);
+                    pin.Dispose();
+                    pin = (NodePin)pin.Next;
+                }
+
+                pin = _deleted;
+                while (pin != null)
+                {
+                    pin.CancelChanges();
+                    _cache.UpdateNode(pin);
+                    pin.Dispose();
+                    pin = (NodePin)pin.Next;
+                }
+
+                if (_hasLogToken)
+                {
+                    _hasLogToken = false;
+                    _cache.Options.LogFile.RollbackTransaction(ref _logToken);
+                }
+            }
+
             public void AddValue(TKey key, TValue value)
             {
-                if(_cache.Options.LogFile != null)
+                if (_cache.Options.LogFile != null)
                 {
                     if (!_hasLogToken)
                         _logToken = _cache.Options.LogFile.BeginTransaction();
@@ -72,44 +135,41 @@ namespace CSharpTest.Net.Collections
 
 
             public NodePin Create(NodePin parent, bool isLeaf)
-            { return Create(parent.LockType, isLeaf); }
+            {
+                return Create(parent.LockType, isLeaf);
+            }
+
             public NodePin Create(LockType ltype, bool isLeaf)
             {
                 IStorageHandle storeHandle = _cache.Storage.Create();
                 NodeHandle handle = new NodeHandle(storeHandle);
                 object refobj;
-                ILockStrategy lck = _cache.CreateLock(handle, out refobj);
+                _cache.CreateLock(handle, out refobj);
 
                 int size = isLeaf ? _cache.Options.MaximumValueNodes : _cache.Options.MaximumChildNodes;
-                NodePin pin = new NodePin(handle, lck, ltype, LockType.Insert, refobj, null, new Node(handle.StoreHandle, size));
+                NodePin pin = new NodePin(handle, ltype, refobj, null,
+                    new Node(handle.StoreHandle, size));
                 NodePin.Append(ref _created, pin);
                 return pin;
             }
 
             public void Destroy(NodePin pin)
             {
-                Assert(pin.LockType != LockType.Read, "Node is not locked for update");
+                AssertionFailedException.Assert(pin.LockType != LockType.Read, "Node is not locked for update");
                 NodePin.Append(ref _deleted, pin);
                 pin.MarkDeleted();
             }
 
             public Node BeginUpdate(NodePin pin)
             {
-                Assert(pin.LockType != LockType.Read, "Node is not locked for update");
-                Assert(_parentItem == null, "An update is already in this operation");
+                AssertionFailedException.Assert(pin.LockType != LockType.Read, "Node is not locked for update");
+                AssertionFailedException.Assert(_parentItem == null, "An update is already in this operation");
                 _parentItem = pin;
                 pin.BeginUpdate();
                 return pin.Ptr;
             }
 
-            public void Commit()
-            {
-                Assert(_committed == false, "Transaction has already been committed.");
-                //Assert(_parentItem != null || (_created != null && _created.Ptr.IsRoot), "The parent was not updated.");
-                PerformCommit();
-            }
-
-            void PerformCommit()
+            private void PerformCommit()
             {
                 if (_disposed) throw new ObjectDisposedException(GetType().FullName);
 
@@ -125,11 +185,8 @@ namespace CSharpTest.Net.Collections
 
                     if (_parentItem != null)
                     {
-                        using (_parentItem.Lock.Write(_cache.Options.LockTimeout))
-                        {
-                            _parentItem.Ptr.ToReadOnly();
-                            _cache.SaveChanges(_parentItem);
-                        }
+                        _parentItem.Ptr.ToReadOnly();
+                        _cache.SaveChanges(_parentItem);
                     }
 
                     pin = _deleted;
@@ -175,58 +232,6 @@ namespace CSharpTest.Net.Collections
                 {
                     _hasLogToken = false;
                     _cache.Options.LogFile.CommitTransaction(ref _logToken);
-                }
-            }
-
-            public void Rollback()
-            {
-                if (_disposed) throw new ObjectDisposedException(GetType().FullName);
-                if (_reverted) return;
-                _reverted = true;
-
-                if (_parentItem != null)
-                {
-                    _parentItem.CancelChanges();
-                    _cache.UpdateNode(_parentItem);
-                    _parentItem.Dispose();
-                }
-
-                NodePin pin = _created;
-                while (pin != null)
-                {
-                    pin.CancelChanges();
-                    _cache.UpdateNode(pin);
-                    _cache.Storage.Destroy(pin.Handle.StoreHandle);
-                    pin.Dispose();
-                    pin = (NodePin)pin.Next;
-                }
-
-                pin = _deleted;
-                while (pin != null)
-                {
-                    pin.CancelChanges();
-                    _cache.UpdateNode(pin);
-                    pin.Dispose();
-                    pin = (NodePin)pin.Next;
-                }
-
-                if (_hasLogToken)
-                {
-                    _hasLogToken = false;
-                    _cache.Options.LogFile.RollbackTransaction(ref _logToken);
-                }
-            }
-
-            public void Dispose()
-            {
-                try
-                {
-                    if (!_committed)
-                        Rollback();
-                }
-                finally
-                {
-                    _disposed = true;
                 }
             }
         }
