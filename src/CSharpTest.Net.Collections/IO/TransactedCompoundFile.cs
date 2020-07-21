@@ -191,12 +191,12 @@ namespace CSharpTest.Net.IO
         /// </summary>
         public static uint FirstIdentity { get { return 1; } }
 
-        const int BlockHeaderSize = 16; //length + CRC
+        const int BlockHeaderSize = 17; //Header Size + Length + CRC + Block Count + Block Id
         private const int OffsetOfHeaderSize = 0;
-        private const int OffsetOfLength = 0;
-        private const int OffsetOfCrc32 = 4;
-        private const int OffsetOfBlockCount = 8;
-        private const int OffsetOfBlockId = 12;
+        private const int OffsetOfLength = 1;
+        private const int OffsetOfCrc32 = 5;
+        private const int OffsetOfBlockCount = 9;
+        private const int OffsetOfBlockId = 13;
 
         readonly Options _options;
         readonly int BlockSize;
@@ -895,7 +895,7 @@ namespace CSharpTest.Net.IO
                         throw new InvalidDataException();
 
                     headerSize = bytes[OffsetOfHeaderSize];
-                    length = (int) GetUInt32(bytes, OffsetOfLength) & 0x00FFFFFF;
+                    length = (int) GetUInt32(bytes, OffsetOfLength);
 
                     block.ActualBlocks = (int) GetUInt32(bytes, OffsetOfBlockCount);
                     uint blockId = GetUInt32(bytes, OffsetOfBlockId);
