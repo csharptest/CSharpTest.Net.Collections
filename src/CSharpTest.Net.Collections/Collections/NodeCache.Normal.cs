@@ -180,6 +180,11 @@ namespace CSharpTest.Net.Collections
 
             protected override NodePin Lock(NodePin parent, LockType ltype, NodeHandle child)
             {
+                return LockInternal(parent, ltype, child, false);
+            }
+
+            private NodePin LockInternal(NodePin parent, LockType ltype, NodeHandle child, bool ignoreHandleComparison)
+            {
                 CacheEntry entry = GetCache(child, false);
 
                 LockType locked = NoLock;
@@ -200,10 +205,13 @@ namespace CSharpTest.Net.Collections
                             if (node == null)
                             {
                                 InvalidNodeHandleException.Assert(
-                                    Storage.TryGetNode(child.StoreHandle, out node, NodeSerializer)
-                                    && node != null
-                                    && node.StorageHandle.Equals(entry.Handle.StoreHandle)
-                                    );
+                                    Storage.TryGetNode(child.StoreHandle, out node, NodeSerializer) && node != null &&
+                                    ignoreHandleComparison
+                                        ? true
+                                        : node.StorageHandle.Equals(entry.Handle.StoreHandle));
+                               
+
+
                                 Node old = Interlocked.CompareExchange(ref entry.Node, node, null);
                                 Assert(null == old, "Collision on cache load.");
                             }
@@ -245,6 +253,11 @@ namespace CSharpTest.Net.Collections
                     Node old = Interlocked.CompareExchange(ref entry.Node, node.Ptr, node.Original);
                     Assert(ReferenceEquals(old, node.Original), "Node was modified without lock");
                 }
+            }
+
+            public override NodePin LockRoot(LockType ltype)
+            {
+                return LockInternal(null, ltype, RootHandle, true);
             }
         }
     }

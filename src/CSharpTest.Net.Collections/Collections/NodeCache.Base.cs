@@ -89,7 +89,7 @@ namespace CSharpTest.Net.Collections
             public abstract ILockStrategy CreateLock(NodeHandle handle, out object refobj);
             protected abstract NodePin Lock(NodePin parent, LockType ltype, NodeHandle child);
 
-            public NodePin LockRoot(LockType ltype)
+            public virtual NodePin LockRoot(LockType ltype)
             {
                 return Lock(null, ltype, RootHandle);
             }
